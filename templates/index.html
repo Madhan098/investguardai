@@ -21,34 +21,41 @@
                     {% if current_user.is_authenticated %}
                         Welcome back, {{ current_user.first_name or 'Investor' }}!
                     {% else %}
-                        Protect Your Investments
+                        InvestGuard AI
                     {% endif %}
                 </h1>
                 <p class="lead mb-5 fade-in-up" style="font-size: 1.3rem; max-width: 800px; margin: 0 auto;">
-                    Advanced AI-powered fraud detection system protecting investors from financial crimes in real-time with machine learning intelligence
+                    India's first comprehensive AI-powered investment fraud prevention platform with real-time social media monitoring, market manipulation detection, and SEBI compliance
                 </p>
                 
                 <!-- Enhanced Statistics -->
                 <div class="row g-4 justify-content-center mb-4">
                     <div class="col-md-3 fade-in-up">
                         <div class="glow-card rounded-4 p-4 stats-pulse">
-                            <h2 class="mb-2 fw-bold display-6">{{ total_alerts }}</h2>
+                            <h2 class="mb-2 fw-bold display-6" data-stat="totalAlerts">{{ total_alerts }}</h2>
                             <div class="text-light opacity-75">Total Alerts Detected</div>
                             <i data-feather="alert-triangle" class="mt-2" style="width: 24px; height: 24px;"></i>
                         </div>
                     </div>
                     <div class="col-md-3 fade-in-up">
                         <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.2s;">
-                            <h2 class="mb-2 fw-bold display-6 text-danger">{{ high_risk_alerts }}</h2>
+                            <h2 class="mb-2 fw-bold display-6 text-danger" data-stat="highRiskAlerts">{{ high_risk_alerts }}</h2>
                             <div class="text-light opacity-75">High Risk Cases</div>
                             <i data-feather="alert-octagon" class="mt-2 text-danger" style="width: 24px; height: 24px;"></i>
                         </div>
                     </div>
                     <div class="col-md-3 fade-in-up">
                         <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.4s;">
-                            <h2 class="mb-2 fw-bold display-6 text-warning">{{ active_alerts }}</h2>
+                            <h2 class="mb-2 fw-bold display-6 text-warning" data-stat="activeAlerts">{{ active_alerts }}</h2>
                             <div class="text-light opacity-75">Active Monitoring</div>
                             <i data-feather="eye" class="mt-2 text-warning" style="width: 24px; height: 24px;"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3 fade-in-up">
+                        <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.6s;">
+                            <h2 class="mb-2 fw-bold display-6 text-success" data-stat="platformsMonitored">15+</h2>
+                            <div class="text-light opacity-75">Platforms Monitored</div>
+                            <i data-feather="globe" class="mt-2 text-success" style="width: 24px; height: 24px;"></i>
                         </div>
                     </div>
                 </div>
@@ -133,6 +140,56 @@
     </div>
 </div>
 
+<!-- Real-time Monitoring Dashboard -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i data-feather="activity" class="me-2"></i>
+            Real-time Monitoring
+        </h2>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i data-feather="wifi" class="me-2"></i>
+                    Live Social Media Feed
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="social-media-feed" class="live-feed" style="height: 200px; overflow-y: auto;">
+                    <div class="text-center text-muted py-4">
+                        <i data-feather="broadcast" width="32" height="32" class="mb-2"></i>
+                        <p>Monitoring 15+ platforms for suspicious activity...</p>
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i data-feather="trending-down" class="me-2"></i>
+                    Market Anomaly Detector
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="market-anomalies" class="live-feed" style="height: 200px; overflow-y: auto;">
+                    <div class="text-center text-muted py-4">
+                        <i data-feather="bar-chart" width="32" height="32" class="mb-2"></i>
+                        <p>Analyzing NSE/BSE for suspicious patterns...</p>
+                        <div class="spinner-border spinner-border-sm" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Recent Fraud Alerts Ticker -->
 <div class="row mb-5">
     <div class="col-12">
@@ -180,39 +237,150 @@
     <div class="col-12">
         <h2 class="mb-4">
             <i data-feather="star" class="me-2"></i>
-            Key Features
+            Advanced AI Features
         </h2>
     </div>
     
-    <div class="col-md-6 mb-4">
-        <div class="card border-0 shadow-sm">
+    <div class="col-md-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <h5 class="card-title">
                     <i data-feather="cpu" class="me-2 text-primary"></i>
                     AI-Powered Detection
                 </h5>
                 <ul class="list-unstyled">
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Natural Language Processing</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Pattern Recognition</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Real-time Scoring</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>BERT-based Sentiment Analysis</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>LSTM Rumor Classification</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Real-time Risk Scoring</li>
                     <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Multi-modal Analysis</li>
                 </ul>
             </div>
         </div>
     </div>
     
-    <div class="col-md-6 mb-4">
-        <div class="card border-0 shadow-sm">
+    <div class="col-md-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <h5 class="card-title">
-                    <i data-feather="shield-check" class="me-2 text-success"></i>
-                    Regulatory Compliance
+                    <i data-feather="trending-up" class="me-2 text-warning"></i>
+                    Market Manipulation Detection
                 </h5>
                 <ul class="list-unstyled">
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>SEBI Guidelines Alignment</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Privacy Protection</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Audit Trail Maintenance</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Reporting Tools</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Pump & Dump Detection</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Wash Trading Analysis</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Spoofing & Layering Alerts</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Cross-market Surveillance</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i data-feather="globe" class="me-2 text-info"></i>
+                    Social Media Monitoring
+                </h5>
+                <ul class="list-unstyled">
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Twitter/X Real-time Scanning</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>WhatsApp & Telegram Monitoring</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Multi-language Processing</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Influencer Score Analysis</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Phase Implementation Status -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i data-feather="layers" class="me-2"></i>
+            Implementation Phases
+        </h2>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card border-primary h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i data-feather="message-circle" class="me-2"></i>
+                    Phase 1: Social Media Monitoring
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Progress</span>
+                        <span class="text-primary">75%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: 75%"></div>
+                    </div>
+                </div>
+                <ul class="list-unstyled mb-0">
+                    <li><i data-feather="check-circle" class="me-2 text-success" width="16" height="16"></i>Social Media Scanner</li>
+                    <li><i data-feather="check-circle" class="me-2 text-success" width="16" height="16"></i>Influence Score Analysis</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Rumor Detection Engine</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Multi-language Support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card border-warning h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i data-feather="trending-up" class="me-2"></i>
+                    Phase 2: Market Manipulation
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Progress</span>
+                        <span class="text-warning">45%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-warning" style="width: 45%"></div>
+                    </div>
+                </div>
+                <ul class="list-unstyled mb-0">
+                    <li><i data-feather="check-circle" class="me-2 text-success" width="16" height="16"></i>Pattern Recognition Dashboard</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Algorithmic Behavior Analyzer</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Cross-market Surveillance</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Predictive Risk Scoring</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card border-info h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i data-feather="book-open" class="me-2"></i>
+                    Phase 3: Education Hub
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Progress</span>
+                        <span class="text-info">30%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" style="width: 30%"></div>
+                    </div>
+                </div>
+                <ul class="list-unstyled mb-0">
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Interactive Risk Simulator</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Vernacular Content Library</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Scam Alert Push Notifications</li>
+                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>AI Chatbot Advisor</li>
                 </ul>
             </div>
         </div>

@@ -28,6 +28,30 @@
             </div>
             <div class="card-body">
                 <form method="POST" enctype="multipart/form-data">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Analysis Language</label>
+                            <select class="form-select" name="analysis_language" id="analysis_language">
+                                <option value="auto">Auto Detect</option>
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी (Hindi)</option>
+                                <option value="ta">தமிழ் (Tamil)</option>
+                                <option value="te">తెలుగు (Telugu)</option>
+                                <option value="mr">मराठी (Marathi)</option>
+                                <option value="gu">ગુજરાતી (Gujarati)</option>
+                                <option value="bn">বাংলা (Bengali)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Analysis Depth</label>
+                            <select class="form-select" name="analysis_depth" id="analysis_depth">
+                                <option value="basic">Basic Scan</option>
+                                <option value="standard">Standard Analysis</option>
+                                <option value="deep">Deep Learning Analysis</option>
+                                <option value="forensic">Forensic Investigation</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label for="content_type" class="form-label">Content Type</label>

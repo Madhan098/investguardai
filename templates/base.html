@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}FraudShield - AI-Powered Investment Fraud Detection{% endblock %}</title>
+    <title>{% block title %}InvestGuard AI - India's Comprehensive Investment Fraud Prevention Platform{% endblock %}</title>
     
     <!-- Bootstrap CSS with Replit Dark Theme -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
@@ -25,7 +25,7 @@
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
                 <i data-feather="shield" class="me-2"></i>
-                FraudShield
+                InvestGuard AI
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -63,6 +63,22 @@
                         <a class="nav-link" href="{{ url_for('reports') }}">
                             <i data-feather="flag" class="me-1"></i>Reports
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="educationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="book-open" class="me-1"></i>Education
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('education') }}">
+                                <i data-feather="play-circle" class="me-2"></i>Risk Simulator
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('chatbot') }}">
+                                <i data-feather="message-circle" class="me-2"></i>AI Advisor Chat
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('education_library') }}">
+                                <i data-feather="library" class="me-2"></i>Content Library
+                            </a></li>
+                        </ul>
                     </li>
                 </ul>
                 
@@ -128,8 +144,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>FraudShield</h5>
-                    <p class="mb-0">AI-powered investment fraud detection platform protecting investors from financial crimes.</p>
+                    <h5>InvestGuard AI</h5>
+                    <p class="mb-0">India's first comprehensive AI-powered investment fraud prevention platform providing real-time protection and regulatory compliance.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p class="mb-0">

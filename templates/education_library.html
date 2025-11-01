@@ -1,0 +1,226 @@
+
+{% extends "base.html" %}
+
+{% block title %}Content Library - InvestGuard AI{% endblock %}
+
+{% block content %}
+<!-- Content Library Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i data-feather="library" class="me-2"></i>
+            Vernacular Content Library
+        </h1>
+        <p class="lead text-muted">
+            Educational resources in multiple Indian languages to help investors make informed decisions.
+        </p>
+    </div>
+</div>
+
+<!-- Content Categories -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i data-feather="shield" width="32" height="32" class="mb-2"></i>
+                <h6>Fraud Prevention</h6>
+                <p class="small mb-0">15 articles • 8 languages</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i data-feather="trending-up" width="32" height="32" class="mb-2"></i>
+                <h6>Investment Basics</h6>
+                <p class="small mb-0">22 articles • 8 languages</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <i data-feather="file-text" width="32" height="32" class="mb-2"></i>
+                <h6>SEBI Guidelines</h6>
+                <p class="small mb-0">12 articles • 5 languages</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i data-feather="alert-triangle" width="32" height="32" class="mb-2"></i>
+                <h6>Market Risks</h6>
+                <p class="small mb-0">18 articles • 8 languages</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Language and Content Filters -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Select Language</label>
+        <select class="form-select" id="languageFilter">
+            <option value="all">All Languages</option>
+            <option value="en">English</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="ta">தமிழ் (Tamil)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+            <option value="mr">मराठी (Marathi)</option>
+            <option value="gu">ગુજરાતી (Gujarati)</option>
+            <option value="bn">বাংলা (Bengali)</option>
+            <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        </select>
+    </div>
+    
+    <div class="col-md-6">
+        <label class="form-label">Content Type</label>
+        <select class="form-select" id="contentFilter">
+            <option value="all">All Types</option>
+            <option value="video">Video Tutorials</option>
+            <option value="article">Articles</option>
+            <option value="infographic">Infographics</option>
+            <option value="audio">Audio Content</option>
+            <option value="checklist">Checklists</option>
+        </select>
+    </div>
+</div>
+
+<!-- Content Grid -->
+<div class="row" id="contentGrid">
+    <!-- Content will be populated by JavaScript -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const contentLibrary = [
+    {
+        id: 1,
+        title: "पोंजी स्कीम की पहचान कैसे करें",
+        language: "hi",
+        type: "video",
+        duration: "8:45",
+        category: "fraud-prevention",
+        description: "पोंजी स्कीम के संकेत और बचने के तरीके",
+        thumbnail: "https://via.placeholder.com/300x200?text=Ponzi+Schemes"
+    },
+    {
+        id: 2,
+        title: "How to Verify SEBI Registration",
+        language: "en",
+        type: "article",
+        readTime: "5 min",
+        category: "sebi-guidelines",
+        description: "Step-by-step guide to verify investment advisor credentials",
+        thumbnail: "https://via.placeholder.com/300x200?text=SEBI+Verification"
+    },
+    {
+        id: 3,
+        title: "சந்தை ஏமாற்றுதல்களை அடையாளம் காணுதல்",
+        language: "ta",
+        type: "infographic",
+        category: "market-risks",
+        description: "சந்தை கையாளுதல் மற்றும் ஏமாற்று முறைகள் பற்றிய வழிகாட்டி",
+        thumbnail: "https://via.placeholder.com/300x200?text=Market+Manipulation"
+    },
+    {
+        id: 4,
+        title: "বিনিয়োগের ঝুঁকি বোঝা",
+        language: "bn",
+        type: "audio",
+        duration: "12:30",
+        category: "investment-basics",
+        description: "বিনিয়োগের বিভিন্ন ঝুঁকি এবং সেগুলি এড়ানোর উপায়",
+        thumbnail: "https://via.placeholder.com/300x200?text=Investment+Risks"
+    },
+    {
+        id: 5,
+        title: "गुंतवणूक सल्लागारांची पडताळणी",
+        language: "mr",
+        type: "checklist",
+        category: "sebi-guidelines",
+        description: "गुंतवणूक सल्लागारांची विश्वसनीयता तपासण्यासाठी चेकलिस्ट",
+        thumbnail: "https://via.placeholder.com/300x200?text=Advisor+Verification"
+    },
+    {
+        id: 6,
+        title: "સોશિયલ મીડિયા પર છેતરપિંડીની ઓળખ",
+        language: "gu",
+        type: "video",
+        duration: "6:20",
+        category: "fraud-prevention",
+        description: "સોશિયલ મીડિયા પર ફાઇનાન્શિયલ છેતરપિંડી કેવી રીતે ઓળખવી",
+        thumbnail: "https://via.placeholder.com/300x200?text=Social+Media+Fraud"
+    }
+];
+
+function loadContent() {
+    const languageFilter = document.getElementById('languageFilter').value;
+    const contentFilter = document.getElementById('contentFilter').value;
+    
+    let filteredContent = contentLibrary;
+    
+    if (languageFilter !== 'all') {
+        filteredContent = filteredContent.filter(item => item.language === languageFilter);
+    }
+    
+    if (contentFilter !== 'all') {
+        filteredContent = filteredContent.filter(item => item.type === contentFilter);
+    }
+    
+    const contentGrid = document.getElementById('contentGrid');
+    contentGrid.innerHTML = filteredContent.map(item => `
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <img src="${item.thumbnail}" class="card-img-top" alt="${item.title}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-secondary">${getLanguageName(item.language)}</span>
+                        <span class="badge bg-primary">${item.type}</span>
+                    </div>
+                    <h6 class="card-title">${item.title}</h6>
+                    <p class="card-text small text-muted">${item.description}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            ${item.duration ? `⏱️ ${item.duration}` : item.readTime ? `📖 ${item.readTime}` : '📋 Checklist'}
+                        </small>
+                        <button class="btn btn-primary btn-sm">
+                            <i data-feather="play" width="14" height="14" class="me-1"></i>
+                            View
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    feather.replace();
+}
+
+function getLanguageName(code) {
+    const languages = {
+        'en': 'English',
+        'hi': 'हिंदी',
+        'ta': 'தமிழ்',
+        'te': 'తెలుగు',
+        'mr': 'मराठी',
+        'gu': 'ગુજરાતી',
+        'bn': 'বাংলা',
+        'kn': 'ಕನ್ನಡ'
+    };
+    return languages[code] || code;
+}
+
+// Event listeners
+document.getElementById('languageFilter').addEventListener('change', loadContent);
+document.getElementById('contentFilter').addEventListener('change', loadContent);
+
+// Load initial content
+loadContent();
+</script>
+{% endblock %}

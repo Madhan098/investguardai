@@ -1,0 +1,285 @@
+
+{% extends "base.html" %}
+
+{% block title %}Education Hub - InvestGuard AI{% endblock %}
+
+{% block content %}
+<!-- Education Hub Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i data-feather="book-open" class="me-2"></i>
+            Investor Education & Protection Hub
+        </h1>
+        <p class="lead text-muted">
+            Interactive learning tools, risk simulators, and educational content in multiple Indian languages.
+        </p>
+    </div>
+</div>
+
+<!-- Interactive Risk Simulator -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i data-feather="play-circle" class="me-2"></i>
+                    Interactive Risk Simulator
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Investment Parameters</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Investment Amount (₹)</label>
+                            <input type="number" id="investmentAmount" class="form-control" value="100000" min="1000" step="1000">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Risk Level</label>
+                            <select id="riskLevel" class="form-select">
+                                <option value="low">Low Risk (3-6% returns)</option>
+                                <option value="medium">Medium Risk (6-12% returns)</option>
+                                <option value="high">High Risk (12-25% returns)</option>
+                                <option value="very_high">Very High Risk (25%+ returns)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time Horizon (Years)</label>
+                            <input type="range" id="timeHorizon" class="form-range" min="1" max="30" value="5" oninput="document.getElementById('timeValue').innerText = this.value">
+                            <div class="text-center"><span id="timeValue">5</span> years</div>
+                        </div>
+                        <button class="btn btn-primary" onclick="runSimulation()">
+                            <i data-feather="play" class="me-2"></i>
+                            Run Simulation
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Simulation Results</h6>
+                        <div id="simulationResults" class="simulation-output">
+                            <div class="text-center text-muted py-5">
+                                <i data-feather="bar-chart" width="48" height="48" class="mb-3"></i>
+                                <p>Run a simulation to see potential outcomes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Educational Content Grid -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i data-feather="library" class="me-2"></i>
+            Educational Resources
+        </h2>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i data-feather="shield" class="me-2"></i>
+                    Fraud Prevention Guide
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <a href="#" class="text-decoration-none">
+                            <i data-feather="play-circle" class="me-2"></i>
+                            Identifying Ponzi Schemes
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-decoration-none">
+                            <i data-feather="play-circle" class="me-2"></i>
+                            Social Media Red Flags
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="text-decoration-none">
+                            <i data-feather="play-circle" class="me-2"></i>
+                            Verifying Investment Advisors
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i data-feather="globe" class="me-2"></i>
+                    Multi-language Content
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="language-selector mb-3">
+                    <select class="form-select" id="languageSelect">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी (Hindi)</option>
+                        <option value="ta">தமிழ் (Tamil)</option>
+                        <option value="te">తెలుగు (Telugu)</option>
+                        <option value="mr">मराठी (Marathi)</option>
+                        <option value="gu">ગુજરાતી (Gujarati)</option>
+                        <option value="bn">বাংলা (Bengali)</option>
+                    </select>
+                </div>
+                <div id="localizedContent">
+                    <p class="text-muted">Select a language to view localized fraud prevention content.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i data-feather="bell" class="me-2"></i>
+                    Alert Preferences
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="emailAlerts" checked>
+                    <label class="form-check-label" for="emailAlerts">Email Alerts</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="smsAlerts">
+                    <label class="form-check-label" for="smsAlerts">SMS Alerts</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="pushAlerts" checked>
+                    <label class="form-check-label" for="pushAlerts">Push Notifications</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="weeklyDigest" checked>
+                    <label class="form-check-label" for="weeklyDigest">Weekly Digest</label>
+                </div>
+                <button class="btn btn-success btn-sm">
+                    <i data-feather="save" class="me-1"></i>
+                    Save Preferences
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function runSimulation() {
+    const amount = parseFloat(document.getElementById('investmentAmount').value);
+    const risk = document.getElementById('riskLevel').value;
+    const years = parseInt(document.getElementById('timeHorizon').value);
+    
+    const riskMultipliers = {
+        'low': { min: 0.03, max: 0.06, volatility: 0.02 },
+        'medium': { min: 0.06, max: 0.12, volatility: 0.05 },
+        'high': { min: 0.12, max: 0.25, volatility: 0.10 },
+        'very_high': { min: 0.25, max: 0.50, volatility: 0.20 }
+    };
+    
+    const params = riskMultipliers[risk];
+    
+    // Monte Carlo simulation
+    const scenarios = [];
+    for (let i = 0; i < 1000; i++) {
+        let value = amount;
+        for (let year = 0; year < years; year++) {
+            const return_rate = params.min + Math.random() * (params.max - params.min);
+            const volatility = (Math.random() - 0.5) * params.volatility;
+            value *= (1 + return_rate + volatility);
+        }
+        scenarios.push(value);
+    }
+    
+    scenarios.sort((a, b) => a - b);
+    
+    const results = {
+        worst: scenarios[Math.floor(scenarios.length * 0.05)],
+        best: scenarios[Math.floor(scenarios.length * 0.95)],
+        median: scenarios[Math.floor(scenarios.length * 0.5)],
+        average: scenarios.reduce((a, b) => a + b) / scenarios.length
+    };
+    
+    document.getElementById('simulationResults').innerHTML = `
+        <div class="bg-light rounded p-3">
+            <h6 class="text-dark mb-3">Potential Outcomes after ${years} years:</h6>
+            <div class="row text-center">
+                <div class="col-6 mb-2">
+                    <div class="text-success fw-bold">Best Case (95%)</div>
+                    <div class="fs-6">₹${Math.round(results.best).toLocaleString()}</div>
+                </div>
+                <div class="col-6 mb-2">
+                    <div class="text-info fw-bold">Average</div>
+                    <div class="fs-6">₹${Math.round(results.average).toLocaleString()}</div>
+                </div>
+                <div class="col-6">
+                    <div class="text-warning fw-bold">Median</div>
+                    <div class="fs-6">₹${Math.round(results.median).toLocaleString()}</div>
+                </div>
+                <div class="col-6">
+                    <div class="text-danger fw-bold">Worst Case (5%)</div>
+                    <div class="fs-6">₹${Math.round(results.worst).toLocaleString()}</div>
+                </div>
+            </div>
+            <div class="mt-3 text-center">
+                <small class="text-muted">Returns: ${((results.average/amount - 1) * 100 / years).toFixed(1)}% annually</small>
+            </div>
+        </div>
+    `;
+    feather.replace();
+}
+
+// Real-time social media feed updates
+setInterval(function() {
+    fetch('/api/social-media-feed')
+        .then(response => response.json())
+        .then(data => {
+            const feedContainer = document.getElementById('social-media-feed');
+            if (feedContainer && data.length > 0) {
+                feedContainer.innerHTML = data.map(item => `
+                    <div class="border-bottom pb-2 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-${item.risk_level === 'Critical' ? 'danger' : 
+                                                   item.risk_level === 'High' ? 'warning' : 
+                                                   item.risk_level === 'Medium' ? 'info' : 'success'}">${item.platform}</span>
+                            <small class="text-muted">${item.timestamp}</small>
+                        </div>
+                        <small>${item.content} (${item.entities} entities)</small>
+                    </div>
+                `).join('');
+            }
+        });
+}, 5000);
+
+// Real-time market anomaly updates
+setInterval(function() {
+    fetch('/api/market-anomalies')
+        .then(response => response.json())
+        .then(data => {
+            const anomalyContainer = document.getElementById('market-anomalies');
+            if (anomalyContainer && data.length > 0) {
+                anomalyContainer.innerHTML = data.map(item => `
+                    <div class="border-bottom pb-2 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-danger">${item.exchange}</span>
+                            <small class="text-muted">${item.timestamp}</small>
+                        </div>
+                        <div class="fw-bold">${item.type}</div>
+                        <small>${item.stock} - Risk: ${item.risk_score}/10 - Volume: +${item.volume_spike}</small>
+                    </div>
+                `).join('');
+            }
+        });
+}, 7000);
+</script>
+{% endblock %}
