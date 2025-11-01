@@ -93,6 +93,8 @@ def make_replit_blueprint():
         code_challenge_method="S256",
         scope=["openid", "profile", "email", "offline_access"],
         storage=UserSessionStorage(),
+        redirect_url=None,
+        redirect_to=None,
     )
 
     @replit_bp.before_app_request

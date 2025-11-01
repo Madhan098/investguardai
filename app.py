@@ -19,6 +19,12 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "fraud-detection-secret-key-2024")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
+# Configure session for OAuth in Replit proxy environment
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = None
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400
+
 # configure the database
 database_url = os.environ.get("DATABASE_URL", "sqlite:///fraud_detection.db")
 
