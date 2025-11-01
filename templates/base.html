@@ -717,6 +717,9 @@
                 const installButton = document.getElementById('pwaInstallButton');
                 if (installButton) {
                     installButton.addEventListener('click', () => {
+                        // Mark as shown so it won't appear again
+                        localStorage.setItem('pwaInstallShown', 'true');
+                        
                         if (deferredPrompt) {
                             // Show native install prompt
                             deferredPrompt.prompt();
@@ -804,14 +807,33 @@
             manualInstructions.style.display = 'block';
         }
         
-        // Show PWA install modal on every page load (if not installed)
+        // Show PWA install modal only once on homepage (if not installed and not shown before)
         function showPWAInstallPrompt() {
             // Don't show if already installed
             if (isAppInstalled()) {
+                // Mark as shown so it won't show again
+                localStorage.setItem('pwaInstallShown', 'true');
                 return;
             }
             
+            // Check if we're on the homepage
+            const isHomepage = window.location.pathname === '/' || window.location.pathname === '/index';
+            
+            // Only show on homepage
+            if (!isHomepage) {
+                return;
+            }
+            
+            // Check if already shown before (using localStorage)
+            const alreadyShown = localStorage.getItem('pwaInstallShown');
+            if (alreadyShown === 'true') {
+                return; // Don't show if already shown once
+            }
+            
             if (installModal) {
+                // Mark as shown before showing
+                localStorage.setItem('pwaInstallShown', 'true');
+                
                 // Show modal immediately
                 installModal.show();
                 
@@ -829,10 +851,22 @@
             const dismissButton = document.getElementById('pwaDismissButton');
             if (dismissButton) {
                 dismissButton.addEventListener('click', () => {
+                    // Mark as shown so it won't appear again
+                    localStorage.setItem('pwaInstallShown', 'true');
+                    
                     // Close modal when dismissed
                     if (installModal) {
                         installModal.hide();
                     }
+                });
+            }
+            
+            // Also mark as shown when modal is closed via the close button
+            const modalElement = document.getElementById('pwaInstallModal');
+            if (modalElement) {
+                modalElement.addEventListener('hidden.bs.modal', () => {
+                    // Mark as shown when modal is closed (any way)
+                    localStorage.setItem('pwaInstallShown', 'true');
                 });
             }
         });
@@ -843,10 +877,16 @@
             e.preventDefault();
             deferredPrompt = e;
             
-            // Show modal on every page load
-            setTimeout(() => {
-                showPWAInstallPrompt();
-            }, 1000); // Show after 1 second to let page load
+            // Only show modal on homepage and only once
+            const isHomepage = window.location.pathname === '/' || window.location.pathname === '/index';
+            const alreadyShown = localStorage.getItem('pwaInstallShown');
+            
+            if (isHomepage && alreadyShown !== 'true') {
+                // Show modal on homepage only, and only once
+                setTimeout(() => {
+                    showPWAInstallPrompt();
+                }, 1000); // Show after 1 second to let page load
+            }
         });
         
         // PWA Installed
@@ -879,8 +919,22 @@
             }
         });
         
-        // Show install prompt on page load (every time)
+        // Show install prompt on homepage only, and only once
         window.addEventListener('load', () => {
+            // Check if we're on the homepage
+            const isHomepage = window.location.pathname === '/' || window.location.pathname === '/index';
+            
+            // Only show on homepage
+            if (!isHomepage) {
+                return;
+            }
+            
+            // Check if already shown before
+            const alreadyShown = localStorage.getItem('pwaInstallShown');
+            if (alreadyShown === 'true') {
+                return; // Don't show if already shown once
+            }
+            
             // Check after a delay to allow page to fully load
             setTimeout(() => {
                 // Show for all browsers (iOS Safari doesn't fire beforeinstallprompt)
@@ -893,7 +947,7 @@
                         showManualInstructions();
                     }
                     
-                    // Show modal on every page load
+                    // Show modal only once on homepage
                     showPWAInstallPrompt();
                 }
             }, 1000); // Show after 1 second
