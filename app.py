@@ -17,13 +17,19 @@ db = SQLAlchemy(model_class=Base)
 # create the app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "fraud-detection-secret-key-2024")
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
 # Configure session for OAuth in Replit proxy environment
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = None
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400
+
+# Set preferred URL scheme for OAuth redirects
+app.config['PREFERRED_URL_SCHEME'] = 'https'
+
+# Allow OAuth to work over HTTP in development
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # configure the database
 database_url = os.environ.get("DATABASE_URL", "sqlite:///fraud_detection.db")
