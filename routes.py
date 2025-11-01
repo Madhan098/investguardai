@@ -354,3 +354,109 @@ def api_chatbot():
         'response': response,
         'timestamp': datetime.utcnow().isoformat()
     })
+
+@app.route('/api/social-media-feed')
+def api_social_media_feed():
+    """API endpoint for real-time social media monitoring feed"""
+    import random
+    
+    sample_feeds = [
+        {
+            'platform': 'WhatsApp',
+            'content': 'New crypto investment group detected with 500+ members',
+            'entities': '15',
+            'risk_level': 'High',
+            'timestamp': '2 mins ago'
+        },
+        {
+            'platform': 'Telegram',
+            'content': 'Stock tip channel promoting penny stocks to 2000+ subscribers',
+            'entities': '8',
+            'risk_level': 'Critical',
+            'timestamp': '5 mins ago'
+        },
+        {
+            'platform': 'Facebook',
+            'content': 'Investment advisory page with fake SEBI credentials detected',
+            'entities': '12',
+            'risk_level': 'Critical',
+            'timestamp': '8 mins ago'
+        },
+        {
+            'platform': 'Instagram',
+            'content': 'Influencer promoting forex trading without disclaimers',
+            'entities': '6',
+            'risk_level': 'Medium',
+            'timestamp': '12 mins ago'
+        },
+        {
+            'platform': 'YouTube',
+            'content': 'Channel teaching "guaranteed profit" trading strategies',
+            'entities': '22',
+            'risk_level': 'High',
+            'timestamp': '15 mins ago'
+        },
+        {
+            'platform': 'Twitter',
+            'content': 'Bot network spreading pump and dump schemes',
+            'entities': '45',
+            'risk_level': 'Critical',
+            'timestamp': '18 mins ago'
+        }
+    ]
+    
+    # Return 3-4 random items to simulate real-time updates
+    selected_feeds = random.sample(sample_feeds, min(4, len(sample_feeds)))
+    return jsonify(selected_feeds)
+
+@app.route('/api/market-anomalies')
+def api_market_anomalies():
+    """API endpoint for market manipulation detection"""
+    import random
+    
+    sample_anomalies = [
+        {
+            'exchange': 'NSE',
+            'type': 'Pump & Dump',
+            'stock': 'ABC Ltd',
+            'risk_score': 8.5,
+            'volume_spike': '340%',
+            'timestamp': '1 min ago'
+        },
+        {
+            'exchange': 'BSE',
+            'type': 'Wash Trading',
+            'stock': 'XYZ Corp',
+            'risk_score': 7.2,
+            'volume_spike': '180%',
+            'timestamp': '4 mins ago'
+        },
+        {
+            'exchange': 'NSE',
+            'type': 'Spoofing',
+            'stock': 'DEF Industries',
+            'risk_score': 9.1,
+            'volume_spike': '520%',
+            'timestamp': '7 mins ago'
+        },
+        {
+            'exchange': 'BSE',
+            'type': 'Layering',
+            'stock': 'GHI Enterprises',
+            'risk_score': 6.8,
+            'volume_spike': '95%',
+            'timestamp': '12 mins ago'
+        },
+        {
+            'exchange': 'NSE',
+            'type': 'Ramping',
+            'stock': 'JKL Limited',
+            'risk_score': 8.9,
+            'volume_spike': '280%',
+            'timestamp': '15 mins ago'
+        }
+    ]
+    
+    # Return 2-3 random items
+    selected_anomalies = random.sample(sample_anomalies, min(3, len(sample_anomalies)))
+    return jsonify(selected_anomalies)

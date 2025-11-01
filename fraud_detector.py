@@ -184,6 +184,25 @@ class FraudDetector:
         else:
             result['recommendation'] = 'safe'
 
+        # Sample response for demonstration with more detailed analysis
+        analysis_result = {
+            'risk_score': risk_score,
+            'sentiment': sentiment,
+            'indicators': indicators,
+            'suspicious_patterns': suspicious_patterns,
+            'recommendation': recommendation,
+            'urgency_level': urgency_level,
+            'contact_pressure': contact_pressure,
+            'confidence_level': min(95, max(60, risk_score * 10)),
+            'fraud_type': self._determine_fraud_type(indicators),
+            'platform_risk': self._assess_platform_risk(content_type),
+            'language_analysis': {
+                'emotional_pressure': len([i for i in indicators if 'pressure' in i or 'urgency' in i]) > 0,
+                'financial_promises': len([i for i in indicators if 'return' in i or 'guarantee' in i]) > 0,
+                'contact_requests': contact_pressure
+            }
+        }
+
         return result
 
     def _analyze_url(self, url, result):
@@ -239,4 +258,49 @@ class FraudDetector:
         else:
             result['recommendation'] = 'safe'
 
+        # Sample response for demonstration with more detailed analysis
+        analysis_result = {
+            'risk_score': risk_score,
+            'sentiment': sentiment,
+            'indicators': indicators,
+            'suspicious_patterns': suspicious_patterns,
+            'recommendation': recommendation,
+            'urgency_level': urgency_level,
+            'contact_pressure': contact_pressure,
+            'confidence_level': min(95, max(60, risk_score * 10)),
+            'fraud_type': self._determine_fraud_type(indicators),
+            'platform_risk': self._assess_platform_risk(content_type),
+            'language_analysis': {
+                'emotional_pressure': len([i for i in indicators if 'pressure' in i or 'urgency' in i]) > 0,
+                'financial_promises': len([i for i in indicators if 'return' in i or 'guarantee' in i]) > 0,
+                'contact_requests': contact_pressure
+            }
+        }
+
         return result
+
+    def _determine_fraud_type(self, indicators):
+        """Determine the type of fraud based on indicators."""
+        if any('keyword' in i and ('return' in i or 'guaranteed' in i or 'risk-free' in i) for i in indicators):
+            return 'Investment Scam'
+        elif any('pyramid' in i or 'multi-level' in i or 'downline' in i for i in indicators):
+            return 'Ponzi Scheme'
+        elif any('act now' in i or 'limited spots' in i or 'deadline' in i or 'hurry' in i for i in indicators):
+            return 'Urgency Tactic'
+        elif any('whatsapp' in i or 'telegram' in i for i in indicators):
+            return 'Contact Pressure'
+        elif any('deepfake' in i or 'ai generated' in i for i in indicators):
+            return 'AI/Deepfake Scam'
+        elif any('pump and dump' in i or 'wash trading' in i or 'market manipulation' in i for i in indicators):
+            return 'Market Manipulation'
+        else:
+            return 'Unknown'
+
+    def _assess_platform_risk(self, content_type):
+        """Assess risk based on the content type/platform."""
+        if content_type == 'url':
+            return 'high'
+        elif content_type == 'text':
+            return 'medium'
+        else: # image, video, etc.
+            return 'low'
