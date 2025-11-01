@@ -23,8 +23,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///fraud_detection.db?charset=utf8")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
-    "pool_pre_ping": True,
-    'connect_args': {'check_same_thread': False}
+    "pool_pre_ping": True
 }
 
 # initialize the app with the extension
