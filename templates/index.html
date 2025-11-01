@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Enhanced Hero Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="hero-gradient text-white rounded-4 p-5 text-center position-relative">
+            <!-- Animated Background Particles -->
+            <div class="hero-particles">
+                <div class="particle" style="width: 4px; height: 4px; top: 20%; left: 10%; animation-delay: 0s;"></div>
+                <div class="particle" style="width: 2px; height: 2px; top: 60%; left: 80%; animation-delay: 1s;"></div>
+                <div class="particle" style="width: 3px; height: 3px; top: 40%; left: 30%; animation-delay: 2s;"></div>
+                <div class="particle" style="width: 5px; height: 5px; top: 80%; left: 60%; animation-delay: 3s;"></div>
+                <div class="particle" style="width: 2px; height: 2px; top: 30%; left: 90%; animation-delay: 4s;"></div>
+            </div>
+            
+            <div class="position-relative">
+                <h1 class="display-3 fw-bold mb-4 fade-in-up">
+                    <i data-feather="shield" class="me-3" style="width: 64px; height: 64px;"></i>
+                    <br>
+                    {% if current_user.is_authenticated %}
+                        Welcome back, {{ current_user.first_name or 'Investor' }}!
+                    {% else %}
+                        Protect Your Investments
+                    {% endif %}
+                </h1>
+                <p class="lead mb-5 fade-in-up" style="font-size: 1.3rem; max-width: 800px; margin: 0 auto;">
+                    Advanced AI-powered fraud detection system protecting investors from financial crimes in real-time with machine learning intelligence
+                </p>
+                
+                <!-- Enhanced Statistics -->
+                <div class="row g-4 justify-content-center mb-4">
+                    <div class="col-md-3 fade-in-up">
+                        <div class="glow-card rounded-4 p-4 stats-pulse">
+                            <h2 class="mb-2 fw-bold display-6">{{ total_alerts }}</h2>
+                            <div class="text-light opacity-75">Total Alerts Detected</div>
+                            <i data-feather="alert-triangle" class="mt-2" style="width: 24px; height: 24px;"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3 fade-in-up">
+                        <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.2s;">
+                            <h2 class="mb-2 fw-bold display-6 text-danger">{{ high_risk_alerts }}</h2>
+                            <div class="text-light opacity-75">High Risk Cases</div>
+                            <i data-feather="alert-octagon" class="mt-2 text-danger" style="width: 24px; height: 24px;"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-3 fade-in-up">
+                        <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.4s;">
+                            <h2 class="mb-2 fw-bold display-6 text-warning">{{ active_alerts }}</h2>
+                            <div class="text-light opacity-75">Active Monitoring</div>
+                            <i data-feather="eye" class="mt-2 text-warning" style="width: 24px; height: 24px;"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Call to Action -->
+                <div class="fade-in-up" style="animation-delay: 0.6s;">
+                    <a href="{{ url_for('analyzer') }}" class="btn btn-primary btn-lg me-3 px-5 py-3">
+                        <i data-feather="search" class="me-2"></i>
+                        Start Analysis
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-lg px-5 py-3">
+                        <i data-feather="activity" class="me-2"></i>
+                        View Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i data-feather="zap" class="me-2"></i>
+            Quick Actions
+        </h2>
+    </div>
+    
+    <div class="col-md-4 mb-4 fade-in-up">
+        <div class="card action-card h-100 border-0 shadow glow-card">
+            <div class="card-body text-center p-4">
+                <div class="mb-4">
+                    <div class="bg-primary bg-opacity-20 rounded-circle p-3 d-inline-flex">
+                        <i data-feather="search" width="48" height="48" class="text-primary"></i>
+                    </div>
+                </div>
+                <h5 class="card-title fw-bold mb-3">Content Analyzer</h5>
+                <p class="card-text text-muted">Analyze text, URLs, and media for fraud indicators using AI-powered detection algorithms.</p>
+                <a href="{{ url_for('analyzer') }}" class="btn btn-primary">
+                    <i data-feather="arrow-right" class="me-2"></i>
+                    Start Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4 fade-in-up">
+        <div class="card action-card h-100 border-0 shadow glow-card">
+            <div class="card-body text-center p-4">
+                <div class="mb-4">
+                    <div class="bg-success bg-opacity-20 rounded-circle p-3 d-inline-flex">
+                        <i data-feather="user-check" width="48" height="48" class="text-success"></i>
+                    </div>
+                </div>
+                <h5 class="card-title fw-bold mb-3">Advisor Verification</h5>
+                <p class="card-text text-muted">Instantly verify investment advisor credentials against official SEBI database records.</p>
+                <a href="{{ url_for('advisor') }}" class="btn btn-success">
+                    <i data-feather="arrow-right" class="me-2"></i>
+                    Verify Now
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4 fade-in-up">
+        <div class="card action-card h-100 border-0 shadow glow-card">
+            <div class="card-body text-center p-4">
+                <div class="mb-4">
+                    <div class="bg-info bg-opacity-20 rounded-circle p-3 d-inline-flex">
+                        <i data-feather="share-2" width="48" height="48" class="text-info"></i>
+                    </div>
+                </div>
+                <h5 class="card-title fw-bold mb-3">Network Analysis</h5>
+                <p class="card-text text-muted">Visualize fraud networks and identify suspicious connection patterns across platforms.</p>
+                <a href="{{ url_for('network') }}" class="btn btn-info">
+                    <i data-feather="arrow-right" class="me-2"></i>
+                    View Network
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Fraud Alerts Ticker -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    Recent Fraud Alerts
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_alerts %}
+                    <div class="alert-ticker">
+                        {% for alert in recent_alerts %}
+                            <div class="alert alert-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }} mb-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>Risk Score: {{ "%.1f"|format(alert.risk_score) }}/10</strong>
+                                        <span class="badge bg-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }} ms-2">
+                                            {{ alert.severity.title() }}
+                                        </span>
+                                        <p class="mb-1 mt-2">{{ alert.content[:150] }}{% if alert.content|length > 150 %}...{% endif %}</p>
+                                        <small class="text-muted">
+                                            <i data-feather="clock" width="14" height="14" class="me-1"></i>
+                                            {{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i data-feather="check-circle" width="48" height="48" class="mb-3"></i>
+                        <p>No recent fraud alerts. System is monitoring for threats.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feature Highlights -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i data-feather="star" class="me-2"></i>
+            Key Features
+        </h2>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i data-feather="cpu" class="me-2 text-primary"></i>
+                    AI-Powered Detection
+                </h5>
+                <ul class="list-unstyled">
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Natural Language Processing</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Pattern Recognition</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Real-time Scoring</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Multi-modal Analysis</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i data-feather="shield-check" class="me-2 text-success"></i>
+                    Regulatory Compliance
+                </h5>
+                <ul class="list-unstyled">
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>SEBI Guidelines Alignment</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Privacy Protection</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Audit Trail Maintenance</li>
+                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Reporting Tools</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-dark text-light border-0">
+            <div class="card-body text-center py-5">
+                <h3 class="mb-3">Ready to Protect Your Investments?</h3>
+                <p class="lead mb-4">Join thousands of investors using FraudShield to stay safe from financial fraud.</p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                        <i data-feather="activity" class="me-2"></i>
+                        View Dashboard
+                    </a>
+                    <a href="{{ url_for('reports') }}" class="btn btn-outline-light btn-lg">
+                        <i data-feather="flag" class="me-2"></i>
+                        Report Fraud
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-refresh fraud alerts every 30 seconds
+    setInterval(function() {
+        // In a real implementation, this would fetch new alerts via AJAX
+        console.log('Checking for new fraud alerts...');
+    }, 30000);
+</script>
+{% endblock %}

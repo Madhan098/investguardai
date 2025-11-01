@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Content Analyzer - FraudShield{% endblock %}
+
+{% block content %}
+<!-- Analyzer Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i data-feather="search" class="me-2"></i>
+            AI Content Analyzer
+        </h1>
+        <p class="lead text-muted">
+            Analyze text, URLs, and media content for fraud indicators using advanced AI detection algorithms.
+        </p>
+    </div>
+</div>
+
+<!-- Analysis Form -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="edit-3" class="me-2"></i>
+                    Content Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="content_type" class="form-label">Content Type</label>
+                            <select class="form-select" id="content_type" name="content_type" required>
+                                <option value="text">Text Content</option>
+                                <option value="url">URL/Link</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                            </select>
+                        </div>
+                        <div class="col-md-9 mb-3">
+                            <label for="content" class="form-label">Content to Analyze</label>
+                            <textarea class="form-control" id="content" name="content" rows="4" 
+                                placeholder="Paste the text content, URL, or description of media to analyze..." required>{{ content if content }}</textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                                <i data-feather="play" class="me-2"></i>
+                                Analyze Content
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearForm()">
+                                <i data-feather="x" class="me-2"></i>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Results -->
+{% if analysis_result %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i data-feather="bar-chart" class="me-2"></i>
+                    Analysis Results
+                </h5>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-info me-2">
+                        Processed in {{ "%.2f"|format(processing_time) }}s
+                    </span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="exportResults()">
+                        <i data-feather="download" class="me-1"></i>
+                        Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Risk Score Display -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="text-center">
+                            <h2 class="mb-3">Risk Score</h2>
+                            <div class="position-relative d-inline-block">
+                                <div class="risk-score-circle bg-{{ 'danger' if analysis_result.risk_score >= 8 else 'warning' if analysis_result.risk_score >= 6 else 'success' if analysis_result.risk_score < 3 else 'info' }}">
+                                    <span class="risk-score-text">{{ "%.1f"|format(analysis_result.risk_score) }}</span>
+                                    <small>/10</small>
+                                </div>
+                            </div>
+                            <p class="mt-3 mb-0">
+                                <span class="badge bg-{{ 'danger' if analysis_result.risk_score >= 8 else 'warning' if analysis_result.risk_score >= 6 else 'success' if analysis_result.risk_score < 3 else 'info' }} fs-6">
+                                    {% if analysis_result.risk_score >= 8 %}
+                                        CRITICAL RISK
+                                    {% elif analysis_result.risk_score >= 6 %}
+                                        HIGH RISK
+                                    {% elif analysis_result.risk_score >= 3 %}
+                                        MEDIUM RISK
+                                    {% else %}
+                                        LOW RISK
+                                    {% endif %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5>Analysis Summary</h5>
+                        <ul class="list-unstyled">
+                            <li>
+                                <i data-feather="target" class="me-2 text-primary"></i>
+                                <strong>Recommendation:</strong> 
+                                <span class="text-capitalize">{{ analysis_result.recommendation.replace('_', ' ') }}</span>
+                            </li>
+                            <li>
+                                <i data-feather="thermometer" class="me-2 text-warning"></i>
+                                <strong>Sentiment:</strong> 
+                                <span class="text-capitalize">{{ analysis_result.sentiment.replace('_', ' ') }}</span>
+                            </li>
+                            <li>
+                                <i data-feather="clock" class="me-2 text-danger"></i>
+                                <strong>Urgency Level:</strong> 
+                                <span class="text-capitalize">{{ analysis_result.urgency_level }}</span>
+                            </li>
+                            <li>
+                                <i data-feather="phone" class="me-2 text-info"></i>
+                                <strong>Contact Pressure:</strong> 
+                                <span class="badge bg-{{ 'warning' if analysis_result.contact_pressure else 'success' }}">
+                                    {{ 'Detected' if analysis_result.contact_pressure else 'None' }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Fraud Indicators -->
+                {% if analysis_result.indicators %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>
+                            <i data-feather="alert-triangle" class="me-2 text-warning"></i>
+                            Detected Fraud Indicators
+                        </h5>
+                        <div class="row">
+                            {% for indicator in analysis_result.indicators %}
+                            <div class="col-md-6 mb-2">
+                                <div class="alert alert-warning py-2 mb-2">
+                                    <i data-feather="alert-circle" class="me-2" width="16" height="16"></i>
+                                    {{ indicator }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Suspicious Patterns -->
+                {% if analysis_result.suspicious_patterns %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>
+                            <i data-feather="search" class="me-2 text-info"></i>
+                            Suspicious Patterns Found
+                        </h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for pattern in analysis_result.suspicious_patterns %}
+                            <span class="badge bg-info">{{ pattern }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Recommendation Actions -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-{{ 'danger' if analysis_result.risk_score >= 8 else 'warning' if analysis_result.risk_score >= 6 else 'info' }}">
+                            <h6 class="alert-heading">
+                                <i data-feather="info" class="me-2"></i>
+                                Recommended Actions
+                            </h6>
+                            {% if analysis_result.recommendation == 'block_immediately' %}
+                                <p><strong>IMMEDIATE ACTION REQUIRED:</strong> This content shows extremely high fraud indicators. Block immediately and report to authorities.</p>
+                            {% elif analysis_result.recommendation == 'high_caution' %}
+                                <p><strong>HIGH CAUTION:</strong> Exercise extreme caution. Verify all claims independently before proceeding.</p>
+                            {% elif analysis_result.recommendation == 'moderate_caution' %}
+                                <p><strong>MODERATE CAUTION:</strong> Some fraud indicators detected. Proceed with caution and verify claims.</p>
+                            {% else %}
+                                <p><strong>SAFE TO PROCEED:</strong> Content appears legitimate with minimal fraud indicators.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Analysis Tips -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="lightbulb" class="me-2"></i>
+                    Analysis Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>For Text Analysis:</h6>
+                        <ul class="small">
+                            <li>Include complete messages or content</li>
+                            <li>Social media posts work best</li>
+                            <li>WhatsApp/Telegram messages are effective</li>
+                            <li>Email content can be analyzed</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>For URL Analysis:</h6>
+                        <ul class="small">
+                            <li>Paste complete URLs including https://</li>
+                            <li>Shortened URLs are automatically flagged</li>
+                            <li>Suspicious domain patterns are detected</li>
+                            <li>Investment site URLs are prioritized</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+<script>
+    function clearForm() {
+        document.getElementById('content').value = '';
+        document.getElementById('content_type').value = 'text';
+    }
+    
+    function exportResults() {
+        // In a real implementation, this would export the analysis results
+        alert('Export functionality would download a detailed report of the analysis results.');
+    }
+    
+    // Form submission with loading state
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        
+        form.addEventListener('submit', function() {
+            analyzeBtn.innerHTML = '<i data-feather="loader" class="me-2"></i>Analyzing...';
+            analyzeBtn.disabled = true;
+            feather.replace();
+        });
+    });
+</script>
+{% endblock %}

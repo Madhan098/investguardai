@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FraudShield{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>
+                <i data-feather="activity" class="me-2"></i>
+                Real-time Dashboard
+            </h1>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary" onclick="refreshDashboard()">
+                    <i data-feather="refresh-cw" class="me-1"></i>
+                    Refresh
+                </button>
+                <span class="badge bg-success">Live</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i data-feather="alert-triangle" class="text-warning" width="32" height="32"></i>
+                </div>
+                <h3 class="mb-1" id="total-alerts">{{ recent_alerts|length }}</h3>
+                <p class="text-muted mb-0">Active Alerts</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i data-feather="trending-up" class="text-danger" width="32" height="32"></i>
+                </div>
+                <h3 class="mb-1" id="high-risk-count">{{ risk_distribution.high }}</h3>
+                <p class="text-muted mb-0">High Risk</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i data-feather="shield" class="text-info" width="32" height="32"></i>
+                </div>
+                <h3 class="mb-1" id="medium-risk-count">{{ risk_distribution.medium }}</h3>
+                <p class="text-muted mb-0">Medium Risk</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i data-feather="check-circle" class="text-success" width="32" height="32"></i>
+                </div>
+                <h3 class="mb-1" id="low-risk-count">{{ risk_distribution.low }}</h3>
+                <p class="text-muted mb-0">Low Risk</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-8 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="bar-chart-2" class="me-2"></i>
+                    Weekly Fraud Trend
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="pie-chart" class="me-2"></i>
+                    Risk Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="riskChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Alerts -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i data-feather="alert-circle" class="me-2"></i>
+                    Recent Fraud Alerts
+                </h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="loadAlerts()">
+                    <i data-feather="refresh-cw" class="me-1"></i>
+                    Refresh Alerts
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="alerts-container">
+                    {% if recent_alerts %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Risk Score</th>
+                                        <th>Severity</th>
+                                        <th>Content Type</th>
+                                        <th>Content Preview</th>
+                                        <th>Detected</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for alert in recent_alerts %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if alert.risk_score >= 8 else 'warning' if alert.risk_score >= 6 else 'info' }}">
+                                                {{ "%.1f"|format(alert.risk_score) }}/10
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }}">
+                                                {{ alert.severity.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <i data-feather="{{ 'file-text' if alert.content_type == 'text' else 'link' if alert.content_type == 'url' else 'image' }}" class="me-1"></i>
+                                            {{ alert.content_type.title() }}
+                                        </td>
+                                        <td>
+                                            <span class="text-truncate d-inline-block" style="max-width: 300px;">
+                                                {{ alert.content[:100] }}{% if alert.content|length > 100 %}...{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ alert.created_at.strftime('%m/%d %H:%M') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="viewAlert({{ alert.id }})">
+                                                    <i data-feather="eye" width="14" height="14"></i>
+                                                </button>
+                                                <button class="btn btn-outline-success" onclick="resolveAlert({{ alert.id }})">
+                                                    <i data-feather="check" width="14" height="14"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i data-feather="check-circle" width="64" height="64" class="mb-3"></i>
+                            <h5>No Active Alerts</h5>
+                            <p>The system is actively monitoring for fraudulent activity.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Detail Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Alert Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="alert-details">
+                <!-- Alert details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" onclick="resolveCurrentAlert()">Mark as Resolved</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        const trendData = {{ daily_alerts | tojson }};
+        
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendData.map(d => d.date),
+                datasets: [{
+                    label: 'Fraud Alerts',
+                    data: trendData.map(d => d.count),
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Risk Distribution Chart
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        const riskData = {{ risk_distribution | tojson }};
+        
+        new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                datasets: [{
+                    data: [riskData.low, riskData.medium, riskData.high],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(220, 53, 69, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Real-time dashboard refresh functions
+        function refreshDashboardStats() {
+            fetch('/api/dashboard/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update stats cards using existing IDs
+                    document.getElementById('total-alerts').textContent = data.total_alerts;
+                    document.getElementById('high-risk-count').textContent = data.high_risk_alerts;
+                    document.getElementById('medium-risk-count').textContent = data.total_alerts - data.high_risk_alerts - data.active_alerts;
+                    document.getElementById('low-risk-count').textContent = data.active_alerts;
+                    
+                    // Update live indicator
+                    const now = new Date();
+                    console.log('Dashboard refreshed at:', now.toLocaleTimeString());
+                })
+                .catch(error => console.error('Error fetching dashboard stats:', error));
+        }
+        
+        function refreshRecentAlerts() {
+            fetch('/api/dashboard/recent-alerts')
+                .then(response => response.json())
+                .then(alerts => {
+                    // Update alerts table if it exists
+                    const alertsTable = document.querySelector('.table tbody');
+                    if (alertsTable && alerts.length > 0) {
+                        const updatedRows = alerts.slice(0, 5).map(alert => {
+                            const severityClass = alert.severity === 'critical' ? 'danger' : 
+                                                alert.severity === 'high' ? 'warning' : 'info';
+                            
+                            return `
+                                <tr class="alert-new">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="risk-score-circle bg-${severityClass}" style="width: 40px; height: 40px; font-size: 0.8rem;">
+                                                ${alert.risk_score.toFixed(1)}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-${severityClass}">${alert.severity.toUpperCase()}</span>
+                                    </td>
+                                    <td>
+                                        <div class="text-truncate" style="max-width: 300px;">
+                                            ${alert.content}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">${alert.created_at}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-${alert.status === 'active' ? 'warning' : 'success'}">${alert.status}</span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                        
+                        alertsTable.innerHTML = updatedRows;
+                    }
+                })
+                .catch(error => console.error('Error fetching recent alerts:', error));
+        }
+        
+        function refreshDashboard() {
+            refreshDashboardStats();
+            refreshRecentAlerts();
+        }
+        
+        // Auto-refresh every 10 seconds for real-time updates
+        setInterval(refreshDashboard, 10000);
+        
+        // Initial refresh after page load
+        setTimeout(refreshDashboard, 2000);
+    });
+</script>
+{% endblock %}

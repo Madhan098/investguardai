@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}Network Analysis - FraudShield{% endblock %}
+
+{% block content %}
+<!-- Network Analysis Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>
+                    <i data-feather="share-2" class="me-2"></i>
+                    Network Analysis
+                </h1>
+                <p class="lead text-muted">
+                    Visualize fraud networks and identify suspicious connection patterns between entities.
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary" onclick="refreshNetwork()">
+                    <i data-feather="refresh-cw" class="me-1"></i>
+                    Refresh
+                </button>
+                <button class="btn btn-outline-success" onclick="exportNetwork()">
+                    <i data-feather="download" class="me-1"></i>
+                    Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Network Controls -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label for="riskThreshold" class="form-label">Risk Threshold</label>
+                        <input type="range" class="form-range" id="riskThreshold" min="1" max="10" value="5" 
+                               onchange="filterNetwork(this.value)">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Low</small>
+                            <small class="text-muted">High</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="connectionType" class="form-label">Connection Type</label>
+                        <select class="form-select" id="connectionType" onchange="filterByType(this.value)">
+                            <option value="all">All Connections</option>
+                            <option value="financial">Financial</option>
+                            <option value="communication">Communication</option>
+                            <option value="ownership">Ownership</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="entitySearch" class="form-label">Search Entity</label>
+                        <input type="text" class="form-control" id="entitySearch" 
+                               placeholder="Search for entity..." onkeyup="searchEntity(this.value)">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="analyzeNetwork()">
+                            <i data-feather="cpu" class="me-1"></i>
+                            Analyze Patterns
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Network Visualization -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i data-feather="git-branch" class="me-2"></i>
+                    Fraud Network Map
+                </h5>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-info">{{ network_data.nodes|length }} Entities</span>
+                    <span class="badge bg-warning">{{ network_data.edges|length }} Connections</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="network-container" style="height: 600px; border: 1px solid #dee2e6; border-radius: 0.375rem;">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Loading network...</span>
+                            </div>
+                            <p class="text-muted">Loading network visualization...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Network Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <i data-feather="users" class="text-primary mb-2" width="32" height="32"></i>
+                <h4 class="mb-1" id="entityCount">{{ network_data.nodes|length }}</h4>
+                <p class="text-muted mb-0">Entities</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <i data-feather="link" class="text-info mb-2" width="32" height="32"></i>
+                <h4 class="mb-1" id="connectionCount">{{ network_data.edges|length }}</h4>
+                <p class="text-muted mb-0">Connections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <i data-feather="alert-triangle" class="text-warning mb-2" width="32" height="32"></i>
+                <h4 class="mb-1" id="suspiciousCount">
+                    {% set suspicious_count = network_data.edges | selectattr('suspicious_score', '>=', 7.0) | list | length %}
+                    {{ suspicious_count }}
+                </h4>
+                <p class="text-muted mb-0">High Risk</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <i data-feather="trending-up" class="text-danger mb-2" width="32" height="32"></i>
+                <h4 class="mb-1" id="clusterCount">-</h4>
+                <p class="text-muted mb-0">Clusters</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Network Connections Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="list" class="me-2"></i>
+                    Suspicious Connections
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if connections %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Source Entity</th>
+                                    <th>Target Entity</th>
+                                    <th>Connection Type</th>
+                                    <th>Strength</th>
+                                    <th>Risk Score</th>
+                                    <th>Detected</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for conn in connections %}
+                                <tr>
+                                    <td>
+                                        <code class="small">{{ conn.source_entity }}</code>
+                                    </td>
+                                    <td>
+                                        <code class="small">{{ conn.target_entity }}</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if conn.connection_type == 'financial' else 'info' if conn.connection_type == 'communication' else 'warning' }}">
+                                            {{ conn.connection_type.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ (conn.strength * 100)|round }}%"
+                                                 aria-valuenow="{{ (conn.strength * 100)|round }}" 
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ "%.1f"|format(conn.strength) }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if conn.suspicious_score >= 8 else 'warning' if conn.suspicious_score >= 6 else 'info' }}">
+                                            {{ "%.1f"|format(conn.suspicious_score) }}/10
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ conn.detected_at.strftime('%m/%d %H:%M') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewConnection({{ conn.id }})">
+                                                <i data-feather="eye" width="14" height="14"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="analyzeEntity('{{ conn.source_entity }}')">
+                                                <i data-feather="search" width="14" height="14"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i data-feather="git-branch" width="64" height="64" class="mb-3"></i>
+                        <h5>No Suspicious Connections</h5>
+                        <p>No high-risk network connections detected at this time.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Results Modal -->
+<div class="modal fade" id="analysisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Network Analysis Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="analysis-results">
+                <!-- Analysis results will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="exportAnalysis()">Export Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/network.js') }}"></script>
+<script>
+    // Network data from backend
+    const networkData = {{ network_data | tojson }};
+    
+    // Initialize network visualization
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeNetwork(networkData);
+    });
+    
+    function initializeNetwork(data) {
+        // Simple network visualization using HTML5 Canvas or SVG
+        const container = document.getElementById('network-container');
+        container.innerHTML = `
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center">
+                    <i data-feather="git-branch" width="64" height="64" class="text-primary mb-3"></i>
+                    <h5>Network Visualization</h5>
+                    <p class="text-muted">Interactive network graph showing ${data.nodes.length} entities and ${data.edges.length} connections</p>
+                    <div class="row g-2 justify-content-center">
+                        ${data.nodes.slice(0, 6).map(node => `
+                            <div class="col-auto">
+                                <div class="badge bg-secondary p-2">${node.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${data.nodes.length > 6 ? `<p class="mt-2 text-muted">... and ${data.nodes.length - 6} more entities</p>` : ''}
+                </div>
+            </div>
+        `;
+        feather.replace();
+    }
+    
+    function filterNetwork(threshold) {
+        console.log('Filtering network with threshold:', threshold);
+        // Filter network based on risk threshold
+    }
+    
+    function filterByType(type) {
+        console.log('Filtering by connection type:', type);
+        // Filter network based on connection type
+    }
+    
+    function searchEntity(query) {
+        console.log('Searching for entity:', query);
+        // Search and highlight entity in network
+    }
+    
+    function analyzeNetwork() {
+        // Show analysis modal with loading state
+        const modal = new bootstrap.Modal(document.getElementById('analysisModal'));
+        document.getElementById('analysis-results').innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <p>Analyzing network patterns...</p>
+            </div>
+        `;
+        modal.show();
+        
+        // Simulate analysis
+        setTimeout(() => {
+            document.getElementById('analysis-results').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Network Statistics</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Total Entities:</strong> ${networkData.nodes.length}</li>
+                            <li><strong>Total Connections:</strong> ${networkData.edges.length}</li>
+                            <li><strong>Avg Risk Score:</strong> ${(networkData.edges.reduce((sum, edge) => sum + edge.suspicious_score, 0) / networkData.edges.length).toFixed(1)}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Risk Assessment</h6>
+                        <div class="alert alert-warning">
+                            <strong>Medium Risk Network</strong><br>
+                            Multiple suspicious connections detected. Enhanced monitoring recommended.
+                        </div>
+                    </div>
+                </div>
+            `;
+        }, 2000);
+    }
+    
+    function viewConnection(id) {
+        alert(`Viewing connection details for ID: ${id}`);
+    }
+    
+    function analyzeEntity(entity) {
+        alert(`Analyzing entity: ${entity}`);
+    }
+    
+    function refreshNetwork() {
+        location.reload();
+    }
+    
+    function exportNetwork() {
+        alert('Network data would be exported as a report file.');
+    }
+    
+    function exportAnalysis() {
+        alert('Analysis results would be exported as a detailed report.');
+    }
+</script>
+{% endblock %}

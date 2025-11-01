@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}Fraud Reports - FraudShield{% endblock %}
+
+{% block content %}
+<!-- Reports Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i data-feather="flag" class="me-2"></i>
+            Fraud Reporting Center
+        </h1>
+        <p class="lead text-muted">
+            Report suspected investment fraud and help protect the community from financial crimes.
+        </p>
+    </div>
+</div>
+
+<!-- Report Submission Form -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="edit-3" class="me-2"></i>
+                    Submit Fraud Report
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="reporter_email" class="form-label">Your Email (Optional)</label>
+                            <input type="email" class="form-control" id="reporter_email" name="reporter_email" 
+                                placeholder="your.email@example.com">
+                            <div class="form-text">
+                                Provide your email if you want updates on the investigation
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="platform" class="form-label">Platform/Source</label>
+                            <select class="form-select" id="platform" name="platform" required>
+                                <option value="">Select platform...</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="telegram">Telegram</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="email">Email</option>
+                                <option value="website">Website</option>
+                                <option value="sms">SMS</option>
+                                <option value="phone_call">Phone Call</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fraud_type" class="form-label">Type of Fraud</label>
+                            <select class="form-select" id="fraud_type" name="fraud_type" required>
+                                <option value="">Select fraud type...</option>
+                                <option value="fake_investment_scheme">Fake Investment Scheme</option>
+                                <option value="ponzi_scheme">Ponzi Scheme</option>
+                                <option value="fake_advisor">Fake Investment Advisor</option>
+                                <option value="pump_and_dump">Pump and Dump</option>
+                                <option value="cryptocurrency_fraud">Cryptocurrency Fraud</option>
+                                <option value="binary_options">Binary Options Fraud</option>
+                                <option value="forex_fraud">Forex Trading Fraud</option>
+                                <option value="romance_investment">Romance Investment Scam</option>
+                                <option value="phishing">Investment Phishing</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="amount_involved" class="form-label">Amount Involved (₹)</label>
+                            <input type="number" class="form-control" id="amount_involved" name="amount_involved" 
+                                placeholder="0" min="0" step="0.01">
+                            <div class="form-text">
+                                Approximate amount lost or being requested (optional)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="content_url" class="form-label">Related URL/Link (Optional)</label>
+                            <input type="url" class="form-control" id="content_url" name="content_url" 
+                                placeholder="https://example.com/suspicious-content">
+                            <div class="form-text">
+                                Website, social media post, or any related link
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="content_description" class="form-label">Detailed Description</label>
+                            <textarea class="form-control" id="content_description" name="content_description" 
+                                rows="6" placeholder="Please provide a detailed description of the fraudulent activity..." required></textarea>
+                            <div class="form-text">
+                                Include as much detail as possible: names, promises made, contact information, timeline, etc.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i data-feather="shield" class="me-2"></i>
+                                <strong>Privacy Notice:</strong> Your report will be handled confidentially and used only for fraud prevention purposes. Personal information will be protected according to privacy regulations.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="send" class="me-2"></i>
+                                Submit Report
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary ms-2">
+                                <i data-feather="x" class="me-2"></i>
+                                Clear Form
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Community Reports -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i data-feather="users" class="me-2"></i>
+                    Recent Community Reports
+                </h5>
+                <span class="badge bg-primary">{{ recent_reports|length }} Reports</span>
+            </div>
+            <div class="card-body">
+                {% if recent_reports %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fraud Type</th>
+                                    <th>Platform</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Reported</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in recent_reports %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-warning">
+                                            {{ report.fraud_type.replace('_', ' ').title() if report.fraud_type else 'General' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <i data-feather="{{ 'message-circle' if report.platform in ['whatsapp', 'telegram'] else 'globe' if report.platform == 'website' else 'mail' if report.platform == 'email' else 'smartphone' }}"></i>
+                                        {{ report.platform.title() if report.platform else 'Unknown' }}
+                                    </td>
+                                    <td>
+                                        {% if report.amount_involved %}
+                                            <span class="text-danger">₹{{ "{:,.0f}".format(report.amount_involved) }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if report.status == 'confirmed' else 'danger' if report.status == 'dismissed' else 'info' if report.status == 'investigating' else 'secondary' }}">
+                                            {{ report.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ report.created_at.strftime('%m/%d/%y %H:%M') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 300px;">
+                                            {{ report.content_description[:100] }}{% if report.content_description|length > 100 %}...{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i data-feather="check-circle" width="64" height="64" class="mb-3"></i>
+                        <h5>No Recent Reports</h5>
+                        <p>No fraud reports have been submitted recently. Help keep the community safe by reporting suspicious activity.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fraud Prevention Tips -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i data-feather="shield-check" class="me-2"></i>
+                    Prevention Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0">
+                    <li>Never invest in "guaranteed" returns</li>
+                    <li>Verify advisor credentials with SEBI</li>
+                    <li>Be wary of high-pressure tactics</li>
+                    <li>Research investment opportunities thoroughly</li>
+                    <li>Don't share personal financial information</li>
+                    <li>Trust your instincts - if it seems too good to be true, it probably is</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    Common Red Flags
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0 text-danger">
+                    <li>Promises of guaranteed high returns</li>
+                    <li>Pressure to "act now" or "limited time offers"</li>
+                    <li>Unregistered investment advisors</li>
+                    <li>Requests for upfront fees or deposits</li>
+                    <li>Difficulty withdrawing invested money</li>
+                    <li>Secretive or complex investment strategies</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emergency Contacts -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i data-feather="phone" class="me-2"></i>
+                    Emergency Contacts
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>SEBI Helpline:</strong><br>
+                        <a href="tel:1800-266-7575" class="text-decoration-none">1800-266-7575</a>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Cyber Crime Helpline:</strong><br>
+                        <a href="tel:1930" class="text-decoration-none">1930</a>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>National Cyber Crime Portal:</strong><br>
+                        <a href="https://cybercrime.gov.in" target="_blank" class="text-decoration-none">cybercrime.gov.in</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Form validation and enhancement
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const amountInput = document.getElementById('amount_involved');
+        
+        // Format amount input
+        amountInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d.]/g, '');
+            e.target.value = value;
+        });
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            const description = document.getElementById('content_description').value.trim();
+            if (description.length < 20) {
+                e.preventDefault();
+                alert('Please provide a more detailed description (at least 20 characters).');
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

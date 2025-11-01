@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Advisor Verification - FraudShield{% endblock %}
+
+{% block content %}
+<!-- Advisor Verification Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i data-feather="user-check" class="me-2"></i>
+            Investment Advisor Verification
+        </h1>
+        <p class="lead text-muted">
+            Instantly verify investment advisor credentials against the SEBI database to ensure legitimacy.
+        </p>
+    </div>
+</div>
+
+<!-- Verification Form -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i data-feather="search" class="me-2"></i>
+                    Advisor Lookup
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="license_number" class="form-label">
+                                SEBI License Number
+                                <span class="text-muted">(Preferred)</span>
+                            </label>
+                            <input type="text" class="form-control" id="license_number" name="license_number" 
+                                placeholder="e.g., INA000001234" value="{{ license_number if license_number }}">
+                            <div class="form-text">
+                                SEBI registration numbers start with 'INA' followed by 9 digits
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">
+                                Advisor Name
+                                <span class="text-muted">(Alternative)</span>
+                            </label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                placeholder="e.g., John Doe" value="{{ name if name }}">
+                            <div class="form-text">
+                                Full name as registered with SEBI
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="shield-check" class="me-2"></i>
+                                Verify Advisor
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearForm()">
+                                <i data-feather="x" class="me-2"></i>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Verification Results -->
+{% if verification_result %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i data-feather="file-text" class="me-2"></i>
+                    Verification Results
+                </h5>
+                <span class="badge bg-{{ 'success' if verification_result.found else 'danger' }}">
+                    {{ 'FOUND' if verification_result.found else 'NOT FOUND' }}
+                </span>
+            </div>
+            <div class="card-body">
+                {% if verification_result.found %}
+                    <!-- Advisor Found -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h4 class="mb-3">{{ verification_result.advisor_details.name }}</h4>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>License Number:</strong></div>
+                                <div class="col-sm-8">
+                                    <code>{{ verification_result.advisor_details.license_number }}</code>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Registration Date:</strong></div>
+                                <div class="col-sm-8">{{ verification_result.advisor_details.registration_date }}</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Status:</strong></div>
+                                <div class="col-sm-8">
+                                    <span class="badge bg-{{ 'success' if verification_result.advisor_details.status == 'active' else 'danger' }}">
+                                        {{ verification_result.advisor_details.status.upper() }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Firm Name:</strong></div>
+                                <div class="col-sm-8">{{ verification_result.advisor_details.firm_name }}</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Contact Email:</strong></div>
+                                <div class="col-sm-8">
+                                    <a href="mailto:{{ verification_result.advisor_details.contact_email }}">
+                                        {{ verification_result.advisor_details.contact_email }}
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Contact Phone:</strong></div>
+                                <div class="col-sm-8">{{ verification_result.advisor_details.contact_phone }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h5>Verification Score</h5>
+                                <div class="verification-score-circle bg-{{ 'success' if verification_result.verification_score >= 8 else 'warning' if verification_result.verification_score >= 6 else 'danger' }}">
+                                    <span class="verification-score-text">{{ "%.1f"|format(verification_result.verification_score) }}</span>
+                                    <small>/10</small>
+                                </div>
+                                <p class="mt-3 mb-0">
+                                    <span class="badge bg-{{ 'success' if verification_result.risk_assessment == 'low_risk' else 'warning' if verification_result.risk_assessment == 'medium_risk' else 'danger' }} fs-6">
+                                        {{ verification_result.risk_assessment.replace('_', ' ').upper() }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Specializations -->
+                    {% if verification_result.advisor_details.specializations %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6>Areas of Specialization</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for spec in verification_result.advisor_details.specializations.strip('[]"').split('", "') %}
+                                <span class="badge bg-info">{{ spec.strip('"') }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                {% else %}
+                    <!-- Advisor Not Found -->
+                    <div class="text-center py-4">
+                        <i data-feather="alert-triangle" width="64" height="64" class="text-warning mb-3"></i>
+                        <h4 class="text-warning">Advisor Not Found</h4>
+                        <p class="text-muted">
+                            The advisor could not be found in the SEBI database. This may indicate fraudulent activity.
+                        </p>
+                    </div>
+                {% endif %}
+                
+                <!-- Warnings -->
+                {% if verification_result.warnings %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-danger">
+                            <i data-feather="alert-triangle" class="me-2"></i>
+                            Warnings
+                        </h6>
+                        {% for warning in verification_result.warnings %}
+                        <div class="alert alert-danger py-2 mb-2">
+                            <i data-feather="alert-circle" class="me-2" width="16" height="16"></i>
+                            {{ warning }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Recommendation -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-{{ 'success' if verification_result.recommendation == 'safe_to_proceed' else 'warning' if verification_result.recommendation == 'proceed_with_caution' else 'danger' }}">
+                            <h6 class="alert-heading">
+                                <i data-feather="info" class="me-2"></i>
+                                Recommendation
+                            </h6>
+                            {% if verification_result.recommendation == 'safe_to_proceed' %}
+                                <p><strong>SAFE TO PROCEED:</strong> This advisor is verified and appears legitimate. You can proceed with confidence.</p>
+                            {% elif verification_result.recommendation == 'proceed_with_caution' %}
+                                <p><strong>PROCEED WITH CAUTION:</strong> Some concerns detected. Verify additional details before proceeding.</p>
+                            {% elif verification_result.recommendation == 'avoid_advisor' %}
+                                <p><strong>AVOID THIS ADVISOR:</strong> Significant issues detected. Consider finding an alternative advisor.</p>
+                            {% elif verification_result.recommendation == 'report_immediately' %}
+                                <p><strong>REPORT IMMEDIATELY:</strong> Critical fraud indicators detected. Do not proceed and report to authorities.</p>
+                            {% else %}
+                                <p><strong>VERIFY INDEPENDENTLY:</strong> Could not verify through SEBI database. Confirm credentials through other channels.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Verification Tips -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i data-feather="lightbulb" class="me-2"></i>
+                    Verification Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0">
+                    <li>Always ask for SEBI registration number</li>
+                    <li>Verify advisor credentials before investing</li>
+                    <li>Check if advisor's license is active</li>
+                    <li>Confirm contact details match SEBI records</li>
+                    <li>Be wary of advisors without proper credentials</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    Red Flags
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0 text-danger">
+                    <li>No SEBI registration number provided</li>
+                    <li>Suspended or revoked license status</li>
+                    <li>Promises of guaranteed returns</li>
+                    <li>Pressure to invest immediately</li>
+                    <li>Unverified contact information</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function clearForm() {
+        document.getElementById('license_number').value = '';
+        document.getElementById('name').value = '';
+    }
+    
+    // Format license number input
+    document.getElementById('license_number').addEventListener('input', function(e) {
+        let value = e.target.value.toUpperCase();
+        // Remove any non-alphanumeric characters except the initial INA
+        if (value.startsWith('INA')) {
+            value = 'INA' + value.substring(3).replace(/[^0-9]/g, '');
+        }
+        e.target.value = value;
+    });
+</script>
+{% endblock %}
