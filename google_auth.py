@@ -87,8 +87,14 @@ def get_redirect_uri():
             print(f"[WARNING] Automatically converting to localhost{port} for OAuth redirect.")
             redirect_uri = f"http://localhost{port}/auth/google/callback"
         else:
-            # Public domain or localhost - use as is
-            base_url = request.url_root.rstrip('/')
+            # Public domain (like investguardai.onrender.com) - use as is
+            # Detect HTTPS properly for production
+            if request.is_secure or 'onrender.com' in host or host.endswith('.onrender.com'):
+                scheme = 'https'
+            else:
+                scheme = request.scheme
+            
+            base_url = f"{scheme}://{host}"
             redirect_uri = f"{base_url}/auth/google/callback"
         
         # Log for debugging - show exact URI being used

@@ -194,14 +194,26 @@ try:
         get_current_user as get_google_user, logout as google_logout, refresh_credentials_if_needed
     )
     # Check if credentials are actually configured by checking the module attributes
-    client_id = getattr(google_auth, 'GOOGLE_CLIENT_ID', None)
-    client_secret = getattr(google_auth, 'GOOGLE_CLIENT_SECRET', None)
+    # Also check environment variables directly (for production deployment)
+    env_client_id = os.environ.get('GOOGLE_CLIENT_ID', '')
+    env_client_secret = os.environ.get('GOOGLE_CLIENT_SECRET', '')
     
-    if client_id and client_secret and client_id.strip() and client_secret.strip():
+    client_id = getattr(google_auth, 'GOOGLE_CLIENT_ID', None) or env_client_id
+    client_secret = getattr(google_auth, 'GOOGLE_CLIENT_SECRET', None) or env_client_secret
+    
+    # Check if credentials are valid (not placeholders)
+    if (client_id and client_secret and 
+        client_id.strip() and client_secret.strip() and
+        client_id != 'YOUR_CLIENT_ID_HERE' and 
+        client_secret != 'YOUR_CLIENT_SECRET_HERE' and
+        'YOUR_' not in client_id and 'YOUR_' not in client_secret):
         GOOGLE_AUTH_AVAILABLE = True
         print("[SUCCESS] Google Auth configured successfully")
+        print(f"[DEBUG] Using Client ID: {client_id[:30]}...{client_id[-10:] if len(client_id) > 40 else ''}")
     else:
-        print("[WARNING] Google Auth credentials not configured (empty or None)")
+        print("[WARNING] Google Auth credentials not configured (empty, None, or placeholders)")
+        print(f"[DEBUG] Client ID from env: {env_client_id[:30] if env_client_id else 'NOT SET'}...")
+        print(f"[DEBUG] Client ID from module: {getattr(google_auth, 'GOOGLE_CLIENT_ID', None)[:30] if getattr(google_auth, 'GOOGLE_CLIENT_ID', None) else 'NOT SET'}...")
         GOOGLE_AUTH_AVAILABLE = False
 except (ImportError, ModuleNotFoundError) as e:
     # Only show error if packages are truly missing (not during reload or in certain contexts)
@@ -401,7 +413,12 @@ def register():
 def google_login():
     """Initiate Google OAuth login"""
     if not GOOGLE_AUTH_AVAILABLE:
-        flash('Google authentication is not configured. Please use email login.', 'error')
+        # Provide more helpful error message for production
+        error_msg = 'Google authentication is not configured on this server. '
+        error_msg += 'Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables on Render. '
+        error_msg += 'For now, please use email login.'
+        print(f"[ERROR] Google Auth not available. GOOGLE_CLIENT_ID: {os.environ.get('GOOGLE_CLIENT_ID', 'NOT SET')[:30]}...")
+        flash(error_msg, 'error')
         return redirect(url_for('login'))
     
     try:
