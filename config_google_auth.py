@@ -20,8 +20,8 @@ GOOGLE_CLIENT_CONFIG_JSON = """{
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         "client_secret": "YOUR_CLIENT_SECRET_HERE",
         "redirect_uris": [
-            "http://localhost:5000/auth/google/callback",
-            "http://127.0.0.1:5000/auth/google/callback",
+            "http://localhost:8000/auth/google/callback",
+            "http://127.0.0.1:8000/auth/google/callback",
             "https://eventcraft-aysl.onrender.com/auth/google/callback",
             "https://your-production-domain.onrender.com/auth/google/callback"
         ]

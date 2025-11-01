@@ -178,15 +178,14 @@ import io
 # Import Google Auth
 GOOGLE_AUTH_AVAILABLE = False
 try:
-    # First check if google.auth is available
-    try:
-        import google.auth
-        from google_auth_oauthlib.flow import Flow
-        from googleapiclient.discovery import build
-    except ImportError as import_error:
-        print(f"Google Auth dependencies not installed: {import_error}")
-        print("Please install: pip install google-auth google-auth-oauthlib google-api-python-client")
-        raise ImportError(f"Missing Google Auth dependencies: {import_error}")
+    # Import Google Auth packages
+    import google.auth
+    from google_auth_oauthlib.flow import Flow
+    from googleapiclient.discovery import build
+    
+    # Verify imports actually work
+    if not hasattr(google.auth, '__version__'):
+        raise ImportError("google.auth module incomplete")
     
     # Now try to import our google_auth module
     import google_auth
@@ -204,14 +203,28 @@ try:
     else:
         print("[WARNING] Google Auth credentials not configured (empty or None)")
         GOOGLE_AUTH_AVAILABLE = False
-except ImportError as e:
-    print(f"[WARNING] Google Auth module not available: {e}")
-    print("   Run: python -m pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client")
+except (ImportError, ModuleNotFoundError) as e:
+    # Only show error if packages are truly missing (not during reload or in certain contexts)
+    import sys
+    error_msg = str(e)
+    # Only show detailed warning if it's actually a missing package, not a reload artifact
+    if 'No module named' in error_msg or 'cannot import' in error_msg:
+        # Check if packages might be available but just not importable right now
+        try:
+            import importlib.util
+            spec = importlib.util.find_spec('google.auth')
+            if spec is None:
+                print(f"[WARNING] Google Auth dependencies not installed: {e}")
+                print("   Run: python -m pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client")
+        except:
+            print(f"[WARNING] Google Auth dependencies not installed: {e}")
+            print("   Run: python -m pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client")
+    else:
+        # Other import errors - might be during reload, don't show warning
+        pass
     GOOGLE_AUTH_AVAILABLE = False
 except Exception as e:
-    print(f"[WARNING] Google Auth error: {e}")
-    import traceback
-    traceback.print_exc()
+    # Other errors - log but don't prevent app from starting
     GOOGLE_AUTH_AVAILABLE = False
 
 # Simple authentication system (supports both regular and Google OAuth)
@@ -220,14 +233,37 @@ def require_login(f):
     from functools import wraps
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Check for regular session login
+        # Check for regular session login (email-based, no database record)
         user_id = session.get('user_id')
         if user_id:
-            return f(*args, **kwargs)
+            # For regular email login, user_id is the email (not stored in User table)
+            # Check if it looks like an email (regular login) or a Google ID (should be in DB)
+            if '@' in str(user_id):
+                # Regular email login - allow access
+                return f(*args, **kwargs)
+            else:
+                # Might be a Google user_id - verify exists in database
+                from models import User
+                user = User.query.filter_by(id=user_id).first()
+                if not user:
+                    # User doesn't exist in database - clear session and redirect to login
+                    session.clear()
+                    flash('Your session has expired. Please log in again.', 'warning')
+                    return redirect(url_for('login'))
+                return f(*args, **kwargs)
         
         # Check for Google OAuth login
-        if GOOGLE_AUTH_AVAILABLE:
+        google_user_id = session.get('google_user_id')
+        if google_user_id and GOOGLE_AUTH_AVAILABLE:
             try:
+                # Verify Google user exists in database
+                from models import User
+                user = User.query.filter_by(id=google_user_id).first()
+                if not user:
+                    # User doesn't exist in database - clear session and redirect to login
+                    session.clear()
+                    flash('Your session has expired. Please log in again.', 'warning')
+                    return redirect(url_for('login'))
                 if google_is_authenticated():
                     return f(*args, **kwargs)
             except:
@@ -369,13 +405,25 @@ def google_login():
         return redirect(url_for('login'))
     
     try:
+        # Get the redirect URI that will be used
+        from google_auth import get_redirect_uri
+        redirect_uri = get_redirect_uri()
+        print(f"[DEBUG] Attempting Google login with redirect URI: {redirect_uri}")
+        
         authorization_url = get_authorization_url()
+        print(f"[DEBUG] Authorization URL generated successfully")
         return redirect(authorization_url)
     except ValueError as e:
-        flash(f'Google authentication error: {str(e)}', 'error')
+        error_msg = str(e)
+        print(f"[ERROR] Google OAuth ValueError: {error_msg}")
+        flash(f'Google authentication error: {error_msg}. Please ensure the redirect URI is added in Google Cloud Console.', 'error')
         return redirect(url_for('login'))
     except Exception as e:
-        flash(f'An error occurred during Google authentication: {str(e)}', 'error')
+        error_msg = str(e)
+        print(f"[ERROR] Google OAuth Exception: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        flash(f'An error occurred during Google authentication: {error_msg}', 'error')
         return redirect(url_for('login'))
 
 @app.route('/auth/google/callback')
@@ -385,9 +433,27 @@ def google_callback():
         flash('Google authentication is not configured.', 'error')
         return redirect(url_for('login'))
     
+    # Check for error from Google
     error = request.args.get('error')
+    error_description = request.args.get('error_description', '')
+    
     if error:
-        flash(f'Google authentication error: {error}', 'error')
+        error_msg = f'Google authentication error: {error}'
+        if error_description:
+            error_msg += f' - {error_description}'
+        print(f"[ERROR] Google OAuth callback error: {error_msg}")
+        
+        # Provide specific help for common errors
+        if error == 'redirect_uri_mismatch':
+            error_msg += '\n\nPlease add this redirect URI to Google Cloud Console:\n'
+            from google_auth import get_redirect_uri
+            try:
+                redirect_uri = get_redirect_uri()
+                error_msg += f'{redirect_uri}\n\nAnd also add:\nhttp://127.0.0.1:8000/auth/google/callback\nhttp://localhost:8000/auth/google/callback'
+            except:
+                error_msg += 'http://127.0.0.1:8000/auth/google/callback\nhttp://localhost:8000/auth/google/callback'
+        
+        flash(error_msg, 'error')
         return redirect(url_for('login'))
     
     code = request.args.get('code')

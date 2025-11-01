@@ -78,102 +78,107 @@
     <!-- Page Transition Overlay -->
     <div id="pageTransition" class="page-transition"></div>
 
-    <!-- Professional Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('index') }}">
-                <div class="brand-icon me-2">
-                    <i class="fas fa-shield-alt text-primary"></i>
-                </div>
-                <span class="heading-gradient">InvestGuard AI</span>
+    <!-- Professional Compact Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-compact fixed-top">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand compact-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-shield-alt brand-icon"></i>
+                <span class="brand-text d-none d-sm-inline">InvestGuard AI</span>
+                <span class="brand-text-short d-sm-none">IG</span>
             </a>
             
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon">
-                    <i class="fas fa-bars"></i>
-                </span>
+            <button class="navbar-toggler compact-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto compact-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-home me-1"></i>Home
+                        <a class="nav-link compact-nav-link" href="{{ url_for('index') }}" title="Home">
+                            <i class="fas fa-home"></i>
+                            <span class="nav-text">Home</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard') }}">
-                            <i class="fas fa-chart-line me-1"></i>Dashboard
+                        <a class="nav-link compact-nav-link" href="{{ url_for('dashboard') }}" title="Dashboard">
+                            <i class="fas fa-chart-line"></i>
+                            <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('analyzer') }}">
-                            <i class="fas fa-search me-1"></i>Analyzer
+                        <a class="nav-link compact-nav-link" href="{{ url_for('analyzer') }}" title="Content Analyzer">
+                            <i class="fas fa-search"></i>
+                            <span class="nav-text">Analyzer</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('advisor') }}">
-                            <i class="fas fa-user-check me-1"></i>Advisor Check
+                        <a class="nav-link compact-nav-link" href="{{ url_for('advisor') }}" title="Advisor Verification">
+                            <i class="fas fa-user-check"></i>
+                            <span class="nav-text">Advisor</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('network') }}">
-                            <i class="fas fa-project-diagram me-1"></i>Network
+                        <a class="nav-link compact-nav-link" href="{{ url_for('network') }}" title="Network Analysis">
+                            <i class="fas fa-project-diagram"></i>
+                            <span class="nav-text">Network</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('reports') }}">
-                            <i class="fas fa-flag me-1"></i>Reports
+                        <a class="nav-link compact-nav-link" href="{{ url_for('reports') }}" title="Reports">
+                            <i class="fas fa-flag"></i>
+                            <span class="nav-text">Reports</span>
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="educationDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-graduation-cap me-1"></i>Education
+                        <a class="nav-link compact-nav-link dropdown-toggle" href="#" id="educationDropdown" role="button" data-bs-toggle="dropdown" title="Education">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span class="nav-text">Education</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('education') }}">
+                        <ul class="dropdown-menu compact-dropdown">
+                            <li><a class="dropdown-item compact-dropdown-item" href="{{ url_for('education') }}">
                                 <i class="fas fa-play-circle me-2"></i>Risk Simulator
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('chatbot') }}">
+                            <li><a class="dropdown-item compact-dropdown-item" href="{{ url_for('chatbot') }}">
                                 <i class="fas fa-robot me-2"></i>AI Advisor Chat
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('education_library') }}">
+                            <li><a class="dropdown-item compact-dropdown-item" href="{{ url_for('education_library') }}">
                                 <i class="fas fa-book me-2"></i>Content Library
                             </a></li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('pwa_install') }}">
-                            <i class="fas fa-download me-1"></i>Install App
+                    <li class="nav-item d-none d-lg-block">
+                        <a class="nav-link compact-nav-link" href="{{ url_for('pwa_install') }}" title="Install App">
+                            <i class="fas fa-download"></i>
+                            <span class="nav-text">Install</span>
                         </a>
                     </li>
                 </ul>
                 
-                <div class="navbar-nav">
-                    <div class="nav-item me-3">
-                        <span class="nav-link text-muted">
-                            <i class="fas fa-clock me-1"></i>
-                            <span id="current-time"></span>
+                <div class="navbar-nav compact-nav-right">
+                    <div class="nav-item me-2 d-none d-xl-block">
+                        <span class="nav-link compact-nav-link text-muted">
+                            <i class="fas fa-clock"></i>
+                            <span id="current-time" class="time-text"></span>
                         </span>
                     </div>
                     
                     {% if session.user_id %}
                         <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link compact-nav-link compact-user-dropdown d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 {% if session.user_picture or session.google_user_picture %}
-                                    <img src="{{ session.user_picture or session.google_user_picture }}" alt="Profile" class="user-avatar me-2 rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                    <img src="{{ session.user_picture or session.google_user_picture }}" alt="Profile" class="compact-user-avatar rounded-circle">
                                 {% else %}
-                                    <div class="user-avatar me-2">
-                                        <i class="fas fa-user-circle"></i>
+                                    <div class="compact-user-avatar-placeholder">
+                                        <i class="fas fa-user"></i>
                                     </div>
                                 {% endif %}
-                                <span class="fw-medium d-none d-md-inline">{{ session.user_name or session.google_user_name or 'User' }}</span>
+                                <span class="compact-user-name d-none d-md-inline">{{ (session.user_name or session.google_user_name or 'User')|truncate(15, true, '...') }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
+                            <ul class="dropdown-menu dropdown-menu-end compact-dropdown">
                                 <li>
-                                    <div class="dropdown-item-text">
+                                    <div class="dropdown-item-text px-3 py-2">
                                         <div class="fw-semibold">{{ session.user_name or session.google_user_name or 'User' }}</div>
-                                        <small class="text-muted">{{ session.user_email or session.google_user_email }}</small>
+                                        <small class="text-muted">{{ (session.user_email or session.google_user_email)|truncate(30, true, '...') }}</small>
                                         {% if session.auth_provider == 'google' %}
                                             <small class="d-block text-muted mt-1">
                                                 <i class="fab fa-google me-1"></i>Google Account
@@ -181,22 +186,24 @@
                                         {% endif %}
                                     </div>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('dashboard') }}">
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li><a class="dropdown-item compact-dropdown-item" href="{{ url_for('dashboard') }}">
                                     <i class="fas fa-chart-line me-2"></i>Dashboard
                                 </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('logout') }}" onclick="return confirm('Are you sure you want to log out?');">
+                                <li><a class="dropdown-item compact-dropdown-item" href="{{ url_for('logout') }}">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a></li>
                             </ul>
                         </div>
                     {% else %}
-                        <div class="nav-item d-flex flex-column flex-sm-row gap-2">
-                            <a class="btn btn-outline-primary btn-sm w-100 w-sm-auto" href="{{ url_for('login') }}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                        <div class="nav-item d-flex gap-1">
+                            <a class="btn btn-outline-primary btn-sm compact-btn" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span class="d-none d-sm-inline">Login</span>
                             </a>
-                            <a class="btn btn-primary btn-sm w-100 w-sm-auto" href="{{ url_for('register') }}">
-                                <i class="fas fa-user-plus me-1"></i>Register
+                            <a class="btn btn-primary btn-sm compact-btn" href="{{ url_for('register') }}">
+                                <i class="fas fa-user-plus"></i>
+                                <span class="d-none d-sm-inline">Register</span>
                             </a>
                         </div>
                     {% endif %}
@@ -423,6 +430,54 @@
         updateTime();
         setInterval(updateTime, 1000);
 
+        // Mark active nav link based on current URL
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.compact-nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const linkPath = new URL(link.href).pathname;
+                
+                // Exact match or starts with
+                if (linkPath === currentPath || 
+                    (currentPath.startsWith(linkPath) && linkPath !== '/')) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Special handling for index/home
+            if (currentPath === '/' || currentPath === '/index') {
+                const homeLink = document.querySelector('.compact-nav-link[href*="index"]') || 
+                                document.querySelector('.compact-nav-link[href="/"]');
+                if (homeLink) {
+                    homeLink.classList.add('active');
+                }
+            }
+        }
+        
+        // Set active link on page load
+        setActiveNavLink();
+        
+        // Compact Navbar Scroll Effect
+        let lastScroll = 0;
+        const navbar = document.querySelector('.navbar-compact');
+        
+        window.addEventListener('scroll', function() {
+            const currentScroll = window.pageYOffset;
+            
+            if (navbar) {
+                // Add scrolled class for styling
+                if (currentScroll > 10) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+            
+            lastScroll = currentScroll;
+        });
+        
         // Professional scroll effects
         window.addEventListener('scroll', function() {
             const navbar = document.querySelector('.navbar');
@@ -433,13 +488,72 @@
             }
         });
         
-        // Mobile menu auto-close on link click
+        // Mobile menu auto-close on link click - Enhanced
         document.addEventListener('DOMContentLoaded', function() {
-            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link, .compact-nav-link');
             const navbarCollapse = document.querySelector('.navbar-collapse');
+            const navbarToggler = document.querySelector('.compact-toggler');
+            
+            function closeMobileMenu() {
+                if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                    // Use Bootstrap's collapse API if available
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                    } else {
+                        navbarCollapse.classList.remove('show');
+                    }
+                    
+                    // Update toggle button state
+                    if (navbarToggler) {
+                        navbarToggler.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            }
             
             navLinks.forEach(function(link) {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', function(e) {
+                    // Don't close if it's a dropdown toggle
+                    if (this.classList.contains('dropdown-toggle')) {
+                        return;
+                    }
+                    
+                    // Close menu after a short delay for smooth transition
+                    setTimeout(closeMobileMenu, 150);
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                    const isClickInsideNav = navbarCollapse.contains(e.target) || 
+                                          (navbarToggler && navbarToggler.contains(e.target));
+                    if (!isClickInsideNav) {
+                        closeMobileMenu();
+                    }
+                }
+            });
+            
+            // Prevent menu close when clicking inside dropdown menu
+            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+            dropdownMenus.forEach(function(menu) {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Enhanced touch feedback
+            navLinks.forEach(function(link) {
+                link.addEventListener('touchstart', function() {
+                    this.style.opacity = '0.7';
+                });
+                
+                link.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.opacity = '';
+                    }, 150);
+                });
+            });
                     if (window.innerWidth < 992) {
                         const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
                         if (bsCollapse) {
@@ -1173,8 +1287,8 @@
             }
         });
 
-        // Smooth Page Transitions
-        document.querySelectorAll('a[href^="/"], a[href^="{{ url_for']').forEach(link => {
+        // Smooth Page Transitions with Active Link Highlighting
+        document.querySelectorAll('a[href^="/"]').forEach(link => {
             link.addEventListener('click', function(e) {
                 // Don't intercept external links or special links
                 if (this.target === '_blank' || this.href.startsWith('http://') || this.href.startsWith('https://')) {
@@ -1188,6 +1302,14 @@
 
                 const href = this.getAttribute('href');
                 if (href && href !== '#' && !href.startsWith('javascript:')) {
+                    // Add click feedback
+                    if (this.classList.contains('compact-nav-link')) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    }
+                    
                     e.preventDefault();
                     
                     // Show transition
