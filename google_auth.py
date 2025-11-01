@@ -65,8 +65,19 @@ SCOPES = [
 def get_redirect_uri():
     """Get the correct redirect URI for OAuth callback"""
     try:
+        # Check for X-Forwarded headers (from Render/proxy)
+        forwarded_host = request.headers.get('X-Forwarded-Host', '')
+        forwarded_proto = request.headers.get('X-Forwarded-Proto', '')
+        
+        # Use ProxyFix-processed values (ProxyFix is configured in app.py)
         host = request.host
         scheme = request.scheme
+        
+        # If X-Forwarded headers are present, prefer them (for proxy/reverse proxy scenarios)
+        if forwarded_host:
+            host = forwarded_host.split(',')[0].strip()  # Take first host if multiple
+        if forwarded_proto:
+            scheme = forwarded_proto.split(',')[0].strip()  # Take first proto if multiple
         
         # Google OAuth doesn't allow IP addresses - must use localhost or public domain
         # Check if using IP address - convert to localhost for local development
@@ -96,11 +107,19 @@ def get_redirect_uri():
             redirect_uri = f"http://localhost{port}/auth/google/callback"
         else:
             # Public domain (like investguardai.onrender.com) - use as is
-            # Detect HTTPS properly for production
-            if request.is_secure or 'onrender.com' in host or host.endswith('.onrender.com'):
+            # Detect HTTPS properly for production - Render always uses HTTPS
+            if (request.is_secure or 
+                forwarded_proto == 'https' or 
+                'onrender.com' in host or 
+                host.endswith('.onrender.com') or
+                request.url_root.startswith('https://')):
                 scheme = 'https'
             else:
                 scheme = request.scheme
+            
+            # Remove port from host if present (Render doesn't include port in host header)
+            if ':' in host and not (host.startswith('[') and ']:' in host):  # Not IPv6
+                host = host.split(':')[0]
             
             base_url = f"{scheme}://{host}"
             redirect_uri = f"{base_url}/auth/google/callback"
@@ -111,6 +130,10 @@ def get_redirect_uri():
         print(f"[DEBUG] request.host: {request.host}")
         print(f"[DEBUG] request.scheme: {request.scheme}")
         print(f"[DEBUG] request.is_secure: {request.is_secure}")
+        print(f"[DEBUG] X-Forwarded-Host: {forwarded_host}")
+        print(f"[DEBUG] X-Forwarded-Proto: {forwarded_proto}")
+        print(f"[DEBUG] Final host used: {host}")
+        print(f"[DEBUG] Final scheme used: {scheme}")
         print(f"[DEBUG] Final Redirect URI: {redirect_uri}")
         print(f"[DEBUG] ===============================================")
         

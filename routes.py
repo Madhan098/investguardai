@@ -414,10 +414,26 @@ def google_login():
     """Initiate Google OAuth login"""
     if not GOOGLE_AUTH_AVAILABLE:
         # Provide more helpful error message for production
-        error_msg = 'Google authentication is not configured on this server. '
-        error_msg += 'Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables on Render. '
-        error_msg += 'For now, please use email login.'
-        print(f"[ERROR] Google Auth not available. GOOGLE_CLIENT_ID: {os.environ.get('GOOGLE_CLIENT_ID', 'NOT SET')[:30]}...")
+        env_client_id = os.environ.get('GOOGLE_CLIENT_ID', '')
+        env_client_secret = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+        
+        print(f"[ERROR] ========== Google OAuth Not Available ==========")
+        print(f"[ERROR] GOOGLE_CLIENT_ID from env: {env_client_id[:50] if env_client_id else 'NOT SET'}...")
+        print(f"[ERROR] GOOGLE_CLIENT_SECRET from env: {'SET' if env_client_secret else 'NOT SET'}...")
+        print(f"[ERROR] Host: {request.host}")
+        print(f"[ERROR] URL: {request.url}")
+        print(f"[ERROR] ===============================================")
+        
+        error_msg = '⚠️ Google authentication is not configured on this server. '
+        error_msg += '\n\nPlease set these environment variables on Render:'
+        error_msg += '\n• GOOGLE_CLIENT_ID'
+        error_msg += '\n• GOOGLE_CLIENT_SECRET'
+        error_msg += '\n\nSteps:'
+        error_msg += '\n1. Go to Render Dashboard > Your Service > Environment'
+        error_msg += '\n2. Click "Add Environment Variable"'
+        error_msg += '\n3. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET'
+        error_msg += '\n4. Redeploy your service'
+        error_msg += '\n\nFor now, please use email login.'
         flash(error_msg, 'error')
         return redirect(url_for('login'))
     
