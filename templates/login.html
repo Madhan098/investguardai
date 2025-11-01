@@ -3,17 +3,22 @@
 {% block title %}Login - InvestGuard AI{% endblock %}
 
 {% block content %}
-<!-- Professional Login Section -->
-<section class="py-5" style="min-height: 100vh; display: flex; align-items: center;">
-    <div class="container">
+<!-- Professional Login Section with Animations -->
+<section class="login-section py-5" style="min-height: 100vh; display: flex; align-items: center; background: var(--gradient-hero); position: relative; overflow: hidden;">
+    <!-- Background Animation -->
+    <div class="login-background-animation"></div>
+    
+    <div class="container position-relative">
         <div class="row justify-content-center">
-            <div class="col-lg-6 col-xl-5">
-                <div class="card-ultra">
+            <div class="col-lg-5 col-xl-4">
+                <div class="card-ultra login-card" data-aos="zoom-in" data-aos-duration="600">
                     <div class="card-body p-5">
                         <!-- Login Header -->
-                        <div class="text-center mb-4">
+                        <div class="text-center mb-4" data-aos="fade-down" data-aos-delay="100">
                             <div class="login-icon mb-3">
-                                <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
+                                <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block">
+                                    <i class="fas fa-shield-alt text-primary" style="font-size: 2.5rem;"></i>
+                                </div>
                             </div>
                             <h2 class="fw-bold text-gradient mb-2">Welcome Back</h2>
                             <p class="text-muted">Sign in to your InvestGuard AI account</p>
@@ -22,58 +27,66 @@
                         <!-- Login Form -->
                         <form method="POST" action="{{ url_for('login') }}" id="loginForm">
                             <!-- Email -->
-                            <div class="mb-4">
-                                <label for="email" class="form-label fw-semibold">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="mb-4" data-aos="fade-up" data-aos-delay="200">
+                                <label for="email" class="form-label fw-semibold">
+                                    <i class="fas fa-envelope me-2 text-primary"></i>Email Address
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="Enter your email" required>
+                                </div>
                             </div>
 
                             <!-- Password -->
-                            <div class="mb-4">
-                                <label for="password" class="form-label fw-semibold">Password</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
+                            <div class="mb-4" data-aos="fade-up" data-aos-delay="300">
+                                <label for="password" class="form-label fw-semibold">
+                                    <i class="fas fa-lock me-2 text-primary"></i>Password
+                                </label>
+                                <div class="input-wrapper">
+                                    <div class="input-group input-group-lg">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Remember Me & Forgot Password -->
-                            <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-up" data-aos-delay="400">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="remember" name="remember">
                                     <label class="form-check-label" for="remember">
                                         Remember me
                                     </label>
                                 </div>
-                                <a href="#" class="text-primary fw-semibold">Forgot Password?</a>
+                                <a href="#" class="text-primary fw-semibold text-decoration-none hover-link">Forgot Password?</a>
                             </div>
 
                             <!-- Divider -->
-                            <div class="divider mb-4">
+                            <div class="divider mb-4" data-aos="fade-up" data-aos-delay="500">
                                 <span class="divider-line"></span>
                                 <span class="divider-text">OR</span>
                                 <span class="divider-line"></span>
                             </div>
 
                             <!-- Google Sign In Button -->
-                            <div class="d-grid mb-4">
-                                <a href="{{ url_for('google_login') }}" class="btn btn-outline-primary btn-lg">
+                            <div class="d-grid mb-4" data-aos="fade-up" data-aos-delay="600">
+                                <a href="{{ url_for('google_login') }}" class="btn btn-outline-primary btn-lg hover-lift">
                                     <i class="fab fa-google me-2"></i>Continue with Google
                                 </a>
                             </div>
 
                             <!-- Submit Button -->
-                            <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-primary btn-lg">
+                            <div class="d-grid mb-4" data-aos="fade-up" data-aos-delay="700">
+                                <button type="submit" class="btn btn-primary btn-lg hover-lift" id="loginSubmitBtn">
                                     <i class="fas fa-sign-in-alt me-2"></i>Sign In with Email
                                 </button>
                             </div>
 
                             <!-- Register Link -->
-                            <div class="text-center">
-                                <p class="mb-0">Don't have an account? 
-                                    <a href="{{ url_for('register') }}" class="text-primary fw-semibold">Create Account</a>
+                            <div class="text-center" data-aos="fade-up" data-aos-delay="800">
+                                <p class="mb-0 text-muted">Don't have an account? 
+                                    <a href="{{ url_for('register') }}" class="text-primary fw-semibold text-decoration-none hover-link">Create Account</a>
                                 </p>
                             </div>
                         </form>
@@ -102,18 +115,24 @@
             icon.classList.toggle('fa-eye-slash');
         });
 
-        // Professional form submission
+        // Professional form submission with loading state
         const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('loginSubmitBtn');
         
         form.addEventListener('submit', function(e) {
-            // Show loading state
-            const submitBtn = this.querySelector('button[type="submit"]');
+            // Show loading state with animation
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
             submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
 
-            // Let the form submit naturally - the server will handle the redirect
-            // The form will be submitted to the server and the server will redirect to dashboard
+            // Add page transition
+            document.body.style.opacity = '0.9';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.3s ease-out';
+            }, 100);
+
+            // Let the form submit naturally
         });
 
         // Professional notification system
@@ -133,4 +152,80 @@
         }
     });
 </script>
+
+<style>
+.login-section {
+    background: linear-gradient(135deg, #0066ff 0%, #6366f1 100%);
+}
+
+.login-background-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><path d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/></g></g></svg>');
+    opacity: 0.1;
+    animation: float 20s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.login-card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.icon-wrapper {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 255, 0.25);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.hover-link {
+    transition: all 0.3s ease;
+}
+
+.hover-link:hover {
+    transform: translateX(5px);
+    color: var(--primary-dark) !important;
+}
+
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 102, 255, 0.3);
+}
+
+.hover-lift:active {
+    transform: translateY(0);
+}
+</style>
 {% endblock %}

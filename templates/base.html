@@ -67,6 +67,17 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    <!-- Page Loading Overlay -->
+    <div id="pageLoader" class="page-loader">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Page Transition Overlay -->
+    <div id="pageTransition" class="page-transition"></div>
+
     <!-- Professional Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
@@ -1148,6 +1159,172 @@
         `;
         document.head.appendChild(typingStyle);
     </script>
+
+    <!-- Page Transitions and Loading States -->
+    <script>
+        // Page Loader
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 300);
+            }
+        });
+
+        // Smooth Page Transitions
+        document.querySelectorAll('a[href^="/"], a[href^="{{ url_for']').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Don't intercept external links or special links
+                if (this.target === '_blank' || this.href.startsWith('http://') || this.href.startsWith('https://')) {
+                    return;
+                }
+
+                // Don't intercept if it's a download or anchor link
+                if (this.download || this.href.includes('#')) {
+                    return;
+                }
+
+                const href = this.getAttribute('href');
+                if (href && href !== '#' && !href.startsWith('javascript:')) {
+                    e.preventDefault();
+                    
+                    // Show transition
+                    const transition = document.getElementById('pageTransition');
+                    if (transition) {
+                        transition.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 300);
+                    } else {
+                        window.location.href = href;
+                    }
+                }
+            });
+        });
+
+        // Form submission transitions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const transition = document.getElementById('pageTransition');
+                if (transition && !this.target) {
+                    setTimeout(() => {
+                        if (transition) {
+                            transition.style.opacity = '0.5';
+                        }
+                    }, 100);
+                }
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        const offsetTop = target.offsetTop - 80;
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Page Loader */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .loader-content {
+            text-align: center;
+            color: white;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .loader-text {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Page Transition */
+        .page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            z-index: 99998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Smooth page fade-in */
+        body {
+            animation: pageFadeIn 0.5s ease-out;
+        }
+
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Smooth content transitions */
+        main {
+            animation: contentFadeIn 0.6s ease-out;
+        }
+
+        @keyframes contentFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 
     {% block scripts %}{% endblock %}
 </body>
