@@ -34,6 +34,7 @@ class AIContentGenerator {
         try {
             console.log(`🤖 Generating ${type} content about ${topic} in ${language}`);
             
+            // Enhanced API call with offline support and better error handling
             const response = await fetch('/api/ai/generate-content', {
                 method: 'POST',
                 headers: {
@@ -43,16 +44,21 @@ class AIContentGenerator {
                     type: type,
                     topic: topic,
                     language: language
-                })
+                }),
+                // Add timeout for better PWA experience
+                signal: AbortSignal.timeout(30000) // 30 second timeout
             });
 
             console.log('📡 API Response Status:', response.status);
-            console.log('📡 API Response Headers:', response.headers);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             
             const data = await response.json();
             console.log('📡 API Response Data:', data);
 
-            if (data.success) {
+            if (data.success && data.content) {
                 this.displayGeneratedContent(data.content, data.type, data.topic);
                 this.showNotification('AI content generated successfully!', 'success');
             } else {
@@ -61,7 +67,18 @@ class AIContentGenerator {
 
         } catch (error) {
             console.error('❌ AI content generation error:', error);
-            this.showNotification(`Failed to generate content: ${error.message}. Using fallback content.`, 'warning');
+            
+            // Enhanced error messages for offline scenarios
+            let errorMessage = 'Failed to generate content';
+            if (!navigator.onLine) {
+                errorMessage = 'You are offline. Using cached content.';
+            } else if (error.name === 'AbortError') {
+                errorMessage = 'Request timeout. Please try again.';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            this.showNotification(`${errorMessage}. Using fallback content.`, 'warning');
             
             // Show fallback content even if API fails
             this.displayGeneratedContent(

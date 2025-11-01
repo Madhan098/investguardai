@@ -1,15 +1,22 @@
 // Service Worker for InvestGuard AI PWA
-const CACHE_NAME = 'investguard-v1';
-const RUNTIME_CACHE = 'investguard-runtime-v1';
+const CACHE_NAME = 'investguard-v2'; // Updated version for new API key
+const RUNTIME_CACHE = 'investguard-runtime-v2';
 
 // Assets to cache immediately
 const PRECACHE_ASSETS = [
   '/',
   '/static/css/custom.css',
+  '/static/css/professional.css',
   '/static/js/dashboard.js',
   '/static/js/analyzer.js',
   '/static/js/network.js',
   '/static/js/websocket-client.js',
+  '/static/js/chatbot.js',
+  '/static/js/ai-content-generator.js',
+  '/static/js/notification-system.js',
+  '/static/js/realtime-dashboard.js',
+  '/static/js/realtime-alerts.js',
+  '/static/manifest.json',
   // Add other critical static files
 ];
 
@@ -46,23 +53,60 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
+  const { request } = event;
+  const url = new URL(request.url);
+  
+  // Skip cross-origin requests (but allow API calls to same origin)
+  if (!url.origin.startsWith(self.location.origin) && !url.pathname.startsWith('/api/')) {
     return;
   }
 
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') {
+  // Skip non-GET requests (but allow API POST requests)
+  if (request.method !== 'GET' && !url.pathname.startsWith('/api/')) {
     return;
   }
 
   // Skip WebSocket connections
-  if (event.request.url.includes('socket.io')) {
+  if (url.pathname.includes('socket.io') || url.protocol === 'ws:' || url.protocol === 'wss:') {
     return;
   }
 
+  // For API calls, use network-first strategy with cache fallback
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache successful API responses for offline access
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            event.waitUntil(
+              caches.open(RUNTIME_CACHE).then((cache) => {
+                cache.put(request, responseToCache);
+              })
+            );
+          }
+          return response;
+        })
+        .catch(() => {
+          // Return cached version if network fails (for offline support)
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            // Return error response for API calls
+            return new Response(JSON.stringify({ error: 'Offline - cached data unavailable' }), {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          });
+        })
+    );
+    return;
+  }
+
+  // For static assets, use cache-first strategy
   event.respondWith(
-    caches.match(event.request)
+    caches.match(request)
       .then((cachedResponse) => {
         // Return cached version if available
         if (cachedResponse) {
@@ -70,7 +114,7 @@ self.addEventListener('fetch', (event) => {
         }
 
         // Fetch from network
-        return fetch(event.request)
+        return fetch(request)
           .then((response) => {
             // Don't cache if not a valid response
             if (!response || response.status !== 200 || response.type !== 'basic') {
@@ -84,7 +128,7 @@ self.addEventListener('fetch', (event) => {
             event.waitUntil(
               caches.open(RUNTIME_CACHE)
                 .then((cache) => {
-                  cache.put(event.request, responseToCache);
+                  cache.put(request, responseToCache);
                 })
             );
 
@@ -92,9 +136,11 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => {
             // Return offline page for navigation requests
-            if (event.request.mode === 'navigate') {
+            if (request.mode === 'navigate') {
               return caches.match('/');
             }
+            // Return error for failed requests
+            return new Response('Offline', { status: 503 });
           });
       })
   );

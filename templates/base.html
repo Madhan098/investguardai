@@ -690,15 +690,83 @@
             
             // Listen for service worker messages
             navigator.serviceWorker.addEventListener('message', (event) => {
-                console.log('Message from service worker:', event.data);
-                if (event.data && event.data.type === 'SW_UPDATED') {
-                    // Notify user about update
-                    if (confirm('App update available! Reload now?')) {
-                        window.location.reload();
+                console.log('[PWA] Message from service worker:', event.data);
+                if (event.data && event.data.type === 'CACHE_UPDATED') {
+                    // Show notification for cache update
+                    if (typeof showNotification === 'function') {
+                        showNotification('Content updated', 'info');
                     }
+                } else if (event.data && event.data.type === 'SW_UPDATED') {
+                    // Auto-update for better UX
+                    console.log('[PWA] New version available, updating...');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 }
             });
         }
+        
+        // Detect PWA mode for enhanced functionality
+        window.isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                      window.navigator.standalone === true ||
+                      document.referrer.includes('android-app://');
+        
+        if (window.isPWA) {
+            console.log('[PWA] Running in standalone mode');
+            document.body.classList.add('pwa-mode');
+            
+            // Enhanced PWA features
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover');
+            }
+            
+            // Prevent zoom on double tap (iOS Safari)
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Better scroll performance in PWA
+            document.body.style.webkitOverflowScrolling = 'touch';
+        }
+        
+        // Online/Offline handling for better PWA experience
+        window.addEventListener('online', () => {
+            console.log('[PWA] Back online - syncing data');
+            if (typeof window.realtimeDashboard !== 'undefined') {
+                window.realtimeDashboard.updateLiveData();
+            }
+            if (typeof showNotification === 'function') {
+                showNotification('Connection restored', 'success');
+            }
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('[PWA] Gone offline - using cached data');
+            if (typeof showNotification === 'function') {
+                showNotification('You are offline - cached data available', 'warning');
+            }
+        });
+        
+        // Initialize PWA features on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!navigator.onLine && window.isPWA) {
+                console.log('[PWA] Starting in offline mode');
+            }
+            if (window.isPWA) {
+                setTimeout(() => {
+                    const loader = document.getElementById('pageLoader');
+                    if (loader) {
+                        loader.style.display = 'none';
+                    }
+                }, 500);
+            }
+        });
         
         // PWA Install Prompt
         let deferredPrompt;
@@ -1208,20 +1276,39 @@
             input.value = '';
             showChatWidgetTyping();
             
+            // Enhanced API call with offline support and better error handling
             fetch('/api/chatbot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: message })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 hideChatWidgetTyping();
-                addChatWidgetMessage(data.response, 'bot');
+                // Handle both success field and direct response field
+                if (data.response) {
+                    addChatWidgetMessage(data.response, 'bot');
+                } else if (data.success && data.response) {
+                    addChatWidgetMessage(data.response, 'bot');
+                } else {
+                    addChatWidgetMessage(data.error || 'Sorry, I encountered an error. Please try again.', 'bot');
+                }
             })
             .catch(error => {
                 hideChatWidgetTyping();
-                addChatWidgetMessage('Sorry, I encountered an error. Please try again.', 'bot');
                 console.error('Chatbot error:', error);
+                
+                // Check if offline
+                if (!navigator.onLine) {
+                    addChatWidgetMessage('You are currently offline. Please check your internet connection and try again.', 'bot');
+                } else {
+                    addChatWidgetMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                }
             });
         }
         

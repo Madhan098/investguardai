@@ -21,7 +21,16 @@ class User(db.Model):
                            onupdate=datetime.now)
 
 
-# OAuth model removed - using simple session-based authentication
+# OAuth State Storage (for cross-site redirects)
+class OAuthState(db.Model):
+    __tablename__ = 'oauth_states'
+    state = db.Column(db.String(255), primary_key=True)
+    redirect_uri = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    
+    def is_expired(self):
+        return datetime.utcnow() > self.expires_at
 
 
 # Fraud Detection Models

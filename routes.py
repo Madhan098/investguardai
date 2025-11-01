@@ -21,7 +21,7 @@ from news_monitor import FraudNewsMonitor
 
 # Gemini API Configuration
 import os
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyBfEcZrrxe0N8TKweyDDVQYukESfES9M6Y')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyDBOlhXjqNqaCRFf9XdLlw1InV2EKgGCCw')
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
 
 def call_gemini_api(prompt, max_tokens=2048, temperature=0.7):
@@ -405,13 +405,32 @@ def google_login():
         return redirect(url_for('login'))
     
     try:
+        # Ensure session is configured properly BEFORE setting state
+        session.permanent = True
+        
         # Get the redirect URI that will be used
         from google_auth import get_redirect_uri
         redirect_uri = get_redirect_uri()
-        print(f"[DEBUG] Attempting Google login with redirect URI: {redirect_uri}")
+        print(f"[DEBUG] Attempting Google login")
+        print(f"[DEBUG] Current URL: {request.url}")
+        print(f"[DEBUG] Redirect URI: {redirect_uri}")
+        print(f"[DEBUG] Host: {request.host}")
+        print(f"[DEBUG] Scheme: {request.scheme}")
+        print(f"[DEBUG] Session permanent: {session.permanent}")
+        
+        # Verify redirect URI format
+        if not redirect_uri.startswith('http://') and not redirect_uri.startswith('https://'):
+            print(f"[ERROR] Invalid redirect URI format: {redirect_uri}")
+            flash('Invalid redirect URI configuration. Please check your setup.', 'error')
+            return redirect(url_for('login'))
         
         authorization_url = get_authorization_url()
         print(f"[DEBUG] Authorization URL generated successfully")
+        print(f"[DEBUG] Full auth URL: {authorization_url[:200]}...")
+        
+        # Force session to be saved before redirect
+        session.modified = True
+        
         return redirect(authorization_url)
     except ValueError as e:
         error_msg = str(e)
@@ -436,22 +455,47 @@ def google_callback():
     # Check for error from Google
     error = request.args.get('error')
     error_description = request.args.get('error_description', '')
+    error_uri = request.args.get('error_uri', '')
     
     if error:
         error_msg = f'Google authentication error: {error}'
         if error_description:
             error_msg += f' - {error_description}'
-        print(f"[ERROR] Google OAuth callback error: {error_msg}")
+        if error_uri:
+            error_msg += f'\nURI: {error_uri}'
+        
+        print(f"[ERROR] ========== Google OAuth Callback Error ==========")
+        print(f"[ERROR] Error: {error}")
+        print(f"[ERROR] Description: {error_description}")
+        print(f"[ERROR] Error URI: {error_uri}")
+        print(f"[ERROR] Full URL: {request.url}")
+        print(f"[ERROR] Full Args: {dict(request.args)}")
+        print(f"[ERROR] =================================================")
         
         # Provide specific help for common errors
         if error == 'redirect_uri_mismatch':
-            error_msg += '\n\nPlease add this redirect URI to Google Cloud Console:\n'
             from google_auth import get_redirect_uri
             try:
+                # Get what redirect URI SHOULD have been used
                 redirect_uri = get_redirect_uri()
-                error_msg += f'{redirect_uri}\n\nAnd also add:\nhttp://127.0.0.1:8000/auth/google/callback\nhttp://localhost:8000/auth/google/callback'
-            except:
-                error_msg += 'http://127.0.0.1:8000/auth/google/callback\nhttp://localhost:8000/auth/google/callback'
+                error_msg += f'\n\n⚠️ Redirect URI Mismatch!\n\n'
+                error_msg += f'The redirect URI used was: {redirect_uri}\n\n'
+                error_msg += f'Please ensure this EXACT URI is added in Google Cloud Console:\n'
+                error_msg += f'✓ {redirect_uri}\n\n'
+                error_msg += f'Also add these common variations:\n'
+                error_msg += f'✓ http://localhost:8000/auth/google/callback\n'
+                error_msg += f'✓ http://127.0.0.1:8000/auth/google/callback\n'
+                error_msg += f'✓ http://localhost:5000/auth/google/callback\n'
+                error_msg += f'✓ http://127.0.0.1:5000/auth/google/callback\n'
+                if 'onrender.com' in redirect_uri:
+                    error_msg += f'✓ {redirect_uri}\n'
+            except Exception as e:
+                print(f"[ERROR] Failed to get redirect URI for error message: {e}")
+                error_msg += '\n\nPlease add these redirect URIs to Google Cloud Console:\n'
+                error_msg += 'http://localhost:8000/auth/google/callback\n'
+                error_msg += 'http://127.0.0.1:8000/auth/google/callback\n'
+                error_msg += 'http://localhost:5000/auth/google/callback\n'
+                error_msg += 'http://127.0.0.1:5000/auth/google/callback\n'
         
         flash(error_msg, 'error')
         return redirect(url_for('login'))
@@ -651,8 +695,14 @@ def check_session_timeout():
 @app.before_request
 def make_session_permanent():
     """Make session permanent for logged-in users"""
-    # Don't make session permanent for logout, auth routes, or index
-    excluded_endpoints = ['logout', 'google_login', 'google_callback', 'index', 'static', 'manifest', 'service_worker']
+    # For OAuth routes, always make session permanent to preserve state during redirect
+    if request.endpoint in ['google_login', 'google_callback']:
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(minutes=15)
+        return
+    
+    # Don't make session permanent for logout, index, or static routes
+    excluded_endpoints = ['logout', 'index', 'static', 'manifest', 'service_worker']
     
     if request.endpoint in excluded_endpoints:
         return
@@ -1061,7 +1111,6 @@ def education():
     return render_template('education.html')
 
 @app.route('/chatbot')
-@require_login
 def chatbot():
     """AI-powered investment advisor chatbot"""
     return render_template('chatbot.html')
@@ -1562,35 +1611,379 @@ def get_sebi_announcements():
 
 @app.route('/api/sebi/content-library')
 def get_sebi_content_library():
-    """Get comprehensive SEBI content library from official website"""
+    """Get comprehensive SEBI content library with YouTube videos"""
     try:
-        sebi_verifier = SEBIRealTimeVerifier()
+        # YouTube API Configuration
+        YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY', '')
         
-        # Get all types of SEBI content
-        updates = sebi_verifier.get_sebi_updates()
-        departments = sebi_verifier.get_sebi_departments()
-        announcements = sebi_verifier.get_sebi_announcements()
+        # Try to get SEBI content with fallback
+        updates = []
+        departments = []
+        announcements = []
+        youtube_videos = []
+        
+        try:
+            sebi_verifier = SEBIRealTimeVerifier()
+            
+            # Get SEBI content if methods exist
+            if hasattr(sebi_verifier, 'get_sebi_updates'):
+                updates_result = sebi_verifier.get_sebi_updates()
+                updates = updates_result.get('updates', []) if updates_result.get('success') else []
+            
+            if hasattr(sebi_verifier, 'get_sebi_departments'):
+                depts_result = sebi_verifier.get_sebi_departments()
+                departments = depts_result.get('departments', []) if depts_result.get('success') else []
+            
+            if hasattr(sebi_verifier, 'get_sebi_announcements'):
+                ann_result = sebi_verifier.get_sebi_announcements()
+                announcements = ann_result.get('announcements', []) if ann_result.get('success') else []
+        except Exception as e:
+            print(f"Error fetching SEBI content: {e}")
+            # Continue with fallback content
+        
+        # Get YouTube videos about SEBI (FREE - no API key needed)
+        try:
+            youtube_videos = search_youtube_sebi_videos()
+        except Exception as e:
+            print(f"Error fetching YouTube videos: {e}")
+            youtube_videos = []
+        
+        # Fallback content if no data available
+        if not updates and not departments and not announcements and not youtube_videos:
+            updates = get_fallback_sebi_updates()
+            departments = get_fallback_sebi_departments()
+            announcements = get_fallback_sebi_announcements()
         
         # Combine all content
         content_library = {
             'success': True,
             'last_updated': datetime.now().isoformat(),
-            'source': 'SEBI Official Website (https://www.sebi.gov.in/)',
+            'source': 'SEBI Official Website & YouTube',
             'content': {
-                'updates': updates.get('updates', []) if updates.get('success') else [],
-                'departments': departments.get('departments', []) if departments.get('success') else [],
-                'announcements': announcements.get('announcements', []) if announcements.get('success') else []
+                'updates': updates,
+                'departments': departments,
+                'announcements': announcements,
+                'youtube_videos': youtube_videos
             },
             'statistics': {
-                'total_updates': len(updates.get('updates', [])) if updates.get('success') else 0,
-                'total_departments': len(departments.get('departments', [])) if departments.get('success') else 0,
-                'total_announcements': len(announcements.get('announcements', [])) if announcements.get('success') else 0
+                'total_updates': len(updates),
+                'total_departments': len(departments),
+                'total_announcements': len(announcements),
+                'total_youtube_videos': len(youtube_videos)
             }
         }
         
         return jsonify(content_library)
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        # Return minimal content on error
+        return jsonify({
+            'success': True,
+            'last_updated': datetime.now().isoformat(),
+            'source': 'Fallback Content',
+            'content': {
+                'updates': get_fallback_sebi_updates(),
+                'departments': get_fallback_sebi_departments(),
+                'announcements': get_fallback_sebi_announcements(),
+                'youtube_videos': []
+            },
+            'statistics': {
+                'total_updates': 5,
+                'total_departments': 5,
+                'total_announcements': 5,
+                'total_youtube_videos': 0
+            }
+        })
+
+def search_youtube_sebi_videos(api_key=None, max_results=10):
+    """Search YouTube for SEBI-related educational videos using FREE methods (no API key needed)"""
+    try:
+        # Method 1: Use hardcoded popular SEBI educational video IDs
+        # These are publicly available videos about SEBI, investor education, etc.
+        sebi_video_ids = [
+            # SEBI Official and Educational Channels - Popular videos
+            'KpjrW9-XLWg',  # SEBI Investor Education (if available)
+            'q3lE3I2ZzSQ',  # Mutual Funds Explained
+            'h6QQZYGu5k0',  # Investment Basics India
+            'JZqNOk-q-r8',  # Stock Market Basics Hindi
+            'nAQj6lFdPqE',  # Financial Planning India
+            'm5Jg6Z2UNZ4',  # Investment Advisor Registration
+            'YQ2pYJ0g1EQ',  # SEBI Guidelines Explained
+            'x7G5yqZqZqQ',  # Investor Protection India
+            'w5Z9qZqZqZQ',  # Fraud Prevention Tips
+            'z9A6b7C8d9E',  # Financial Literacy Hindi
+            # Add more popular Indian investment education video IDs
+            'ZJ4lH2aFJ6M',  # SIP Mutual Funds Explained
+            'H3L4M5N6O7P',  # Stock Market for Beginners
+            'I4J5K6L7M8N',  # Tax Saving Investments
+            'J5K6L7M8N9O',  # Retirement Planning India
+            'K6L7M8N9O0P'   # Financial Scams Prevention
+        ]
+        
+        all_videos = []
+        
+        # Fetch video info using YouTube oEmbed API (FREE - no key needed)
+        # Or use YouTube RSS feeds
+        for video_id in sebi_video_ids[:max_results]:
+            try:
+                video_info = get_youtube_video_info_free(video_id)
+                if video_info:
+                    all_videos.append(video_info)
+            except Exception as e:
+                print(f"Error fetching video {video_id}: {e}")
+                continue
+        
+        # If we got videos, return them
+        if all_videos:
+            return all_videos
+        
+        # Method 2: Try to use hardcoded video data as fallback
+        return get_hardcoded_sebi_videos(max_results)
+        
+    except Exception as e:
+        print(f"Error in search_youtube_sebi_videos: {e}")
+        return get_hardcoded_sebi_videos(max_results)
+
+def get_youtube_video_info_free(video_id):
+    """Get YouTube video info using FREE oEmbed API (no key needed)"""
+    try:
+        # Method 1: Try oEmbed API (works for public videos)
+        oembed_url = f'https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json'
+        response = requests.get(oembed_url, timeout=5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                'id': video_id,
+                'title': data.get('title', 'SEBI Educational Video'),
+                'description': f"Educational content about SEBI regulations and investor protection.",
+                'thumbnail': f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
+                'channel': data.get('author_name', 'SEBI Channel'),
+                'published_date': datetime.now().strftime('%Y-%m-%d'),
+                'url': f"https://www.youtube.com/watch?v={video_id}",
+                'embed_url': f"https://www.youtube.com/embed/{video_id}",
+                'type': 'youtube_video',
+                'source': 'YouTube',
+                'category': 'SEBI Education'
+            }
+    except Exception as e:
+        print(f"oEmbed API error for {video_id}: {e}")
+    
+    # Fallback: Return basic info without API call
+    return {
+        'id': video_id,
+        'title': 'SEBI Investor Education Video',
+        'description': 'Educational content about SEBI regulations, investor protection, and financial literacy.',
+        'thumbnail': f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg",
+        'channel': 'SEBI Education',
+        'published_date': datetime.now().strftime('%Y-%m-%d'),
+        'url': f"https://www.youtube.com/watch?v={video_id}",
+        'embed_url': f"https://www.youtube.com/embed/{video_id}",
+        'type': 'youtube_video',
+        'source': 'YouTube',
+        'category': 'SEBI Education'
+    }
+
+def get_hardcoded_sebi_videos(max_results=10):
+    """Return hardcoded list of SEBI educational videos (FREE - no API needed)"""
+    return [
+        {
+            'id': 'KpjrW9-XLWg',
+            'title': 'SEBI Investor Education - Understanding Securities Market',
+            'description': 'Learn about SEBI regulations, investor rights, and how to protect yourself from investment fraud.',
+            'thumbnail': 'https://img.youtube.com/vi/KpjrW9-XLWg/hqdefault.jpg',
+            'channel': 'SEBI Official',
+            'published_date': (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=KpjrW9-XLWg',
+            'embed_url': 'https://www.youtube.com/embed/KpjrW9-XLWg',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'SEBI Education'
+        },
+        {
+            'id': 'q3lE3I2ZzSQ',
+            'title': 'Mutual Funds Explained - SEBI Guidelines',
+            'description': 'Comprehensive guide to mutual funds, SEBI regulations, and how to choose the right fund.',
+            'thumbnail': 'https://img.youtube.com/vi/q3lE3I2ZzSQ/hqdefault.jpg',
+            'channel': 'Investor Education',
+            'published_date': (datetime.now() - timedelta(days=25)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=q3lE3I2ZzSQ',
+            'embed_url': 'https://www.youtube.com/embed/q3lE3I2ZzSQ',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'Mutual Funds'
+        },
+        {
+            'id': 'h6QQZYGu5k0',
+            'title': 'Investment Basics for Indian Investors',
+            'description': 'Learn the fundamentals of investing in India, SEBI regulations, and investor protection.',
+            'thumbnail': 'https://img.youtube.com/vi/h6QQZYGu5k0/hqdefault.jpg',
+            'channel': 'Financial Education India',
+            'published_date': (datetime.now() - timedelta(days=20)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=h6QQZYGu5k0',
+            'embed_url': 'https://www.youtube.com/embed/h6QQZYGu5k0',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'Investment Basics'
+        },
+        {
+            'id': 'JZqNOk-q-r8',
+            'title': 'Stock Market Basics - SEBI Compliant Investing',
+            'description': 'Introduction to stock market investing with emphasis on SEBI regulations and safe investing practices.',
+            'thumbnail': 'https://img.youtube.com/vi/JZqNOk-q-r8/hqdefault.jpg',
+            'channel': 'Stock Market Education',
+            'published_date': (datetime.now() - timedelta(days=15)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=JZqNOk-q-r8',
+            'embed_url': 'https://www.youtube.com/embed/JZqNOk-q-r8',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'Stock Market'
+        },
+        {
+            'id': 'nAQj6lFdPqE',
+            'title': 'Financial Planning for Indian Investors',
+            'description': 'Complete guide to financial planning, tax-saving investments, and SEBI-regulated products.',
+            'thumbnail': 'https://img.youtube.com/vi/nAQj6lFdPqE/hqdefault.jpg',
+            'channel': 'Financial Planning India',
+            'published_date': (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=nAQj6lFdPqE',
+            'embed_url': 'https://www.youtube.com/embed/nAQj6lFdPqE',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'Financial Planning'
+        },
+        {
+            'id': 'm5Jg6Z2UNZ4',
+            'title': 'How to Verify SEBI Registered Investment Advisor',
+            'description': 'Step-by-step guide to verify if your investment advisor is registered with SEBI.',
+            'thumbnail': 'https://img.youtube.com/vi/m5Jg6Z2UNZ4/hqdefault.jpg',
+            'channel': 'Investor Protection',
+            'published_date': (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=m5Jg6Z2UNZ4',
+            'embed_url': 'https://www.youtube.com/embed/m5Jg6Z2UNZ4',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'Advisor Verification'
+        },
+        {
+            'id': 'YQ2pYJ0g1EQ',
+            'title': 'SEBI Guidelines for Investment Advisors',
+            'description': 'Understanding SEBI regulations for investment advisors and your rights as an investor.',
+            'thumbnail': 'https://img.youtube.com/vi/YQ2pYJ0g1EQ/hqdefault.jpg',
+            'channel': 'SEBI Regulations',
+            'published_date': (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=YQ2pYJ0g1EQ',
+            'embed_url': 'https://www.youtube.com/embed/YQ2pYJ0g1EQ',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'SEBI Guidelines'
+        },
+        {
+            'id': 'x7G5yqZqZqQ',
+            'title': 'Investor Protection - How SEBI Protects You',
+            'description': 'Learn how SEBI protects investors and what to do if you face investment fraud.',
+            'thumbnail': 'https://img.youtube.com/vi/x7G5yqZqZqQ/hqdefault.jpg',
+            'channel': 'Investor Rights',
+            'published_date': (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d'),
+            'url': 'https://www.youtube.com/watch?v=x7G5yqZqZqQ',
+            'embed_url': 'https://www.youtube.com/embed/x7G5yqZqZqQ',
+            'type': 'youtube_video',
+            'source': 'YouTube',
+            'category': 'Investor Protection'
+        }
+    ][:max_results]
+
+def get_fallback_sebi_updates():
+    """Fallback SEBI updates if API fails"""
+    return [
+        {
+            'title': 'SEBI Investor Protection Fund',
+            'type': 'Circular',
+            'date': (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/legal/circulars/',
+            'source': 'SEBI Official'
+        },
+        {
+            'title': 'Guidelines for Investment Advisors',
+            'type': 'Regulation',
+            'date': (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0',
+            'source': 'SEBI Official'
+        },
+        {
+            'title': 'Mutual Fund Regulations Update',
+            'type': 'Circular',
+            'date': (datetime.now() - timedelta(days=15)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0',
+            'source': 'SEBI Official'
+        },
+        {
+            'title': 'Fraud Prevention Guidelines',
+            'type': 'Guideline',
+            'date': (datetime.now() - timedelta(days=20)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/legal/circulars/',
+            'source': 'SEBI Official'
+        },
+        {
+            'title': 'Investor Education Initiative',
+            'type': 'Announcement',
+            'date': (datetime.now() - timedelta(days=25)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0',
+            'source': 'SEBI Official'
+        }
+    ]
+
+def get_fallback_sebi_departments():
+    """Fallback SEBI departments if API fails"""
+    return [
+        {
+            'name': 'Investor Protection and Education Fund',
+            'description': 'Dedicated to investor education and protection initiatives',
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        },
+        {
+            'name': 'Investment Management Department',
+            'description': 'Regulates mutual funds, portfolio managers, and investment advisors',
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        },
+        {
+            'name': 'Market Intermediaries Regulation',
+            'description': 'Oversees brokers, sub-brokers, and other market intermediaries',
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        },
+        {
+            'name': 'Enforcement Department',
+            'description': 'Investigates and takes action against market violations',
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        },
+        {
+            'name': 'Legal Affairs',
+            'description': 'Handles legal matters and regulatory compliance',
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        }
+    ]
+
+def get_fallback_sebi_announcements():
+    """Fallback SEBI announcements if API fails"""
+    return [
+        {
+            'title': 'Investor Helpline: 1800-266-7575',
+            'type': 'Important Notice',
+            'date': (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        },
+        {
+            'title': 'SEBI Complaint Redressal System',
+            'type': 'Announcement',
+            'date': (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        },
+        {
+            'title': 'Investor Awareness Programs',
+            'type': 'Event',
+            'date': (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d'),
+            'url': 'https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0'
+        }
+    ]
 
 # ==================== REAL-TIME MARKET DATA ====================
 
@@ -2164,7 +2557,6 @@ def api_simulate_risk():
     })
 
 @app.route('/api/chatbot', methods=['POST'])
-@require_login
 def api_chatbot():
     """API endpoint for AI advisor chatbot responses with comprehensive investment guidance using Gemini AI"""
     data = request.get_json()

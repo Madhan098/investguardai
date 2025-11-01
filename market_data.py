@@ -19,7 +19,7 @@ class RealTimeMarketData:
             'NIFTY_IT': '^CNXIT',
             'SENSEX': '^BSESN'
         }
-        self.gemini_api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyBfEcZrrxe0N8TKweyDDVQYukESfES9M6Y')
+        self.gemini_api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyDBOlhXjqNqaCRFf9XdLlw1InV2EKgGCCw')
         self.gemini_api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
         
     def get_live_stock_data(self, symbol):

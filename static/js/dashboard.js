@@ -38,12 +38,23 @@ class Dashboard {
         try {
             this.showLoading(true);
             
-            // Fetch latest statistics
-            const statsResponse = await fetch('/api/stats');
+            // Enhanced API calls with offline support
+            const statsResponse = await fetch('/api/stats', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
+            
+            if (!statsResponse.ok) {
+                throw new Error(`HTTP error! status: ${statsResponse.status}`);
+            }
+            
             const stats = await statsResponse.json();
             
             // Update statistics cards
-            this.updateStats(stats);
+            if (stats) {
+                this.updateStats(stats);
+            }
             
             // Fetch latest alerts
             await this.loadAlerts();
@@ -53,7 +64,16 @@ class Dashboard {
             
         } catch (error) {
             console.error('Error refreshing dashboard:', error);
-            this.showNotification('Failed to refresh dashboard', 'error');
+            
+            // Enhanced error handling for offline scenarios
+            let errorMessage = 'Failed to refresh dashboard';
+            if (!navigator.onLine) {
+                errorMessage = 'You are offline. Showing cached data.';
+            } else if (error.name === 'AbortError') {
+                errorMessage = 'Request timeout. Please try again.';
+            }
+            
+            this.showNotification(errorMessage, navigator.onLine ? 'error' : 'warning');
             this.showLoading(false);
         }
     }

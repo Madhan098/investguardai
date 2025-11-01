@@ -64,63 +64,158 @@ class RealTimeDashboard {
     
     async updateLiveData() {
         try {
-            const response = await fetch('/api/dashboard/live-stats');
+            // Enhanced API call with offline support
+            const response = await fetch('/api/dashboard/live-stats', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
+                },
+                // Add timeout for better PWA experience
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             
             if (data.success) {
                 this.updateDashboard(data);
                 this.showLiveIndicator();
+            } else {
+                console.warn('Live data update returned unsuccessful:', data);
             }
         } catch (error) {
             console.error('Error updating live data:', error);
+            
+            // Check if offline and use cached data if available
+            if (!navigator.onLine) {
+                console.log('Offline - attempting to use cached data');
+                // Try to get cached data from service worker
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    // Service worker will handle offline requests
+                }
+            }
+            
+            // Show offline indicator if needed
+            if (!navigator.onLine) {
+                this.showOfflineIndicator();
+            }
+        }
+    }
+    
+    showOfflineIndicator() {
+        // Show offline indicator in UI
+        const liveIndicator = document.querySelector('.live-indicator');
+        if (liveIndicator) {
+            liveIndicator.classList.remove('online');
+            liveIndicator.classList.add('offline');
+            liveIndicator.textContent = 'Offline';
         }
     }
     
     async loadMarketData() {
         try {
+            // Enhanced API calls with offline support and timeouts for PWA
             // Load NIFTY 50 data
-            const niftyResponse = await fetch('/api/market/nifty50');
-            const niftyData = await niftyResponse.json();
+            const niftyResponse = await fetch('/api/market/nifty50', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
             
-            if (niftyData.success) {
-                this.updateMarketDisplay(niftyData);
+            if (niftyResponse.ok) {
+                const niftyData = await niftyResponse.json();
+                if (niftyData.success) {
+                    this.updateMarketDisplay(niftyData);
+                }
             }
             
             // Load market summary
-            const summaryResponse = await fetch('/api/market/summary');
-            const summaryData = await summaryResponse.json();
+            const summaryResponse = await fetch('/api/market/summary', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
             
-            if (summaryData.success) {
-                this.updateMarketSummary(summaryData);
+            if (summaryResponse.ok) {
+                const summaryData = await summaryResponse.json();
+                if (summaryData.success) {
+                    this.updateMarketSummary(summaryData);
+                }
             }
         } catch (error) {
             console.error('Error loading market data:', error);
+            
+            // Show offline message if applicable
+            if (!navigator.onLine) {
+                console.log('[PWA] Offline - market data unavailable, using cached data');
+            }
         }
     }
     
     async loadFraudAlerts() {
         try {
-            const response = await fetch('/api/news/fraud-alerts');
+            // Enhanced API call with offline support for PWA
+            const response = await fetch('/api/news/fraud-alerts', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             
-            if (data.success) {
+            if (data.success && data.articles) {
                 this.updateFraudAlerts(data.articles);
+            } else {
+                console.warn('Fraud alerts returned unsuccessful:', data);
             }
         } catch (error) {
             console.error('Error loading fraud alerts:', error);
+            
+            // Show offline message if applicable
+            if (!navigator.onLine) {
+                console.log('[PWA] Offline - fraud alerts unavailable, using cached data');
+            }
         }
     }
     
     async loadSEBIUpdates() {
         try {
-            const response = await fetch('/api/news/sebi-updates');
-            const data = await response.json();
+            // Enhanced API call with offline support for PWA
+            const response = await fetch('/api/news/sebi-updates', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
             
-            if (data.success) {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.success && data.updates) {
                 this.updateSEBIUpdates(data.updates);
+            } else {
+                console.warn('SEBI updates returned unsuccessful:', data);
             }
         } catch (error) {
             console.error('Error loading SEBI updates:', error);
+            
+            // Show offline message if applicable
+            if (!navigator.onLine) {
+                console.log('[PWA] Offline - SEBI updates unavailable, using cached data');
+            }
         }
     }
     

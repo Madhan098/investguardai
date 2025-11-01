@@ -157,6 +157,20 @@
                 </div>
             </div>
 
+            <!-- YouTube Videos Section -->
+            <div class="content-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">
+                        <i class="fab fa-youtube text-danger me-2"></i>
+                        SEBI Educational Videos
+                    </h3>
+                    <span class="sebi-badge" id="youtubeVideosCount">0 videos</span>
+                </div>
+                <div id="youtubeVideosContent" class="row">
+                    <!-- YouTube videos will be loaded here -->
+                </div>
+            </div>
+
         </div>
 
         <!-- Error Message -->
@@ -184,7 +198,16 @@
             try {
                 showLoading();
                 
-                const response = await fetch('/api/sebi/content-library');
+                const response = await fetch('/api/sebi/content-library', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: AbortSignal.timeout(15000) // 15 second timeout
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 
                 if (data.success) {
@@ -192,33 +215,58 @@
                     displayContent(data);
                     hideLoading();
                 } else {
-                    showError(data.error || 'Failed to load SEBI content');
+                    console.warn('API returned unsuccessful:', data);
+                    // Still try to display content if available
+                    if (data.content) {
+                        displayContent(data);
+                        hideLoading();
+                    } else {
+                        showError(data.error || 'Failed to load SEBI content');
+                    }
                 }
             } catch (error) {
                 console.error('Error loading SEBI content:', error);
-                showError('Network error: ' + error.message);
+                // Show error but don't hide content if already loaded
+                if (!contentData) {
+                    showError('Network error: ' + error.message);
+                } else {
+                    hideLoading();
+                }
             }
         }
 
         function displayContent(data) {
             // Update statistics
-            document.getElementById('totalUpdates').textContent = data.statistics.total_updates;
-            document.getElementById('totalDepartments').textContent = data.statistics.total_departments;
-            document.getElementById('totalAnnouncements').textContent = data.statistics.total_announcements;
+            const stats = data.statistics || {};
+            document.getElementById('totalUpdates').textContent = stats.total_updates || 0;
+            document.getElementById('totalDepartments').textContent = stats.total_departments || 0;
+            document.getElementById('totalAnnouncements').textContent = stats.total_announcements || 0;
 
             // Update counts
-            document.getElementById('updatesCount').textContent = `${data.statistics.total_updates} items`;
-            document.getElementById('departmentsCount').textContent = `${data.statistics.total_departments} items`;
-            document.getElementById('announcementsCount').textContent = `${data.statistics.total_announcements} items`;
+            document.getElementById('updatesCount').textContent = `${stats.total_updates || 0} items`;
+            document.getElementById('departmentsCount').textContent = `${stats.total_departments || 0} items`;
+            document.getElementById('announcementsCount').textContent = `${stats.total_announcements || 0} items`;
+            document.getElementById('youtubeVideosCount').textContent = `${stats.total_youtube_videos || 0} videos`;
 
             // Display updates
-            displayUpdates(data.content.updates);
+            if (data.content && data.content.updates) {
+                displayUpdates(data.content.updates);
+            }
             
             // Display departments
-            displayDepartments(data.content.departments);
+            if (data.content && data.content.departments) {
+                displayDepartments(data.content.departments);
+            }
             
             // Display announcements
-            displayAnnouncements(data.content.announcements);
+            if (data.content && data.content.announcements) {
+                displayAnnouncements(data.content.announcements);
+            }
+            
+            // Display YouTube videos
+            if (data.content && data.content.youtube_videos) {
+                displayYouTubeVideos(data.content.youtube_videos);
+            }
 
             // Show content sections
             document.getElementById('contentSections').style.display = 'block';
@@ -351,6 +399,92 @@
             document.getElementById('loadingIndicator').style.display = 'none';
         }
 
+        function displayYouTubeVideos(videos) {
+            const container = document.getElementById('youtubeVideosContent');
+            
+            if (!videos || videos.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Loading educational videos about SEBI and investor protection...
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = videos.map(video => `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card content-card h-100">
+                        <div class="position-relative">
+                            <img src="${video.thumbnail || 'https://via.placeholder.com/320x180?text=SEBI+Video'}" 
+                                 alt="${video.title}" 
+                                 class="card-img-top" 
+                                 style="height: 180px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-danger">
+                                    <i class="fab fa-youtube me-1"></i>YouTube
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title text-danger">
+                                <i class="fab fa-youtube me-2"></i>
+                                ${video.title.substring(0, 60)}${video.title.length > 60 ? '...' : ''}
+                            </h6>
+                            <p class="card-text small text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                ${video.channel || 'SEBI Channel'}
+                            </p>
+                            <p class="card-text small text-muted">
+                                ${video.description || ''}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="${video.url}" target="_blank" class="btn btn-danger btn-sm">
+                                    <i class="fab fa-youtube me-1"></i>Watch
+                                </a>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="embedVideo('${video.embed_url}', '${video.title}')">
+                                    <i class="fas fa-play me-1"></i>Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function embedVideo(embedUrl, title) {
+            // Create modal for video preview
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'videoModal';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div class="ratio ratio-16x9">
+                                <iframe src="${embedUrl}" 
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            modal.addEventListener('hidden.bs.modal', () => {
+                document.body.removeChild(modal);
+            });
+        }
+
         function showError(message) {
             document.getElementById('loadingIndicator').style.display = 'none';
             document.getElementById('contentSections').style.display = 'none';
@@ -360,6 +494,7 @@
 
         function refreshContent() {
             console.log('🔄 Refreshing SEBI content...');
+            contentData = null;
             loadSEBIContent();
         }
 

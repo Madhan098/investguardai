@@ -21,7 +21,12 @@ TWILIO_AUTH_TOKEN=your_twilio_token
 TWILIO_PHONE=+1234567890
 
 # Gemini AI (Already configured)
-GEMINI_API_KEY=AIzaSyBfEcZrrxe0N8TKweyDDVQYukESfES9M6Y
+GEMINI_API_KEY=AIzaSyDBOlhXjqNqaCRFf9XdLlw1InV2EKgGCCw
+
+# YouTube Data API v3 (Optional - for SEBI video search)
+# Get from: https://console.cloud.google.com/apis/library/youtube.googleapis.com
+# Free tier: 10,000 units/day
+YOUTUBE_API_KEY=your_youtube_api_key_here
 
 # Yahoo Finance (No API key needed - works immediately)
 # Already integrated via yfinance package

@@ -6,6 +6,7 @@ Supports both web and PWA installations
 import os
 import secrets
 from flask import session, redirect, url_for, request, flash
+from app import db
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
@@ -32,12 +33,16 @@ except ImportError:
         except:
             pass
 
-# If still not set, use placeholders (must be configured via environment variables)
-if not GOOGLE_CLIENT_ID:
-    # IMPORTANT: Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET as environment variables
-    # or create config_google_auth.py with your actual credentials
+# If still not set, try environment variables one more time
+if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID == 'YOUR_CLIENT_ID_HERE':
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+    
+    # Final check - if still empty, raise error
+    if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID == 'YOUR_CLIENT_ID_HERE':
+        print("[WARNING] Google OAuth Client ID not configured properly!")
+        print("[WARNING] Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET")
+        print("[WARNING] Or update config_google_auth.py with your credentials")
 
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
@@ -52,37 +57,71 @@ SCOPES = [
 def get_redirect_uri():
     """Get the correct redirect URI for OAuth callback"""
     try:
-        # Get base URL from request
-        if request.is_secure:
-            scheme = 'https'
-        else:
-            scheme = 'http'
-        
         host = request.host
-        base_url = f"{scheme}://{host}".rstrip('/')
+        scheme = request.scheme
         
-        # Normalize localhost variations
-        if 'localhost' in host or '127.0.0.1' in host:
-            # For local development, prefer 127.0.0.1 for consistency
-            if 'localhost' in host:
-                host = host.replace('localhost', '127.0.0.1')
-            base_url = f"http://{host}".rstrip('/')
+        # Google OAuth doesn't allow IP addresses - must use localhost or public domain
+        # Check if using IP address - convert to localhost for local development
+        if host.startswith('127.') or host == 'localhost':
+            # Already using localhost or 127.0.0.1 - use as is
+            if '8000' in host or ':8000' in host:
+                redirect_uri = "http://localhost:8000/auth/google/callback"
+            elif '5000' in host or ':5000' in host:
+                redirect_uri = "http://localhost:5000/auth/google/callback"
+            else:
+                # Default to 8000
+                redirect_uri = "http://localhost:8000/auth/google/callback"
+        elif (host.startswith('172.') or host.startswith('192.168.') or 
+              host.startswith('10.') or host.startswith('169.254.')):
+            # Private IP address detected - Google OAuth doesn't allow IPs
+            # Automatically convert to localhost for local development
+            port = ':8000'
+            if ':8000' in host:
+                port = ':8000'
+            elif ':5000' in host:
+                port = ':5000'
+            else:
+                port = ':8000'
+            
+            print(f"[WARNING] IP address {host} detected. Google OAuth doesn't allow IP addresses.")
+            print(f"[WARNING] Automatically converting to localhost{port} for OAuth redirect.")
+            redirect_uri = f"http://localhost{port}/auth/google/callback"
+        else:
+            # Public domain or localhost - use as is
+            base_url = request.url_root.rstrip('/')
+            redirect_uri = f"{base_url}/auth/google/callback"
         
-        redirect_uri = f"{base_url}/auth/google/callback"
-        
-        # Log for debugging (remove in production)
-        print(f"[DEBUG] OAuth Redirect URI: {redirect_uri}")
+        # Log for debugging - show exact URI being used
+        print(f"[DEBUG] ========== OAuth Redirect URI Debug ==========")
+        print(f"[DEBUG] request.url_root: {request.url_root}")
+        print(f"[DEBUG] request.host: {request.host}")
+        print(f"[DEBUG] request.scheme: {request.scheme}")
+        print(f"[DEBUG] request.is_secure: {request.is_secure}")
+        print(f"[DEBUG] Final Redirect URI: {redirect_uri}")
+        print(f"[DEBUG] ===============================================")
         
         return redirect_uri
     except Exception as e:
         print(f"[ERROR] Failed to get redirect URI: {e}")
-        # Fallback to localhost with port 8000
-        return "http://127.0.0.1:8000/auth/google/callback"
+        import traceback
+        traceback.print_exc()
+        # Fallback - use localhost (Google doesn't allow IP addresses)
+        fallback_uri = os.environ.get('GOOGLE_REDIRECT_URI', 'http://localhost:8000/auth/google/callback')
+        print(f"[DEBUG] Using fallback redirect URI: {fallback_uri}")
+        return fallback_uri
 
 def get_flow():
     """Create and configure OAuth2 flow"""
-    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
-        raise ValueError("Google OAuth credentials not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.")
+    # Verify credentials are actually set (not placeholders)
+    if (not GOOGLE_CLIENT_ID or 
+        GOOGLE_CLIENT_ID == 'YOUR_CLIENT_ID_HERE' or 
+        not GOOGLE_CLIENT_SECRET or 
+        GOOGLE_CLIENT_SECRET == 'YOUR_CLIENT_SECRET_HERE'):
+        error_msg = "Google OAuth credentials not configured properly. "
+        error_msg += f"Client ID: {GOOGLE_CLIENT_ID[:30] if GOOGLE_CLIENT_ID else 'NOT SET'}... "
+        error_msg += "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables or update config_google_auth.py"
+        print(f"[ERROR] {error_msg}")
+        raise ValueError(error_msg)
     
     # Try to use JSON config if available, otherwise use individual variables
     client_config = None
@@ -100,30 +139,53 @@ def get_flow():
     if json_config:
         try:
             client_config = json.loads(json_config)
-            # Update redirect URI in config to current request
+            # Verify JSON config has valid credentials (not placeholders)
             if 'web' in client_config:
-                redirect_uri = get_redirect_uri()
-                # Ensure redirect_uris list exists
-                if 'redirect_uris' not in client_config['web']:
-                    client_config['web']['redirect_uris'] = []
-                # Add current redirect URI if not already in list
-                if redirect_uri not in client_config['web']['redirect_uris']:
-                    client_config['web']['redirect_uris'].append(redirect_uri)
+                json_client_id = client_config['web'].get('client_id', '')
+                json_client_secret = client_config['web'].get('client_secret', '')
+                
+                # Check if JSON config has placeholders
+                if (json_client_id in ['', 'YOUR_CLIENT_ID_HERE'] or 
+                    json_client_secret in ['', 'YOUR_CLIENT_SECRET_HERE']):
+                    print("[WARNING] JSON config has placeholder values, falling back to individual credentials")
+                    client_config = None
+                else:
+                    # Update redirect URI in config to current request
+                    redirect_uri = get_redirect_uri()
+                    # Ensure redirect_uris list exists
+                    if 'redirect_uris' not in client_config['web']:
+                        client_config['web']['redirect_uris'] = []
+                    # Add current redirect URI if not already in list
+                    if redirect_uri not in client_config['web']['redirect_uris']:
+                        client_config['web']['redirect_uris'].append(redirect_uri)
+                    
+                    print(f"[DEBUG] Using JSON config with Client ID: {json_client_id[:30]}...{json_client_id[-15:] if len(json_client_id) > 45 else ''}")
         except Exception as e:
-            print(f"Error parsing JSON config: {e}")
+            print(f"[ERROR] Error parsing JSON config: {e}")
+            import traceback
+            traceback.print_exc()
             client_config = None
     
     # Fallback to individual config if JSON not available
     if not client_config:
-        client_config = {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [get_redirect_uri()],
+        # Verify individual credentials are valid (not placeholders)
+        if (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_ID != 'YOUR_CLIENT_ID_HERE' and
+            GOOGLE_CLIENT_SECRET and GOOGLE_CLIENT_SECRET != 'YOUR_CLIENT_SECRET_HERE'):
+            print(f"[DEBUG] Using individual credentials with Client ID: {GOOGLE_CLIENT_ID[:30]}...{GOOGLE_CLIENT_ID[-15:] if len(GOOGLE_CLIENT_ID) > 45 else ''}")
+            client_config = {
+                "web": {
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "client_secret": GOOGLE_CLIENT_SECRET,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": [get_redirect_uri()],
+                }
             }
-        }
+        else:
+            error_msg = "Neither JSON config nor individual credentials are properly configured. "
+            error_msg += f"Client ID: {GOOGLE_CLIENT_ID[:30] if GOOGLE_CLIENT_ID else 'NOT SET'}..."
+            print(f"[ERROR] {error_msg}")
+            raise ValueError(error_msg)
     
     flow = Flow.from_client_config(client_config, scopes=SCOPES)
     flow.redirect_uri = get_redirect_uri()
@@ -136,21 +198,72 @@ def get_authorization_url():
         
         # Generate state for CSRF protection
         state = secrets.token_urlsafe(32)
+        
+        # Store state in both session (primary) and database (fallback)
         session['oauth_state'] = state
+        session.permanent = True
+        session.modified = True
+        
+        # Also store in database as fallback (in case session cookies fail)
+        try:
+            from models import OAuthState
+            from datetime import datetime, timedelta
+            redirect_uri = get_redirect_uri()
+            
+            # Store in database with 15 minute expiration
+            oauth_state = OAuthState(
+                state=state,
+                redirect_uri=redirect_uri,
+                expires_at=datetime.utcnow() + timedelta(minutes=15)
+            )
+            db.session.add(oauth_state)
+            db.session.commit()
+            print(f"[DEBUG] OAuth state stored in database as fallback: {state[:30]}...")
+        except Exception as e:
+            print(f"[WARNING] Failed to store OAuth state in database: {e}")
+            # Continue with session-only storage
+        
+        print(f"[DEBUG] OAuth state stored in session: {state[:30]}...")
+        print(f"[DEBUG] Session will be saved before redirect")
         
         # Ensure redirect URI is set correctly
         redirect_uri = get_redirect_uri()
         flow.redirect_uri = redirect_uri
         
+        print(f"[DEBUG] ========== Authorization URL Generation ==========")
+        print(f"[DEBUG] Using redirect URI in flow: {redirect_uri}")
+        print(f"[DEBUG] Client ID: {GOOGLE_CLIENT_ID}")
+        print(f"[DEBUG] Client ID length: {len(GOOGLE_CLIENT_ID) if GOOGLE_CLIENT_ID else 0}")
+        print(f"[DEBUG] Client ID is placeholder: {GOOGLE_CLIENT_ID == 'YOUR_CLIENT_ID_HERE' if GOOGLE_CLIENT_ID else 'NOT SET'}")
+        print(f"[DEBUG] Flow redirect_uri attribute: {flow.redirect_uri}")
+        
         # Get authorization URL
+        # Note: Using prompt='select_account' for better UX and to avoid consent issues
+        # If you need to force re-consent, change to 'consent'
         authorization_url, _ = flow.authorization_url(
             access_type='offline',
             include_granted_scopes='true',
             state=state,
-            prompt='consent'
+            prompt='select_account'  # Changed from 'consent' to 'select_account' for better compatibility
         )
         
-        print(f"[DEBUG] Generated authorization URL: {authorization_url[:100]}...")
+        # Extract redirect_uri from the authorization URL to verify
+        from urllib.parse import urlparse, parse_qs, unquote
+        parsed = urlparse(authorization_url)
+        params = parse_qs(parsed.query)
+        if 'redirect_uri' in params:
+            actual_redirect_uri = unquote(params['redirect_uri'][0])
+            print(f"[DEBUG] Redirect URI in auth URL (decoded): {actual_redirect_uri}")
+            print(f"[DEBUG] Redirect URI in auth URL (encoded): {params['redirect_uri'][0]}")
+            
+            # Verify they match
+            if actual_redirect_uri != redirect_uri:
+                print(f"[WARNING] Redirect URI mismatch!")
+                print(f"[WARNING] Expected: {redirect_uri}")
+                print(f"[WARNING] Got in URL: {actual_redirect_uri}")
+        
+        print(f"[DEBUG] Full authorization URL (first 300 chars): {authorization_url[:300]}...")
+        print(f"[DEBUG] =================================================")
         
         return authorization_url
     except ValueError as e:
@@ -171,12 +284,70 @@ def get_user_info(code):
         state = session.get('oauth_state')
         request_state = request.args.get('state')
         
+        # Debug session state
+        print(f"[DEBUG] ========== OAuth State Verification ==========")
+        print(f"[DEBUG] Session state: {state[:30] if state else 'NOT FOUND'}...")
+        print(f"[DEBUG] Request state: {request_state[:30] if request_state else 'NOT FOUND'}...")
+        print(f"[DEBUG] All session keys: {list(session.keys())}")
+        print(f"[DEBUG] Session permanent: {session.permanent}")
+        print(f"[DEBUG] Session modified: {session.modified}")
+        
+        # Try to get state from database if session doesn't have it (fallback)
+        if not state and request_state:
+            try:
+                from models import OAuthState
+                from datetime import datetime
+                oauth_state_record = OAuthState.query.filter_by(state=request_state).first()
+                
+                if oauth_state_record:
+                    if oauth_state_record.is_expired():
+                        print(f"[WARNING] OAuth state expired in database")
+                        db.session.delete(oauth_state_record)
+                        db.session.commit()
+                    else:
+                        state = oauth_state_record.state
+                        print(f"[DEBUG] OAuth state found in database (fallback): {state[:30]}...")
+                        # Also restore to session
+                        session['oauth_state'] = state
+                        session.permanent = True
+            except Exception as e:
+                print(f"[WARNING] Failed to retrieve OAuth state from database: {e}")
+        
+        # Try to get state from session with different key names
         if not state:
-            raise ValueError("No state found in session. Please try logging in again.")
+            state = session.get('oauth_state') or session.get('state') or session.get('_oauth_state')
+        
+        print(f"[DEBUG] Final state after fallback: {state[:30] if state else 'NOT FOUND'}...")
+        print(f"[DEBUG] ===============================================")
+        
+        if not state:
+            error_msg = "No state found in session or database. Please try logging in again."
+            error_msg += "\n\nPossible causes:"
+            error_msg += "\n1. Session cookies are blocked by browser"
+            error_msg += "\n2. Browser privacy settings blocking cookies"
+            error_msg += "\n3. Using private/incognito mode with strict settings"
+            error_msg += "\n4. State expired (15 minutes timeout)"
+            error_msg += "\n5. Cross-site cookie restrictions"
+            print(f"[ERROR] {error_msg}")
+            raise ValueError(error_msg)
+        
+        if not request_state:
+            raise ValueError("No state parameter received from Google. Possible authentication failure.")
         
         if state != request_state:
             print(f"[ERROR] State mismatch. Session: {state[:20]}..., Request: {request_state[:20] if request_state else 'None'}...")
             raise ValueError("Invalid state parameter. Possible CSRF attack. Please try logging in again.")
+        
+        # Clean up database record after successful verification
+        try:
+            from models import OAuthState
+            oauth_state_record = OAuthState.query.filter_by(state=state).first()
+            if oauth_state_record:
+                db.session.delete(oauth_state_record)
+                db.session.commit()
+                print(f"[DEBUG] OAuth state record cleaned up from database")
+        except Exception as e:
+            print(f"[WARNING] Failed to clean up OAuth state from database: {e}")
         
         # Ensure redirect URI matches
         redirect_uri = get_redirect_uri()

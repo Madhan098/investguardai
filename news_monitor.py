@@ -13,7 +13,7 @@ import re
 class FraudNewsMonitor:
     def __init__(self):
         self.api_key = os.getenv('NEWS_API_KEY', 'YOUR_NEWS_API_KEY')
-        self.gemini_api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyBfEcZrrxe0N8TKweyDDVQYukESfES9M6Y')
+        self.gemini_api_key = os.getenv('GEMINI_API_KEY', 'AIzaSyDBOlhXjqNqaCRFf9XdLlw1InV2EKgGCCw')
         self.gemini_api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
         self.base_url = "https://newsapi.org/v2/everything"
         self.headers = {
