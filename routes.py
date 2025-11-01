@@ -129,8 +129,8 @@ def analyzer():
         # Store analysis in history with proper Unicode handling
         content_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
         
-        # Ensure content is properly encoded for database storage
-        safe_content = content.encode('utf-8', 'ignore').decode('utf-8')
+        # Ensure content is properly handled for database storage
+        safe_content = content
         
         history_entry = AnalysisHistory(
             content_hash=content_hash,
