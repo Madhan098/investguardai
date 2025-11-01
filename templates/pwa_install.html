@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Install App - InvestGuard AI{% endblock %}
+
+{% block content %}
+<!-- PWA Install Page -->
+<section class="py-5" style="min-height: 100vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <!-- Header -->
+                        <div class="text-center mb-5" data-aos="fade-up">
+                            <div class="mb-4">
+                                <i class="fas fa-mobile-alt fa-5x text-primary"></i>
+                            </div>
+                            <h1 class="display-4 fw-bold text-gradient mb-3">Install InvestGuard AI</h1>
+                            <p class="lead text-muted">Get the best experience with our Progressive Web App</p>
+                        </div>
+
+                        <!-- Quick Install (if available) -->
+                        <div id="quickInstallSection" class="text-center mb-5" data-aos="fade-up" data-aos-delay="100" style="display: none;">
+                            <button id="quickInstallButton" class="btn btn-primary btn-lg px-5 py-3 mb-4">
+                                <i class="fas fa-download me-2"></i>Install Now
+                            </button>
+                            <p class="text-muted">Click the button above to install the app instantly</p>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="row g-4 mb-5" data-aos="fade-up" data-aos-delay="200">
+                            <div class="col-md-4">
+                                <div class="feature-box text-center p-4 h-100">
+                                    <div class="feature-icon bg-primary bg-opacity-10 rounded-3 p-3 mb-3 d-inline-block">
+                                        <i class="fas fa-bolt text-primary fs-2"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Faster Loading</h5>
+                                    <p class="text-muted mb-0">Cached content loads instantly for a smoother experience</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-box text-center p-4 h-100">
+                                    <div class="feature-icon bg-success bg-opacity-10 rounded-3 p-3 mb-3 d-inline-block">
+                                        <i class="fas fa-wifi-slash text-success fs-2"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Offline Access</h5>
+                                    <p class="text-muted mb-0">Use the app even when you're not connected to the internet</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-box text-center p-4 h-100">
+                                    <div class="feature-icon bg-info bg-opacity-10 rounded-3 p-3 mb-3 d-inline-block">
+                                        <i class="fas fa-bell text-info fs-2"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-3">Push Notifications</h5>
+                                    <p class="text-muted mb-0">Get real-time alerts about fraud threats and updates</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Platform-Specific Instructions -->
+                        <div class="instructions-section" data-aos="fade-up" data-aos-delay="300">
+                            <h2 class="fw-bold mb-4 text-center">Installation Instructions</h2>
+                            
+                            <!-- Android (Chrome) -->
+                            <div id="androidInstructions" class="instruction-card card mb-4" style="display: none;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fab fa-android text-success fs-1 me-3"></i>
+                                        <div>
+                                            <h4 class="fw-bold mb-1">Android (Chrome)</h4>
+                                            <p class="text-muted mb-0">Install on Android devices using Chrome browser</p>
+                                        </div>
+                                    </div>
+                                    <ol class="mb-0 ps-3">
+                                        <li class="mb-2">Open this page in <strong>Google Chrome</strong> browser</li>
+                                        <li class="mb-2">Tap the <strong>menu</strong> button <i class="fas fa-ellipsis-v"></i> (three dots) in the top right corner</li>
+                                        <li class="mb-2">Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></li>
+                                        <li class="mb-2">Tap <strong>"Install"</strong> in the popup</li>
+                                        <li class="mb-0">The app icon will appear on your home screen!</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <!-- iOS (Safari) -->
+                            <div id="iosInstructions" class="instruction-card card mb-4" style="display: none;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fab fa-apple text-dark fs-1 me-3"></i>
+                                        <div>
+                                            <h4 class="fw-bold mb-1">iOS (Safari)</h4>
+                                            <p class="text-muted mb-0">Install on iPhone or iPad using Safari browser</p>
+                                        </div>
+                                    </div>
+                                    <ol class="mb-0 ps-3">
+                                        <li class="mb-2">Open this page in <strong>Safari</strong> browser (not Chrome)</li>
+                                        <li class="mb-2">Tap the <strong>Share</strong> button <i class="fas fa-share-alt"></i> at the bottom</li>
+                                        <li class="mb-2">Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                                        <li class="mb-2">Customize the name if desired, then tap <strong>"Add"</strong></li>
+                                        <li class="mb-0">The app icon will appear on your home screen!</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <!-- Desktop (Chrome/Edge) -->
+                            <div id="desktopInstructions" class="instruction-card card mb-4" style="display: none;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-desktop text-primary fs-1 me-3"></i>
+                                        <div>
+                                            <h4 class="fw-bold mb-1">Desktop (Chrome/Edge)</h4>
+                                            <p class="text-muted mb-0">Install on Windows, Mac, or Linux</p>
+                                        </div>
+                                    </div>
+                                    <ol class="mb-0 ps-3">
+                                        <li class="mb-2">Open this page in <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong> browser</li>
+                                        <li class="mb-2">Look for the <strong>Install</strong> icon <i class="fas fa-plus-circle"></i> in the address bar</li>
+                                        <li class="mb-2">Click the <strong>"Install"</strong> button when prompted</li>
+                                        <li class="mb-2">Confirm the installation in the popup dialog</li>
+                                        <li class="mb-0">The app will open in its own window!</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <!-- General Instructions -->
+                            <div id="generalInstructions" class="instruction-card card mb-4">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fas fa-globe text-info fs-1 me-3"></i>
+                                        <div>
+                                            <h4 class="fw-bold mb-1">Other Browsers</h4>
+                                            <p class="text-muted mb-0">General installation instructions</p>
+                                        </div>
+                                    </div>
+                                    <ol class="mb-0 ps-3">
+                                        <li class="mb-2">Look for an <strong>"Install"</strong> option in your browser's menu</li>
+                                        <li class="mb-2">On mobile: Check browser menu for <strong>"Add to Home Screen"</strong> option</li>
+                                        <li class="mb-2">On desktop: Look for install icon in the address bar or browser menu</li>
+                                        <li class="mb-2">Follow the browser-specific instructions to complete installation</li>
+                                        <li class="mb-0">The app will be added to your device/applications</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Benefits Section -->
+                        <div class="benefits-section bg-light rounded-3 p-5 mb-5" data-aos="fade-up" data-aos-delay="400">
+                            <h3 class="fw-bold mb-4 text-center">Why Install the App?</h3>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-check-circle text-success me-3 mt-1 fs-5"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-2">Instant Access</h6>
+                                            <p class="text-muted mb-0 small">Quick launch from your home screen without opening a browser</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-check-circle text-success me-3 mt-1 fs-5"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-2">Better Performance</h6>
+                                            <p class="text-muted mb-0 small">Optimized loading and smoother user experience</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-check-circle text-success me-3 mt-1 fs-5"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-2">Offline Capability</h6>
+                                            <p class="text-muted mb-0 small">Access cached content even without internet connection</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-check-circle text-success me-3 mt-1 fs-5"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-2">Push Notifications</h6>
+                                            <p class="text-muted mb-0 small">Stay updated with real-time fraud alerts</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Support Section -->
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="500">
+                            <p class="text-muted mb-3">Need help with installation?</p>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-home me-2"></i>Back to Home
+                            </a>
+                            <button onclick="window.location.reload()" class="btn btn-primary">
+                                <i class="fas fa-sync-alt me-2"></i>Try Install Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Detect platform and show appropriate instructions
+    document.addEventListener('DOMContentLoaded', function() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+        const isChrome = /Chrome/.test(navigator.userAgent);
+        const isEdge = /Edg/.test(navigator.userAgent);
+        const isSafari = /Safari/.test(navigator.userAgent) && !isChrome;
+        const isDesktop = !isIOS && !isAndroid;
+
+        // Show platform-specific instructions
+        if (isIOS && isSafari) {
+            document.getElementById('iosInstructions').style.display = 'block';
+            document.getElementById('generalInstructions').style.display = 'none';
+        } else if (isAndroid && isChrome) {
+            document.getElementById('androidInstructions').style.display = 'block';
+            document.getElementById('generalInstructions').style.display = 'none';
+        } else if (isDesktop && (isChrome || isEdge)) {
+            document.getElementById('desktopInstructions').style.display = 'block';
+            document.getElementById('generalInstructions').style.display = 'none';
+        }
+
+        // Quick install button (if beforeinstallprompt is available)
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show quick install section
+            const quickInstallSection = document.getElementById('quickInstallSection');
+            if (quickInstallSection) {
+                quickInstallSection.style.display = 'block';
+            }
+        });
+
+        // Quick install button handler
+        const quickInstallButton = document.getElementById('quickInstallButton');
+        if (quickInstallButton) {
+            quickInstallButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    // Show the install prompt
+                    deferredPrompt.prompt();
+                    
+                    // Wait for user response
+                    const { outcome } = await deferredPrompt.userChoice;
+                    
+                    if (outcome === 'accepted') {
+                        // Show success message
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                        alertDiv.innerHTML = `
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Success!</strong> Installing app...
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        document.body.appendChild(alertDiv);
+                        
+                        setTimeout(() => {
+                            alertDiv.remove();
+                        }, 5000);
+                    }
+                    
+                    deferredPrompt = null;
+                    quickInstallSection.style.display = 'none';
+                }
+            });
+        }
+
+        // Check if app is already installed
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true ||
+                   document.referrer.includes('android-app://');
+        }
+
+        // If app is already installed, show message
+        if (isAppInstalled()) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Great!</strong> The app is already installed on your device.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            const cardBody = document.querySelector('.card-body');
+            if (cardBody) {
+                cardBody.insertBefore(alertDiv, cardBody.firstChild);
+            }
+        }
+    });
+</script>
+{% endblock %}
+

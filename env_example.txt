@@ -28,3 +28,16 @@ GEMINI_API_KEY=AIzaSyBfEcZrrxe0N8TKweyDDVQYukESfES9M6Y
 
 # SEBI Database (No API key needed - public data)
 # Uses web scraping from official SEBI website
+
+# Google OAuth Configuration (Required for Google Login)
+# Get from: https://console.cloud.google.com/
+# See GOOGLE_AUTH_SETUP.md for detailed setup instructions
+# Your credentials are already configured in config_google_auth.py
+# Optionally override here:
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+# Note: Make sure to add your production domain to Google OAuth redirect URIs:
+# 1. Go to https://console.cloud.google.com/apis/credentials
+# 2. Edit your OAuth 2.0 Client ID
+# 3. Add: https://your-production-domain.onrender.com/auth/google/callback

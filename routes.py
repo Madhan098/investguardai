@@ -1,4 +1,5 @@
-from flask import render_template, request, jsonify, flash, redirect, url_for, session
+from flask import render_template, request, jsonify, flash, redirect, url_for, session, g
+import secrets
 from app import app, db
 from models import FraudAlert, Advisor, NetworkConnection, UserReport, AnalysisHistory
 from fraud_detector import FraudDetector
@@ -174,22 +175,85 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 import io
 
-# Simple authentication system (no external dependencies)
+# Import Google Auth
+GOOGLE_AUTH_AVAILABLE = False
+try:
+    # First check if google.auth is available
+    try:
+        import google.auth
+        from google_auth_oauthlib.flow import Flow
+        from googleapiclient.discovery import build
+    except ImportError as import_error:
+        print(f"Google Auth dependencies not installed: {import_error}")
+        print("Please install: pip install google-auth google-auth-oauthlib google-api-python-client")
+        raise ImportError(f"Missing Google Auth dependencies: {import_error}")
+    
+    # Now try to import our google_auth module
+    import google_auth
+    from google_auth import (
+        get_authorization_url, get_user_info, is_authenticated as google_is_authenticated,
+        get_current_user as get_google_user, logout as google_logout, refresh_credentials_if_needed
+    )
+    # Check if credentials are actually configured by checking the module attributes
+    client_id = getattr(google_auth, 'GOOGLE_CLIENT_ID', None)
+    client_secret = getattr(google_auth, 'GOOGLE_CLIENT_SECRET', None)
+    
+    if client_id and client_secret and client_id.strip() and client_secret.strip():
+        GOOGLE_AUTH_AVAILABLE = True
+        print("[SUCCESS] Google Auth configured successfully")
+    else:
+        print("[WARNING] Google Auth credentials not configured (empty or None)")
+        GOOGLE_AUTH_AVAILABLE = False
+except ImportError as e:
+    print(f"[WARNING] Google Auth module not available: {e}")
+    print("   Run: python -m pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client")
+    GOOGLE_AUTH_AVAILABLE = False
+except Exception as e:
+    print(f"[WARNING] Google Auth error: {e}")
+    import traceback
+    traceback.print_exc()
+    GOOGLE_AUTH_AVAILABLE = False
+
+# Simple authentication system (supports both regular and Google OAuth)
 def require_login(f):
-    """Simple decorator to check if user is logged in via session"""
+    """Simple decorator to check if user is logged in via session or Google OAuth"""
     from functools import wraps
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('user_id'):
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
+        # Check for regular session login
+        user_id = session.get('user_id')
+        if user_id:
+            return f(*args, **kwargs)
+        
+        # Check for Google OAuth login
+        if GOOGLE_AUTH_AVAILABLE:
+            try:
+                if google_is_authenticated():
+                    return f(*args, **kwargs)
+            except:
+                pass
+        
+        # Not logged in - redirect to login (don't flash if already redirecting)
+        # Only flash if user directly accessed a protected route
+        if request.endpoint != 'login':
+            flash('Please log in to access this page.', 'info')
+        return redirect(url_for('login'))
     return decorated_function
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Professional login page with user authentication"""
     # If user is already logged in, redirect to dashboard
-    if session.get('user_id'):
+    # Check both regular and Google auth
+    user_id = session.get('user_id')
+    if not user_id and GOOGLE_AUTH_AVAILABLE:
+        try:
+            if google_is_authenticated():
+                return redirect(url_for('dashboard'))
+        except:
+            pass
+    
+    if user_id:
         return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
@@ -200,18 +264,26 @@ def login():
         # Simple demo authentication - in production, implement proper password hashing
         if email and password:
             # For demo purposes, accept any email/password combination
+            # Generate unique session key
+            session_key = secrets.token_urlsafe(32)
             session['user_id'] = email
             session['user_name'] = email.split('@')[0].title()
             session['user_email'] = email
+            session['session_key'] = session_key
+            session['last_activity'] = datetime.utcnow().isoformat()
+            session['login_time'] = datetime.utcnow().isoformat()
             
-            # Always set session as permanent for better persistence
+            # Session timeout: 15 minutes of inactivity
             session.permanent = True
-            app.permanent_session_lifetime = timedelta(days=30)
+            app.permanent_session_lifetime = timedelta(minutes=15)
             
             # Force session to be saved
             session.modified = True
             
-            flash('Login successful! Welcome back.', 'success')
+            # Only show success message once per login session
+            if not session.get('login_message_shown'):
+                flash('Login successful! Welcome back.', 'success')
+                session['login_message_shown'] = True
             return redirect(url_for('dashboard'))
         else:
             flash('Please enter both email and password.', 'error')
@@ -268,37 +340,287 @@ def register():
         session['user_name'] = f"{first_name} {last_name}".title()
         session['user_email'] = email
         
-        # Set session as permanent if user wants to be remembered
+        # Generate unique session key
+        session_key = secrets.token_urlsafe(32)
+        session['session_key'] = session_key
+        session['last_activity'] = datetime.utcnow().isoformat()
+        session['login_time'] = datetime.utcnow().isoformat()
+        
+        # Session timeout: 15 minutes of inactivity
         session.permanent = True
-        app.permanent_session_lifetime = timedelta(days=30)
+        app.permanent_session_lifetime = timedelta(minutes=15)
         
         # Force session to be saved
         session.modified = True
         
-        flash('Registration successful! You are now logged in.', 'success')
+        # Only show success message once
+        if not session.get('login_message_shown'):
+            flash('Registration successful! You are now logged in.', 'success')
+            session['login_message_shown'] = True
         return redirect(url_for('dashboard'))
     
     return render_template('register.html')
 
+@app.route('/auth/google')
+def google_login():
+    """Initiate Google OAuth login"""
+    if not GOOGLE_AUTH_AVAILABLE:
+        flash('Google authentication is not configured. Please use email login.', 'error')
+        return redirect(url_for('login'))
+    
+    try:
+        authorization_url = get_authorization_url()
+        return redirect(authorization_url)
+    except ValueError as e:
+        flash(f'Google authentication error: {str(e)}', 'error')
+        return redirect(url_for('login'))
+    except Exception as e:
+        flash(f'An error occurred during Google authentication: {str(e)}', 'error')
+        return redirect(url_for('login'))
+
+@app.route('/auth/google/callback')
+def google_callback():
+    """Handle Google OAuth callback"""
+    if not GOOGLE_AUTH_AVAILABLE:
+        flash('Google authentication is not configured.', 'error')
+        return redirect(url_for('login'))
+    
+    error = request.args.get('error')
+    if error:
+        flash(f'Google authentication error: {error}', 'error')
+        return redirect(url_for('login'))
+    
+    code = request.args.get('code')
+    if not code:
+        flash('No authorization code received from Google.', 'error')
+        return redirect(url_for('login'))
+    
+    try:
+        # Clear any old session data and flash messages before new login
+        # This prevents old logout messages from appearing
+        old_keys = list(session.keys())
+        for key in old_keys:
+            if key not in ['_permanent', '_id']:  # Keep Flask session internals
+                session.pop(key, None)
+        
+        # Get user info from Google
+        user_info = get_user_info(code)
+        
+        # Generate unique session key
+        session_key = secrets.token_urlsafe(32)
+        
+        # Store user info in session
+        session['user_id'] = user_info['id']
+        session['user_email'] = user_info['email']
+        session['user_name'] = user_info.get('name') or user_info.get('given_name', 'User')
+        session['user_picture'] = user_info.get('picture')
+        session['session_key'] = session_key
+        session['last_activity'] = datetime.utcnow().isoformat()
+        session['login_time'] = datetime.utcnow().isoformat()
+        
+        # Also store Google-specific session data
+        session['google_user_id'] = user_info['id']
+        session['google_user_email'] = user_info['email']
+        session['google_user_name'] = user_info.get('name')
+        session['google_user_picture'] = user_info.get('picture')
+        session['auth_provider'] = 'google'
+        
+        # Save user to database if not exists
+        from models import User
+        
+        user = User.query.filter_by(id=user_info['id']).first()
+        if not user:
+            user = User(
+                id=user_info['id'],
+                email=user_info['email'],
+                first_name=user_info.get('given_name'),
+                last_name=user_info.get('family_name'),
+                profile_image_url=user_info.get('picture'),
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
+            db.session.add(user)
+            db.session.commit()
+        else:
+            # Update user info
+            user.email = user_info['email']
+            user.first_name = user_info.get('given_name')
+            user.last_name = user_info.get('family_name')
+            user.profile_image_url = user_info.get('picture')
+            user.updated_at = datetime.utcnow()
+            db.session.commit()
+        
+        # Session timeout: 15 minutes of inactivity
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(minutes=15)
+        session.modified = True
+        
+        # Only show success message once per login session
+        if not session.get('login_message_shown'):
+            flash('Successfully logged in with Google!', 'success')
+            session['login_message_shown'] = True
+        return redirect(url_for('dashboard'))
+        
+    except ValueError as e:
+        flash(f'Authentication error: {str(e)}', 'error')
+        return redirect(url_for('login'))
+    except Exception as e:
+        flash(f'An error occurred during authentication: {str(e)}', 'error')
+        return redirect(url_for('login'))
+
 @app.route('/logout')
 def logout():
-    """Simple logout"""
+    """Simple logout - clears both regular and Google OAuth sessions and redirects to home page"""
+    # Clear Google OAuth session if exists (before clearing main session)
+    if GOOGLE_AUTH_AVAILABLE:
+        try:
+            google_logout()
+        except:
+            pass
+    
+    # Pop all session keys explicitly
+    session_keys_to_remove = [
+        'user_id', 'user_email', 'user_name', 'user_picture',
+        'google_user_id', 'google_user_email', 'google_user_name', 
+        'google_user_picture', 'auth_provider', 'google_credentials', 
+        'oauth_state', 'login_message_shown', 'session_key', 'last_activity', 'login_time'
+    ]
+    
+    for key in session_keys_to_remove:
+        session.pop(key, None)
+    
+    # Clear all remaining session data
     session.clear()
-    flash('Logged out successfully!', 'info')
-    return redirect(url_for('index'))
+    session.permanent = False  # Disable permanent session
+    session.modified = True
+    
+    # Store flash message AFTER clearing session (but before redirect)
+    # Use 'success' category instead of 'info' to distinguish from login messages
+    flash('You have been logged out successfully.', 'success')
+    
+    # Create response with redirect to home page ('/')
+    from flask import make_response
+    response = make_response(redirect('/', code=302))
+    
+    # Add no-cache headers to prevent browser from caching the logout redirect
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
+    # Delete the session cookie explicitly
+    response.set_cookie(
+        app.config.get('SESSION_COOKIE_NAME', 'investguard_session'),
+        '',
+        expires=0,
+        path=app.config.get('SESSION_COOKIE_PATH', '/'),
+        domain=app.config.get('SESSION_COOKIE_DOMAIN'),
+        secure=app.config.get('SESSION_COOKIE_SECURE', False),
+        httponly=app.config.get('SESSION_COOKIE_HTTPONLY', True),
+        samesite=app.config.get('SESSION_COOKIE_SAMESITE', 'Lax')
+    )
+    
+    return response
 
-# Make session permanent
+# Session timeout handler - check if session has expired (runs first)
+@app.before_request
+def check_session_timeout():
+    """Check if session has expired due to inactivity (15 minutes)"""
+    # Exclude certain routes from timeout check
+    excluded_endpoints = ['logout', 'google_login', 'google_callback', 'static', 'manifest', 'service_worker', 'login', 'register', 'index', 'pwa_install']
+    
+    if request.endpoint in excluded_endpoints:
+        return
+    
+    # Check if user is logged in
+    user_id = session.get('user_id') or session.get('google_user_id')
+    
+    if user_id:
+        # Get last activity time
+        last_activity_str = session.get('last_activity')
+        
+        if last_activity_str:
+            try:
+                # Parse last activity time (handle both timezone-aware and naive)
+                last_activity = datetime.fromisoformat(last_activity_str.replace('Z', ''))
+                if last_activity.tzinfo is not None:
+                    # Convert timezone-aware to naive UTC
+                    last_activity = last_activity.replace(tzinfo=None)
+                
+                # Get current time (UTC)
+                now = datetime.utcnow()
+                
+                # Calculate time difference in minutes
+                time_diff = (now - last_activity).total_seconds() / 60
+                
+                # Session timeout: 15 minutes of inactivity
+                if time_diff > 15:
+                    # Session expired - clear session and redirect to login
+                    session.clear()
+                    flash('Your session has expired due to inactivity (15 minutes). Please log in again.', 'warning')
+                    
+                    # Redirect to login
+                    if request.endpoint != 'login':
+                        return redirect(url_for('login'))
+                    return
+            except (ValueError, TypeError, AttributeError) as e:
+                # If last_activity is invalid, treat as expired
+                session.clear()
+                if request.endpoint != 'login':
+                    return redirect(url_for('login'))
+                return
+        else:
+            # No last_activity - treat as new session or expired
+            # Only expire if user_id exists but no last_activity (shouldn't happen, but safety check)
+            if session.get('user_id') and not session.get('login_time'):
+                session.clear()
+                if request.endpoint != 'login':
+                    return redirect(url_for('login'))
+                return
+        
+        # Update last activity time on each request (before processing)
+        session['last_activity'] = datetime.utcnow().isoformat()
+        session.modified = True
+
+# Make session permanent (except for logout and auth routes)
 @app.before_request
 def make_session_permanent():
-    session.permanent = True
+    """Make session permanent for logged-in users"""
+    # Don't make session permanent for logout, auth routes, or index
+    excluded_endpoints = ['logout', 'google_login', 'google_callback', 'index', 'static', 'manifest', 'service_worker']
+    
+    if request.endpoint in excluded_endpoints:
+        return
+    
+    # Only make permanent if user is logged in
+    if session.get('user_id') or (GOOGLE_AUTH_AVAILABLE and session.get('google_user_id')):
+        session.permanent = True
+        # Session timeout: 15 minutes
+        app.permanent_session_lifetime = timedelta(minutes=15)
 
 # Initialize service classes
 fraud_detector = FraudDetector()
 advisor_verifier = AdvisorVerifier()
 network_analyzer = NetworkAnalyzer()
 
+@app.route('/install')
+@app.route('/pwa-install')
+def pwa_install():
+    """PWA Installation Instructions Page"""
+    return render_template('pwa_install.html')
+
+@app.route('/manifest.json')
+def manifest():
+    """Serve PWA manifest.json"""
+    return send_file('static/manifest.json', mimetype='application/manifest+json')
+
+@app.route('/service-worker.js')
+def service_worker():
+    """Serve service worker"""
+    return send_file('static/js/service-worker.js', mimetype='application/javascript')
+
 @app.route('/')
 def index():
+    """Home page - accessible to all users (logged in or not)"""
     # Get recent fraud statistics
     total_alerts = FraudAlert.query.count()
     high_risk_alerts = FraudAlert.query.filter(FraudAlert.risk_score >= 7.0).count()

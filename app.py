@@ -24,7 +24,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['PERMANENT_SESSION_LIFETIME'] = 86400
+app.config['PERMANENT_SESSION_LIFETIME'] = 900  # 15 minutes in seconds
 app.config['SESSION_COOKIE_NAME'] = 'investguard_session'
 app.config['SESSION_COOKIE_DOMAIN'] = None  # Allow cookies on any domain
 app.config['SESSION_COOKIE_PATH'] = '/'

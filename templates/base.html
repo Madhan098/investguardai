@@ -6,6 +6,29 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0066ff">
+    <meta name="msapplication-TileColor" content="#0066ff">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ url_for('static', filename='icons/icon-72x72.png') }}">
+    <link rel="apple-touch-icon" sizes="96x96" href="{{ url_for('static', filename='icons/icon-96x96.png') }}">
+    <link rel="apple-touch-icon" sizes="128x128" href="{{ url_for('static', filename='icons/icon-128x128.png') }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ url_for('static', filename='icons/icon-144x144.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ url_for('static', filename='icons/icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" sizes="384x384" href="{{ url_for('static', filename='icons/icon-384x384.png') }}">
+    <link rel="apple-touch-icon" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512x512.png') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/icon-72x72.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icons/icon-72x72.png') }}">
+    
     <title>{% block title %}InvestGuard AI - Advanced Investment Fraud Prevention Platform{% endblock %}</title>
     
     <!-- Preconnect for performance -->
@@ -31,7 +54,9 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
-    <!-- Custom CSS -->
+    <!-- Professional CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <!-- Legacy Custom CSS (for backward compatibility) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     
     <!-- Meta tags for SEO -->
@@ -106,6 +131,11 @@
                             </a></li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('pwa_install') }}">
+                            <i class="fas fa-download me-1"></i>Install App
+                        </a>
+                    </li>
                 </ul>
                 
                 <div class="navbar-nav">
@@ -119,15 +149,32 @@
                     {% if session.user_id %}
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <div class="user-avatar me-2">
-                                    <i class="fas fa-user-circle"></i>
-                                </div>
-                                <span class="fw-medium">{{ session.user_name or 'User' }}</span>
+                                {% if session.user_picture or session.google_user_picture %}
+                                    <img src="{{ session.user_picture or session.google_user_picture }}" alt="Profile" class="user-avatar me-2 rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                {% else %}
+                                    <div class="user-avatar me-2">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                {% endif %}
+                                <span class="fw-medium d-none d-md-inline">{{ session.user_name or session.google_user_name or 'User' }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><span class="dropdown-item-text text-muted">{{ session.user_id }}</span></li>
+                                <li>
+                                    <div class="dropdown-item-text">
+                                        <div class="fw-semibold">{{ session.user_name or session.google_user_name or 'User' }}</div>
+                                        <small class="text-muted">{{ session.user_email or session.google_user_email }}</small>
+                                        {% if session.auth_provider == 'google' %}
+                                            <small class="d-block text-muted mt-1">
+                                                <i class="fab fa-google me-1"></i>Google Account
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <li><a class="dropdown-item" href="{{ url_for('dashboard') }}">
+                                    <i class="fas fa-chart-line me-2"></i>Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}" onclick="return confirm('Are you sure you want to log out?');">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a></li>
                             </ul>
@@ -154,20 +201,114 @@
             {% if messages %}
                 <div class="container mt-4">
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert" data-aos="fade-down">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }} me-2"></i>
-                                {{ message }}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert" data-aos="fade-down" style="animation: fadeInDown 0.5s ease-out;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }} me-2"></i>
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     {% endfor %}
                 </div>
+                <script>
+                    // Auto-dismiss flash messages after 5 seconds
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const alerts = document.querySelectorAll('.alert-dismissible');
+                        alerts.forEach(function(alert) {
+                            setTimeout(function() {
+                                const bsAlert = new bootstrap.Alert(alert);
+                                bsAlert.close();
+                            }, 5000);
+                        });
+                    });
+                </script>
             {% endif %}
         {% endwith %}
         
         {% block content %}{% endblock %}
     </main>
+    
+    <!-- PWA Install Prompt Modal -->
+    <div class="modal fade" id="pwaInstallModal" tabindex="-1" aria-labelledby="pwaInstallModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content pwa-install-modal">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <div class="pwa-install-icon mb-4">
+                        <i class="fas fa-mobile-alt fa-4x text-primary"></i>
+                    </div>
+                    <h2 class="modal-title fw-bold mb-3" id="pwaInstallModalLabel">Install InvestGuard AI</h2>
+                    <p class="text-muted mb-4">
+                        Install our app for a better experience! Get instant access to fraud detection tools, 
+                        offline support, and faster loading times.
+                    </p>
+                    
+                    <!-- Features List -->
+                    <div class="row text-start mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                <div>
+                                    <strong>Offline Access</strong>
+                                    <p class="small text-muted mb-0">Use the app without internet</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                <div>
+                                    <strong>Faster Loading</strong>
+                                    <p class="small text-muted mb-0">Cached content loads instantly</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                <div>
+                                    <strong>App-like Experience</strong>
+                                    <p class="small text-muted mb-0">Standalone app interface</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                <div>
+                                    <strong>Push Notifications</strong>
+                                    <p class="small text-muted mb-0">Real-time fraud alerts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Install Instructions (shown if auto-install not available) -->
+                    <div id="pwaManualInstructions" class="alert alert-info text-start" style="display: none;">
+                        <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-2"></i>Install Instructions:</h6>
+                        <div id="pwaPlatformInstructions"></div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary btn-lg" id="pwaInstallButton">
+                            <i class="fas fa-download me-2"></i>Install Now
+                        </button>
+                        <a href="{{ url_for('pwa_install') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-book me-2"></i>View Instructions
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary" id="pwaDismissButton" data-bs-dismiss="modal">
+                            Dismiss (Auto-close in 5s)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Professional Footer -->
     <footer class="footer">
@@ -390,6 +531,624 @@
         }
     </script>
     
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                        
+                        // Check for updates every hour
+                        setInterval(() => {
+                            registration.update();
+                        }, 3600000);
+                        
+                        // Handle service worker updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    if (confirm('New version available! Reload to update?')) {
+                                        newWorker.postMessage({ action: 'skipWaiting' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+            
+            // Listen for service worker messages
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                console.log('Message from service worker:', event.data);
+                if (event.data && event.data.type === 'SW_UPDATED') {
+                    // Notify user about update
+                    if (confirm('App update available! Reload now?')) {
+                        window.location.reload();
+                    }
+                }
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        let installModal = null;
+        
+        // Initialize modal when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalElement = document.getElementById('pwaInstallModal');
+            if (modalElement) {
+                installModal = new bootstrap.Modal(modalElement, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                
+                // Install button click handler
+                const installButton = document.getElementById('pwaInstallButton');
+                if (installButton) {
+                    installButton.addEventListener('click', () => {
+                        if (deferredPrompt) {
+                            // Show native install prompt
+                            deferredPrompt.prompt();
+                            deferredPrompt.userChoice.then((choiceResult) => {
+                                if (choiceResult.outcome === 'accepted') {
+                                    console.log('User accepted the install prompt');
+                                    // Close modal
+                                    if (installModal) {
+                                        installModal.hide();
+                                    }
+                                } else {
+                                    console.log('User dismissed the install prompt');
+                                }
+                                deferredPrompt = null;
+                            });
+                        } else {
+                            // Show manual instructions if native prompt not available
+                            showManualInstructions();
+                        }
+                    });
+                }
+            }
+        });
+        
+        // Detect if app is already installed
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true ||
+                   document.referrer.includes('android-app://');
+        }
+        
+        // Show manual install instructions
+        function showManualInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isChrome = /Chrome/.test(navigator.userAgent);
+            const isEdge = /Edg/.test(navigator.userAgent);
+            const isSafari = /Safari/.test(navigator.userAgent) && !isChrome;
+            
+            const instructionsDiv = document.getElementById('pwaPlatformInstructions');
+            const manualInstructions = document.getElementById('pwaManualInstructions');
+            
+            if (!instructionsDiv || !manualInstructions) return;
+            
+            let instructions = '';
+            
+            if (isIOS) {
+                instructions = `
+                    <ol class="mb-0 small">
+                        <li>Tap the <strong>Share</strong> button <i class="fas fa-share-alt"></i> at the bottom</li>
+                        <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                        <li>Tap <strong>"Add"</strong> in the top right corner</li>
+                        <li>The app will appear on your home screen!</li>
+                    </ol>
+                `;
+            } else if (isAndroid && isChrome) {
+                instructions = `
+                    <ol class="mb-0 small">
+                        <li>Tap the <strong>menu</strong> button <i class="fas fa-ellipsis-v"></i> (three dots) in the browser</li>
+                        <li>Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></li>
+                        <li>Tap <strong>"Install"</strong> when prompted</li>
+                        <li>The app will be installed on your device!</li>
+                    </ol>
+                `;
+            } else if (isChrome || isEdge) {
+                instructions = `
+                    <ol class="mb-0 small">
+                        <li>Look for the <strong>Install</strong> icon in your browser's address bar</li>
+                        <li>Click the <strong>Install</strong> button</li>
+                        <li>Confirm the installation in the popup</li>
+                        <li>The app will open in a new window!</li>
+                    </ol>
+                `;
+            } else {
+                instructions = `
+                    <ol class="mb-0 small">
+                        <li>Look for the <strong>Install</strong> option in your browser's menu</li>
+                        <li>Follow the browser-specific instructions to install the app</li>
+                        <li>The app will be added to your device/applications</li>
+                    </ol>
+                `;
+            }
+            
+            instructionsDiv.innerHTML = instructions;
+            manualInstructions.style.display = 'block';
+        }
+        
+        // Show PWA install modal on every page load (if not installed)
+        function showPWAInstallPrompt() {
+            // Don't show if already installed
+            if (isAppInstalled()) {
+                return;
+            }
+            
+            if (installModal) {
+                // Show modal immediately
+                installModal.show();
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    if (installModal) {
+                        installModal.hide();
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Handle dismiss button
+        document.addEventListener('DOMContentLoaded', () => {
+            const dismissButton = document.getElementById('pwaDismissButton');
+            if (dismissButton) {
+                dismissButton.addEventListener('click', () => {
+                    // Close modal when dismissed
+                    if (installModal) {
+                        installModal.hide();
+                    }
+                });
+            }
+        });
+        
+        // Capture beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome from automatically showing the prompt
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show modal on every page load
+            setTimeout(() => {
+                showPWAInstallPrompt();
+            }, 1000); // Show after 1 second to let page load
+        });
+        
+        // PWA Installed
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('PWA installed successfully');
+            
+            // Close modal if open
+            if (installModal) {
+                installModal.hide();
+            }
+            
+            // Clear deferred prompt
+            deferredPrompt = null;
+            
+            // Show success message
+            if (typeof bootstrap !== 'undefined') {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Success!</strong> App installed successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+        });
+        
+        // Show install prompt on page load (every time)
+        window.addEventListener('load', () => {
+            // Check after a delay to allow page to fully load
+            setTimeout(() => {
+                // Show for all browsers (iOS Safari doesn't fire beforeinstallprompt)
+                if (!isAppInstalled()) {
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+                    
+                    if (isIOS && isSafari && installModal) {
+                        // Show manual instructions for iOS
+                        showManualInstructions();
+                    }
+                    
+                    // Show modal on every page load
+                    showPWAInstallPrompt();
+                }
+            }, 1000); // Show after 1 second
+        });
+    </script>
+    
+    <!-- Enhanced Animations & Interactions -->
+    <script>
+        // Initialize AOS (Animate On Scroll)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 800,
+                    easing: 'ease-in-out',
+                    once: true,
+                    offset: 100,
+                    delay: 0
+                });
+            }
+            
+            // Smooth scroll for all anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href !== '#' && href.length > 1) {
+                        e.preventDefault();
+                        const target = document.querySelector(href);
+                        if (target) {
+                            const offsetTop = target.offsetTop - 80;
+                            window.scrollTo({
+                                top: offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Navbar scroll effect
+            let lastScroll = 0;
+            const navbar = document.querySelector('.navbar');
+            
+            window.addEventListener('scroll', function() {
+                const currentScroll = window.pageYOffset;
+                
+                if (currentScroll > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                
+                lastScroll = currentScroll;
+            });
+            
+            // Add fade-in animation to elements on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe cards and sections
+            document.querySelectorAll('.card, section, .stat-card').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Enhanced button ripple effect
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Current time display
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                const timeElement = document.getElementById('current-time');
+                if (timeElement) {
+                    timeElement.textContent = timeString;
+                }
+            }
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Counter animation function
+            window.animateCounter = function(element, target, duration = 2000) {
+                const start = parseInt(element.textContent) || 0;
+                const increment = (target - start) / (duration / 16);
+                let current = start;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    element.textContent = Math.floor(current);
+                }, 16);
+            };
+        });
+        
+        // Add ripple effect styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .btn {
+                position: relative;
+                overflow: hidden;
+            }
+            .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.6);
+                transform: scale(0);
+                animation: ripple-animation 0.6s ease-out;
+                pointer-events: none;
+            }
+            @keyframes ripple-animation {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <!-- Floating AI Chat Widget -->
+    <div id="chatWidget" class="chat-widget-container">
+        <!-- Chat Button -->
+        <button id="chatWidgetButton" class="chat-widget-button" onclick="toggleChatWidget()">
+            <i class="fas fa-comments"></i>
+            <span class="chat-notification-badge">1</span>
+        </button>
+        
+        <!-- Chat Window -->
+        <div id="chatWindow" class="chat-window" style="display: none;">
+            <div class="chat-window-header">
+                <div class="d-flex align-items-center">
+                    <div class="chat-avatar me-2">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">AI Investment Advisor</h6>
+                        <small class="text-success">
+                            <i class="fas fa-circle" style="font-size: 8px;"></i> Online
+                        </small>
+                    </div>
+                </div>
+                <div class="chat-window-controls">
+                    <button class="btn btn-sm btn-link text-white" onclick="minimizeChatWidget()" title="Minimize">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link text-white" onclick="toggleChatWidget()" title="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatWidgetMessages">
+                <div class="message bot-message">
+                    <div class="d-flex mb-2">
+                        <div class="chat-avatar-sm me-2">
+                            <i class="fas fa-robot text-primary"></i>
+                        </div>
+                        <div class="message-bubble bot-bubble">
+                            <p class="mb-1">👋 Welcome! I'm your AI Investment Advisor. How can I help you today?</p>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="quick-questions mb-2">
+                    <button class="btn btn-sm btn-outline-primary me-1 mb-1" onclick="sendQuickQuestion('How do I verify a SEBI advisor?')">
+                        Verify Advisor
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary me-1 mb-1" onclick="sendQuickQuestion('What are signs of investment fraud?')">
+                        Fraud Signs
+                    </button>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="chatWidgetInput" class="form-control" placeholder="Type your message..." onkeypress="handleChatWidgetKeyPress(event)">
+                    <button class="btn btn-primary" onclick="sendChatWidgetMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget JavaScript -->
+    <script>
+        // Chat Widget Functions
+        let chatWidgetOpen = false;
+        
+        function toggleChatWidget() {
+            const chatWindow = document.getElementById('chatWindow');
+            const chatButton = document.getElementById('chatWidgetButton');
+            const notificationBadge = document.querySelector('.chat-notification-badge');
+            
+            chatWidgetOpen = !chatWidgetOpen;
+            
+            if (chatWidgetOpen) {
+                chatWindow.style.display = 'flex';
+                chatButton.innerHTML = '<i class="fas fa-times"></i>';
+                if (notificationBadge) {
+                    notificationBadge.style.display = 'none';
+                }
+                setTimeout(() => {
+                    document.getElementById('chatWidgetInput').focus();
+                }, 300);
+            } else {
+                chatWindow.style.display = 'none';
+                chatButton.innerHTML = '<i class="fas fa-comments"></i>';
+            }
+        }
+        
+        function minimizeChatWidget() {
+            toggleChatWidget();
+        }
+        
+        function sendChatWidgetMessage() {
+            const input = document.getElementById('chatWidgetInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addChatWidgetMessage(message, 'user');
+            input.value = '';
+            showChatWidgetTyping();
+            
+            fetch('/api/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideChatWidgetTyping();
+                addChatWidgetMessage(data.response, 'bot');
+            })
+            .catch(error => {
+                hideChatWidgetTyping();
+                addChatWidgetMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                console.error('Chatbot error:', error);
+            });
+        }
+        
+        function sendQuickQuestion(question) {
+            document.getElementById('chatWidgetInput').value = question;
+            sendChatWidgetMessage();
+        }
+        
+        function handleChatWidgetKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatWidgetMessage();
+            }
+        }
+        
+        function addChatWidgetMessage(content, sender) {
+            const messagesContainer = document.getElementById('chatWidgetMessages');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="d-flex mb-2 justify-content-end">
+                        <div class="message-bubble user-bubble">
+                            <p class="mb-1">${content}</p>
+                            <small class="text-white-50">${timestamp}</small>
+                        </div>
+                        <div class="chat-avatar-sm ms-2">
+                            <i class="fas fa-user text-primary"></i>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="d-flex mb-2">
+                        <div class="chat-avatar-sm me-2">
+                            <i class="fas fa-robot text-primary"></i>
+                        </div>
+                        <div class="message-bubble bot-bubble">
+                            <p class="mb-1">${content}</p>
+                            <small class="text-muted">${timestamp}</small>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showChatWidgetTyping() {
+            const messagesContainer = document.getElementById('chatWidgetMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'chat-widget-typing-indicator';
+            typingDiv.className = 'message bot-message';
+            typingDiv.innerHTML = `
+                <div class="d-flex mb-2">
+                    <div class="chat-avatar-sm me-2">
+                        <i class="fas fa-robot text-primary"></i>
+                    </div>
+                    <div class="message-bubble bot-bubble">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function hideChatWidgetTyping() {
+            const typingIndicator = document.getElementById('chat-widget-typing-indicator');
+            if (typingIndicator) typingIndicator.remove();
+        }
+        
+        // Add typing dots animation
+        const typingStyle = document.createElement('style');
+        typingStyle.textContent = `
+            .typing-dots {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                padding: 4px 0;
+            }
+            .typing-dots span {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: var(--gray);
+                animation: typing 1.4s infinite ease-in-out;
+            }
+            .typing-dots span:nth-child(1) { animation-delay: 0s; }
+            .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+            .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+            @keyframes typing {
+                0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+                30% { transform: translateY(-8px); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(typingStyle);
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

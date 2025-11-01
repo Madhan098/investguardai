@@ -49,10 +49,24 @@
                                 <a href="#" class="text-primary fw-semibold">Forgot Password?</a>
                             </div>
 
+                            <!-- Divider -->
+                            <div class="divider mb-4">
+                                <span class="divider-line"></span>
+                                <span class="divider-text">OR</span>
+                                <span class="divider-line"></span>
+                            </div>
+
+                            <!-- Google Sign In Button -->
+                            <div class="d-grid mb-4">
+                                <a href="{{ url_for('google_login') }}" class="btn btn-outline-primary btn-lg">
+                                    <i class="fab fa-google me-2"></i>Continue with Google
+                                </a>
+                            </div>
+
                             <!-- Submit Button -->
                             <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-hero">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In with Email
                                 </button>
                             </div>
 

@@ -98,9 +98,23 @@
                                 </div>
                             </div>
 
+                            <!-- Divider -->
+                            <div class="divider mb-4">
+                                <span class="divider-line"></span>
+                                <span class="divider-text">OR</span>
+                                <span class="divider-line"></span>
+                            </div>
+
+                            <!-- Google Sign Up Button -->
+                            <div class="d-grid mb-4">
+                                <a href="{{ url_for('google_login') }}" class="btn btn-outline-primary btn-lg">
+                                    <i class="fab fa-google me-2"></i>Sign Up with Google
+                                </a>
+                            </div>
+
                             <!-- Submit Button -->
                             <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-hero">
+                                <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="fas fa-user-plus me-2"></i>Create Account
                                 </button>
                             </div>

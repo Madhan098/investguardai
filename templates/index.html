@@ -1,64 +1,58 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Ultra Stunning Hero Section -->
-<section class="hero-gradient">
-    <div class="hero-particles">
-        <div class="particle" style="top: 20%; left: 10%; width: 4px; height: 4px; animation-delay: 0s;"></div>
-        <div class="particle" style="top: 60%; left: 80%; width: 6px; height: 6px; animation-delay: 2s;"></div>
-        <div class="particle" style="top: 80%; left: 20%; width: 3px; height: 3px; animation-delay: 4s;"></div>
-        <div class="particle" style="top: 30%; left: 70%; width: 5px; height: 5px; animation-delay: 1s;"></div>
-        <div class="particle" style="top: 70%; left: 50%; width: 4px; height: 4px; animation-delay: 3s;"></div>
-    </div>
+<!-- Professional Hero Section with Animations -->
+<section class="hero-section" data-aos="fade-in">
     <div class="container">
-        <div class="row align-items-center min-vh-100">
-            <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
-                <div class="hero-content">
-                    <div class="badge bg-primary bg-opacity-20 text-white px-4 py-2 rounded-pill mb-4 border border-white border-opacity-30" data-aos="fade-up" data-aos-delay="200">
-                        <i class="fas fa-shield-alt me-2"></i>AI-Powered Protection
-                    </div>
-                    <h1 class="hero-title" data-aos="fade-up" data-aos-delay="300">
-                        {% if session.user_id %}
-                            Welcome back, <span class="text-shimmer">{{ session.user_name or 'Investor' }}</span>!
-                        {% else %}
-                            Protect Your Investments with <span class="text-shimmer">Advanced AI</span>
-                        {% endif %}
-                    </h1>
-                    <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="400">
-                        India's most advanced investment fraud prevention platform. Real-time monitoring, 
-                        AI-powered analysis, and comprehensive protection for your financial future.
-                    </p>
-                    <div class="hero-stats row g-3 mb-4" data-aos="fade-up" data-aos-delay="500">
-                        <div class="col-4">
-                            <div class="stat-card">
-                                <div class="stat-number" data-counter="{{ total_alerts }}">0</div>
-                                <div class="small text-muted">Alerts Detected</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="stat-card">
-                                <div class="stat-number text-danger" data-counter="{{ high_risk_alerts }}">0</div>
-                                <div class="small text-muted">High Risk</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="stat-card">
-                                <div class="stat-number text-success" data-counter="{{ active_alerts }}">0</div>
-                                <div class="small text-muted">Active</div>
-                            </div>
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="badge badge-primary mb-3" data-aos="fade-down" data-aos-delay="100">
+                    <i class="fas fa-shield-alt me-2"></i>AI-Powered Protection
+                </div>
+                <h1 class="hero-title text-white mb-3" data-aos="fade-up" data-aos-delay="200">
+                    {% if session.user_id %}
+                        Welcome back, {{ session.user_name or 'Investor' }}!
+                    {% else %}
+                        Protect Your Investments with Advanced AI
+                    {% endif %}
+                </h1>
+                <p class="hero-subtitle text-white mb-4" data-aos="fade-up" data-aos-delay="300">
+                    India's most advanced investment fraud prevention platform. Real-time monitoring, 
+                    AI-powered analysis, and comprehensive protection for your financial future.
+                </p>
+                <div class="row mb-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="col-4 mb-3">
+                        <div class="stat-card bg-white bg-opacity-10 text-white">
+                            <div class="stat-number text-white" data-counter="{{ total_alerts }}">0</div>
+                            <div class="stat-label text-white">Alerts Detected</div>
                         </div>
                     </div>
-                    <div class="hero-actions d-flex flex-wrap gap-4" data-aos="fade-up" data-aos-delay="600">
-                        <a href="{{ url_for('analyzer') }}" class="btn btn-hero">
-                            <i class="fas fa-search me-2"></i>Start Analysis
-                        </a>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-hero" style="background: var(--gradient-secondary);">
-                            <i class="fas fa-chart-line me-2"></i>View Dashboard
-                        </a>
+                    <div class="col-4 mb-3">
+                        <div class="stat-card bg-white bg-opacity-10 text-white">
+                            <div class="stat-number text-white" data-counter="{{ high_risk_alerts }}">0</div>
+                            <div class="stat-label text-white">High Risk</div>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="stat-card bg-white bg-opacity-10 text-white">
+                            <div class="stat-number text-white" data-counter="{{ active_alerts }}">0</div>
+                            <div class="stat-label text-white">Active</div>
+                        </div>
                     </div>
                 </div>
+                <div class="hero-actions" data-aos="fade-up" data-aos-delay="500">
+                    <a href="{{ url_for('analyzer') }}" class="btn btn-primary btn-lg me-2 mb-2">
+                        <i class="fas fa-search me-2"></i>Start Analysis
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg mb-2">
+                        <i class="fas fa-chart-line me-2"></i>View Dashboard
+                    </a>
+                    <button id="pwa-install-button" class="btn btn-outline-light btn-lg d-none mb-2" style="display: none !important;">
+                        <i class="fas fa-download me-2"></i>Install App
+                    </button>
+                </div>
             </div>
-            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="600">
                 <div class="hero-visual">
                     <div class="dashboard-preview card shadow-lg border-0">
                         <div class="card-header bg-transparent border-0">

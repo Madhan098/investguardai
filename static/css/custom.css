@@ -2081,3 +2081,182 @@ body::before {
         color: white;
     }
 }
+
+/* PWA Install Modal Styles */
+.pwa-install-modal {
+    background: var(--gradient-primary);
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-2xl);
+    overflow: hidden;
+}
+
+.pwa-install-modal .modal-content {
+    background: var(--gradient-card);
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}
+
+.pwa-install-modal .modal-header {
+    background: transparent;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+.pwa-install-modal .modal-body {
+    padding: 2rem;
+}
+
+.pwa-install-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-glow);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.pwa-install-icon i {
+    color: white;
+    font-size: 3rem;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+    }
+}
+
+.pwa-install-modal .modal-title {
+    color: var(--dark-color);
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.pwa-install-modal .btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    box-shadow: var(--shadow-lg);
+}
+
+.pwa-install-modal .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    background: var(--gradient-primary);
+}
+
+.pwa-install-modal .btn-outline-secondary {
+    border: 2px solid #e5e7eb;
+    color: #6b7280;
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.pwa-install-modal .btn-outline-secondary:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.pwa-install-modal .alert-info {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--border-radius);
+    color: var(--dark-color);
+}
+
+.pwa-install-modal .alert-info h6 {
+    color: var(--primary-color);
+}
+
+.pwa-install-modal .alert-info ol {
+    padding-left: 1.5rem;
+    margin-bottom: 0;
+}
+
+.pwa-install-modal .alert-info li {
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.pwa-install-modal .alert-info li:last-child {
+    margin-bottom: 0;
+}
+
+.pwa-install-modal .modal-backdrop {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .pwa-install-modal .modal-content {
+        background: linear-gradient(145deg, #1f2937 0%, #111827 50%, #0f172a 100%);
+        color: white;
+    }
+    
+    .pwa-install-modal .modal-title {
+        color: white;
+    }
+    
+    .pwa-install-modal .text-muted {
+        color: #9ca3af !important;
+    }
+    
+    .pwa-install-modal .btn-outline-secondary {
+        border-color: #374151;
+        color: #9ca3af;
+    }
+    
+    .pwa-install-modal .btn-outline-secondary:hover {
+        background: #374151;
+        border-color: #4b5563;
+        color: white;
+    }
+    
+    .pwa-install-modal .alert-info {
+        background: rgba(99, 102, 241, 0.2);
+        border-color: rgba(99, 102, 241, 0.3);
+        color: white;
+    }
+    
+    .pwa-install-modal .alert-info li {
+        color: #d1d5db;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .pwa-install-modal .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .pwa-install-modal .modal-title {
+        font-size: 1.5rem;
+    }
+    
+    .pwa-install-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .pwa-install-icon i {
+        font-size: 2.5rem;
+    }
+}
