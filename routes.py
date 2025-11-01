@@ -219,6 +219,24 @@ def network():
                          network_data=network_data,
                          connections=connections)
 
+@app.route('/education')
+@require_login
+def education():
+    """Interactive education hub with risk simulators and learning content"""
+    return render_template('education.html')
+
+@app.route('/chatbot')
+@require_login
+def chatbot():
+    """AI-powered investment advisor chatbot"""
+    return render_template('chatbot.html')
+
+@app.route('/education/library')
+@require_login
+def education_library():
+    """Educational content library in multiple languages"""
+    return render_template('education_library.html')
+
 @app.route('/reports', methods=['GET', 'POST'])
 @require_login
 def reports():
@@ -273,4 +291,66 @@ def api_stats():
         'total_alerts': total_alerts,
         'active_alerts': active_alerts,
         'high_risk_alerts': high_risk_alerts
+    })
+
+@app.route('/api/education/simulate-risk', methods=['POST'])
+@require_login
+def api_simulate_risk():
+    """API endpoint for investment risk simulation"""
+    data = request.get_json()
+    investment_amount = data.get('amount', 100000)
+    risk_level = data.get('risk_level', 'medium')
+    time_horizon = data.get('time_horizon', 12)
+    
+    # Simple risk simulation logic
+    risk_multipliers = {
+        'low': {'loss': 0.05, 'gain': 0.08},
+        'medium': {'loss': 0.15, 'gain': 0.15},
+        'high': {'loss': 0.30, 'gain': 0.25}
+    }
+    
+    multiplier = risk_multipliers.get(risk_level, risk_multipliers['medium'])
+    
+    # Calculate potential outcomes
+    worst_case = investment_amount * (1 - multiplier['loss'])
+    best_case = investment_amount * (1 + multiplier['gain'])
+    expected_return = investment_amount * (1 + (multiplier['gain'] * 0.6 - multiplier['loss'] * 0.4))
+    
+    return jsonify({
+        'investment_amount': investment_amount,
+        'risk_level': risk_level,
+        'time_horizon': time_horizon,
+        'worst_case': round(worst_case, 2),
+        'best_case': round(best_case, 2),
+        'expected_return': round(expected_return, 2),
+        'risk_score': multiplier['loss'] * 10
+    })
+
+@app.route('/api/education/chatbot', methods=['POST'])
+@require_login
+def api_chatbot():
+    """API endpoint for AI advisor chatbot responses"""
+    data = request.get_json()
+    user_message = data.get('message', '').strip()
+    
+    if not user_message:
+        return jsonify({'error': 'Message is required'}), 400
+    
+    # Simple chatbot response logic based on keywords
+    user_message_lower = user_message.lower()
+    
+    if any(word in user_message_lower for word in ['fraud', 'scam', 'fake']):
+        response = "⚠️ I can help you identify potential fraud. Look for these red flags: guaranteed returns, pressure to invest quickly, unregistered advisors, requests for personal banking details, and promises that seem too good to be true. Always verify investment advisors through SEBI's official database."
+    elif any(word in user_message_lower for word in ['advisor', 'verify', 'check']):
+        response = "🔍 To verify an investment advisor, you can use our Advisor Verification tool. You'll need their SEBI registration number (starts with INA) or their full name. All legitimate investment advisors must be registered with SEBI."
+    elif any(word in user_message_lower for word in ['risk', 'safe', 'secure']):
+        response = "📊 Investment risk depends on various factors. Use our Risk Simulator to understand potential outcomes. Remember: higher returns usually mean higher risk. Diversify your portfolio and never invest more than you can afford to lose."
+    elif any(word in user_message_lower for word in ['sebi', 'regulation', 'legal']):
+        response = "📜 SEBI (Securities and Exchange Board of India) regulates the Indian securities market. Always ensure your investments are with SEBI-registered entities. Check our compliance section for more information about investor rights and protections."
+    else:
+        response = "💡 I'm here to help with investment fraud prevention, advisor verification, risk assessment, and SEBI compliance. You can ask me about identifying scams, verifying advisors, understanding investment risks, or regulatory matters. How can I assist you today?"
+    
+    return jsonify({
+        'response': response,
+        'timestamp': datetime.utcnow().isoformat()
     })
