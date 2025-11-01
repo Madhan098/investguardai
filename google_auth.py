@@ -14,35 +14,43 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import json
 
-# Try to import from config file first (for easy setup)
-try:
-    from config_google_auth import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CLIENT_CONFIG_JSON
-except ImportError:
-    # Fall back to environment variables
-    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
-    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
-    GOOGLE_CLIENT_CONFIG_JSON = os.environ.get('GOOGLE_CLIENT_CONFIG_JSON', '')
-    
-    # Try to parse JSON config if provided as env var
-    if GOOGLE_CLIENT_CONFIG_JSON and not GOOGLE_CLIENT_ID:
-        try:
-            config = json.loads(GOOGLE_CLIENT_CONFIG_JSON)
-            if 'web' in config:
-                GOOGLE_CLIENT_ID = config['web'].get('client_id', '')
-                GOOGLE_CLIENT_SECRET = config['web'].get('client_secret', '')
-        except:
-            pass
+# PRIORITIZE ENVIRONMENT VARIABLES (for production/Render deployment)
+# This ensures production deployments use environment variables, not config file
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+GOOGLE_CLIENT_CONFIG_JSON = os.environ.get('GOOGLE_CLIENT_CONFIG_JSON', '')
 
-# If still not set, try environment variables one more time
+# Fallback to config file only if environment variables not set (for local development)
 if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID == 'YOUR_CLIENT_ID_HERE':
-    GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
-    GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
-    
-    # Final check - if still empty, raise error
-    if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID == 'YOUR_CLIENT_ID_HERE':
-        print("[WARNING] Google OAuth Client ID not configured properly!")
-        print("[WARNING] Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET")
-        print("[WARNING] Or update config_google_auth.py with your credentials")
+    try:
+        from config_google_auth import GOOGLE_CLIENT_ID as CFG_CLIENT_ID, GOOGLE_CLIENT_SECRET as CFG_CLIENT_SECRET, GOOGLE_CLIENT_CONFIG_JSON as CFG_JSON
+        if not GOOGLE_CLIENT_ID and CFG_CLIENT_ID and CFG_CLIENT_ID != 'YOUR_CLIENT_ID_HERE':
+            GOOGLE_CLIENT_ID = CFG_CLIENT_ID
+        if not GOOGLE_CLIENT_SECRET and CFG_CLIENT_SECRET and CFG_CLIENT_SECRET != 'YOUR_CLIENT_SECRET_HERE':
+            GOOGLE_CLIENT_SECRET = CFG_CLIENT_SECRET
+        if not GOOGLE_CLIENT_CONFIG_JSON and CFG_JSON:
+            GOOGLE_CLIENT_CONFIG_JSON = CFG_JSON
+    except ImportError:
+        pass  # Config file not available, use environment variables only
+
+# Try to parse JSON config if provided as env var
+if GOOGLE_CLIENT_CONFIG_JSON and not GOOGLE_CLIENT_ID:
+    try:
+        config = json.loads(GOOGLE_CLIENT_CONFIG_JSON)
+        if 'web' in config:
+            if not GOOGLE_CLIENT_ID:
+                GOOGLE_CLIENT_ID = config['web'].get('client_id', '')
+            if not GOOGLE_CLIENT_SECRET:
+                GOOGLE_CLIENT_SECRET = config['web'].get('client_secret', '')
+    except:
+        pass
+
+# Final check - log warning if not configured
+if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID == 'YOUR_CLIENT_ID_HERE':
+    print("[WARNING] Google OAuth Client ID not configured properly!")
+    print("[WARNING] Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET as environment variables")
+    print("[WARNING] For Render: Go to your service > Environment > Add environment variable")
+    print("[WARNING] Or update config_google_auth.py for local development")
 
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
