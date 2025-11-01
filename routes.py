@@ -337,30 +337,349 @@ def api_simulate_risk():
 @app.route('/api/chatbot', methods=['POST'])
 @require_login
 def api_chatbot():
-    """API endpoint for AI advisor chatbot responses"""
+    """API endpoint for AI advisor chatbot responses with comprehensive investment guidance"""
     data = request.get_json()
     user_message = data.get('message', '').strip()
     
     if not user_message:
         return jsonify({'error': 'Message is required'}), 400
     
-    # Simple chatbot response logic based on keywords
+    # Enhanced chatbot with detailed financial advisory
     user_message_lower = user_message.lower()
     
-    if any(word in user_message_lower for word in ['fraud', 'scam', 'fake']):
-        response = "⚠️ I can help you identify potential fraud. Look for these red flags: guaranteed returns, pressure to invest quickly, unregistered advisors, requests for personal banking details, and promises that seem too good to be true. Always verify investment advisors through SEBI's official database."
-    elif any(word in user_message_lower for word in ['advisor', 'verify', 'check']):
-        response = "🔍 To verify an investment advisor, you can use our Advisor Verification tool. You'll need their SEBI registration number (starts with INA) or their full name. All legitimate investment advisors must be registered with SEBI."
-    elif any(word in user_message_lower for word in ['risk', 'safe', 'secure']):
-        response = "📊 Investment risk depends on various factors. Use our Risk Simulator to understand potential outcomes. Remember: higher returns usually mean higher risk. Diversify your portfolio and never invest more than you can afford to lose."
-    elif any(word in user_message_lower for word in ['sebi', 'regulation', 'legal']):
-        response = "📜 SEBI (Securities and Exchange Board of India) regulates the Indian securities market. Always ensure your investments are with SEBI-registered entities. Check our compliance section for more information about investor rights and protections."
+    # Fraud Detection Queries
+    if any(word in user_message_lower for word in ['fraud', 'scam', 'fake', 'suspicious', 'ponzi', 'pyramid']):
+        response = """⚠️ **FRAUD DETECTION ADVISORY**
+
+🚨 Red Flags to Watch:
+• Guaranteed returns (e.g., "200% returns guaranteed")
+• Pressure to invest immediately ("Limited time offer")
+• Unregistered advisors (No SEBI registration)
+• Requests for personal banking credentials
+• Promises that seem too good to be true
+• WhatsApp/Telegram-only communication
+• Fake celebrity endorsements
+• Referral bonuses for bringing new investors
+
+✅ Protection Steps:
+1. Verify advisor SEBI registration at www.sebi.gov.in
+2. Never share OTP, PIN, or passwords
+3. Check company registration with MCA
+4. Use our Content Analyzer to scan messages
+5. Report to cybercrime.gov.in if scammed
+
+💡 Remember: If it sounds too good to be true, it probably is!"""
+
+    # Advisor Verification
+    elif any(word in user_message_lower for word in ['advisor', 'verify', 'check', 'sebi registration', 'ina']):
+        response = """🔍 **ADVISOR VERIFICATION GUIDE**
+
+📋 Valid SEBI Registrations:
+• Investment Advisors (IA) - INA prefix
+• Research Analysts (RA) - INH prefix
+• Stock Brokers - INZ prefix
+• Portfolio Managers - INP prefix
+
+✅ How to Verify:
+1. Visit our Advisor Verification tool
+2. Enter SEBI registration number (e.g., INA000012345)
+3. Check status, validity, and history
+4. Verify advisor's credentials
+
+⚠️ Warning Signs:
+• No registration number provided
+• Expired registration
+• Suspended/cancelled status
+• Refuses verification requests
+
+📞 SEBI Investor Helpline: 1800-266-7575
+🌐 Official Portal: www.sebi.gov.in/sebiweb"""
+
+    # Risk Assessment & Portfolio
+    elif any(word in user_message_lower for word in ['risk', 'portfolio', 'diversif', 'allocation', 'safe']):
+        response = """📊 **INVESTMENT RISK ASSESSMENT**
+
+📈 Risk Categories:
+• **Low Risk** (3-5% returns): Fixed Deposits, Bonds, Debt Funds
+• **Medium Risk** (8-12% returns): Index Funds, Balanced Funds, Blue-chip Stocks
+• **High Risk** (12%+ returns): Small-cap Stocks, Sectoral Funds, Derivatives
+
+🎯 Diversification Strategy:
+1. **Age-based allocation**: Equity % = 100 - Your Age
+2. **Asset classes**: Mix equity, debt, gold (60:30:10)
+3. **Geographic**: Indian + International exposure
+4. **Sectors**: Don't concentrate in one industry
+
+⚖️ Risk Management:
+• Never invest emergency funds
+• Don't invest money needed within 3 years
+• Review portfolio quarterly
+• Rebalance annually
+• Use stop-loss orders
+
+💡 Use our Risk Simulator to test different scenarios!"""
+
+    # SEBI Regulations & Compliance
+    elif any(word in user_message_lower for word in ['sebi', 'regulation', 'legal', 'compliance', 'rules']):
+        response = """📜 **SEBI COMPLIANCE & INVESTOR RIGHTS**
+
+🏛️ Key SEBI Regulations:
+• SEBI (Investment Advisers) Regulations, 2013
+• SEBI (Prohibition of Fraudulent and Unfair Trade Practices) Regulations, 2003
+• SEBI (Stock Brokers) Regulations, 1992
+
+👨‍⚖️ Your Rights as Investor:
+1. Right to fair treatment and transparency
+2. Right to receive accurate information
+3. Right to grievance redressal
+4. Protection from insider trading
+5. Right to opt-out of unsuitable advice
+
+⚠️ Investor Obligations:
+• Conduct due diligence before investing
+• Read offer documents carefully
+• Monitor investments regularly
+• Report suspicious activities
+
+📞 File Complaints:
+• SEBI SCORES: scores.gov.in
+• NSE Investor Portal: nseindia.com
+• BSE Investor Protection: bseindia.com
+
+🔗 Know Your Rights: sebi.gov.in/investor-education"""
+
+    # Market Analysis & Trends
+    elif any(word in user_message_lower for word in ['market', 'stock', 'nifty', 'sensex', 'trend', 'analysis']):
+        response = """📈 **MARKET ANALYSIS GUIDANCE**
+
+🎯 Market Indicators to Track:
+• **Nifty 50**: India's top 50 companies benchmark
+• **Sensex**: BSE's 30-stock index
+• **PE Ratio**: Market valuation (Avg: 20-25)
+• **VIX**: Volatility index (Fear gauge)
+
+📊 Analysis Tools:
+1. **Technical Analysis**: Charts, patterns, indicators
+2. **Fundamental Analysis**: Financial statements, ratios
+3. **Sentiment Analysis**: News, social media trends
+4. **Volume Analysis**: Trading activity levels
+
+⚠️ Market Manipulation Red Flags:
+• Pump and dump schemes
+• Wash trading (fake volumes)
+• Insider trading patterns
+• Coordinated buying/selling
+
+💡 Smart Investing Tips:
+• Don't time the market - invest regularly (SIP)
+• Focus on quality companies with strong fundamentals
+• Avoid penny stocks and illiquid securities
+• Use our Market Anomaly detector for unusual patterns
+
+📰 Stay informed with SEBI circulars and exchange notices!"""
+
+    # Investment Products & Options
+    elif any(word in user_message_lower for word in ['mutual fund', 'sip', 'etf', 'bond', 'fd', 'product']):
+        response = """💰 **INVESTMENT PRODUCTS GUIDE**
+
+🏦 **Mutual Funds**:
+• Equity Funds (High risk, high return)
+• Debt Funds (Low-medium risk)
+• Hybrid Funds (Balanced approach)
+• Index Funds (Low cost, passive)
+✅ Best for: Regular investors via SIP
+
+📊 **Exchange Traded Funds (ETFs)**:
+• Trade like stocks on exchanges
+• Lower expense ratio than mutual funds
+• Tax efficient for long-term
+✅ Best for: DIY investors
+
+💵 **Fixed Income**:
+• Fixed Deposits (Guaranteed returns)
+• Government Bonds (Sovereign guarantee)
+• Corporate Bonds (Higher yield)
+• PPF, EPF (Tax benefits)
+✅ Best for: Capital preservation
+
+⚠️ Avoid These:
+• Unregistered Chit Funds
+• Unregulated P2P lending
+• Binary options trading
+• Unlisted shares from unknown companies
+• Forex trading on unregulated platforms
+
+🔍 Always verify: SEBI registration, AMC track record, expense ratio, and exit loads before investing!"""
+
+    # Tax & Financial Planning
+    elif any(word in user_message_lower for word in ['tax', 'saving', '80c', 'ltcg', 'stcg', 'financial plan']):
+        response = """💼 **TAX & FINANCIAL PLANNING**
+
+💰 Tax on Investments:
+• **Equity LTCG** (>1 year): 10% above ₹1 lakh
+• **Equity STCG** (<1 year): 15%
+• **Debt LTCG** (>3 years): 20% with indexation
+• **Debt STCG**: As per income tax slab
+
+🎯 Tax Saving Options (Sec 80C - ₹1.5L limit):
+• ELSS Mutual Funds (3-year lock-in)
+• PPF (15-year, govt backed)
+• NPS (Retirement planning)
+• Life Insurance premiums
+• Home loan principal repayment
+
+📋 Financial Planning Steps:
+1. **Emergency Fund**: 6-12 months expenses
+2. **Insurance**: Life + Health coverage
+3. **Retirement**: Start early, NPS/EPF
+4. **Goals**: Education, home, marriage
+5. **Wealth Creation**: Equity investments
+
+⚠️ Tax Fraud Warning:
+• Fake tax consultants promising huge refunds
+• Schemes claiming "tax-free" high returns
+• Unregistered tax advisors
+• Shell companies for tax evasion
+
+📞 Consult certified CA/CFP for personalized tax planning!"""
+
+    # Cryptocurrency & Alternative Investments
+    elif any(word in user_message_lower for word in ['crypto', 'bitcoin', 'blockchain', 'nft', 'alternative']):
+        response = """🪙 **CRYPTOCURRENCY & ALTERNATIVES**
+
+⚠️ **IMPORTANT DISCLAIMER**:
+Cryptocurrencies are NOT regulated by SEBI or RBI in India. High risk of fraud!
+
+🚨 Crypto Scam Red Flags:
+• Guaranteed returns on crypto investments
+• Pump and dump schemes in groups
+• Fake crypto exchanges
+• Ponzi schemes disguised as crypto
+• Celebrity endorsements (often fake)
+• "Get rich quick" crypto courses
+
+🇮🇳 Indian Regulations:
+• 30% tax on crypto gains + 1% TDS
+• Crypto losses cannot offset other income
+• No legal recourse if exchange fails
+• Banks may freeze accounts for violations
+
+✅ Safer Alternatives:
+• Gold ETFs/Sovereign Gold Bonds
+• REITs (Real Estate Investment Trusts)
+• InvITs (Infrastructure Investment Trusts)
+• Commodity futures (regulated by SEBI)
+
+💡 If investing in crypto:
+1. Use only reputable exchanges
+2. Never invest more than 2-5% of portfolio
+3. Understand technology and risks
+4. Never fall for referral schemes
+5. Report scams to cybercrime.gov.in
+
+⚖️ Wait for clear regulations before major crypto investments!"""
+
+    # Beginner Investment Guide
+    elif any(word in user_message_lower for word in ['beginner', 'start', 'new', 'first time', 'how to invest']):
+        response = """🌱 **BEGINNER'S INVESTMENT GUIDE**
+
+📚 Step-by-Step for New Investors:
+
+**Step 1: Build Foundation**
+• Open savings bank account
+• Get PAN card
+• Complete KYC (Aadhaar-based)
+• Create emergency fund (6 months expenses)
+
+**Step 2: Understand Basics**
+• Risk tolerance (conservative/moderate/aggressive)
+• Time horizon (short/medium/long term)
+• Investment goals (retirement/education/wealth)
+• Tax implications
+
+**Step 3: Choose Products**
+• Start with: Index Fund SIP ₹1,000-5,000/month
+• Add: Debt fund for stability
+• Later: Individual stocks (research required)
+
+**Step 4: Open Accounts**
+• Demat + Trading account with SEBI-registered broker
+• Mutual Fund account (direct plans save costs)
+• NPS account for retirement
+
+**Step 5: Start Small**
+• Begin with SIP (Systematic Investment Plan)
+• Learn continuously
+• Review quarterly
+• Increase investments gradually
+
+⚠️ Beginner Mistakes to Avoid:
+• Following stock tips blindly
+• Investing without research
+• Putting all money in one stock
+• Taking loans for investments
+• Panic selling in market corrections
+• Trading without knowledge
+
+📖 Free Learning Resources:
+• NSE Certified courses
+• SEBI investor education portal
+• Our Education Library (multilingual)
+
+💪 Remember: Investing is a marathon, not a sprint!"""
+
+    # General/Default Response
     else:
-        response = "💡 I'm here to help with investment fraud prevention, advisor verification, risk assessment, and SEBI compliance. You can ask me about identifying scams, verifying advisors, understanding investment risks, or regulatory matters. How can I assist you today?"
+        response = """👋 **Welcome to InvestGuard AI Assistant!**
+
+I'm your SEBI-compliant investment advisor. I can help you with:
+
+🔍 **Fraud Detection**
+• Identify investment scams
+• Analyze suspicious schemes
+• Report fraudulent activities
+
+✅ **Advisor Verification**
+• Check SEBI registration
+• Verify credentials
+• Find registered professionals
+
+📊 **Risk Assessment**
+• Portfolio analysis
+• Risk profiling
+• Diversification strategies
+
+📜 **Regulatory Guidance**
+• SEBI compliance
+• Investor rights
+• Legal protections
+
+💰 **Investment Education**
+• Mutual funds, stocks, bonds
+• Tax planning
+• Financial literacy
+
+🌐 **Market Insights**
+• Market trends
+• Anomaly detection
+• Sentiment analysis
+
+**Popular Questions:**
+• "How to verify a SEBI advisor?"
+• "What are the red flags for fraud?"
+• "How to build a balanced portfolio?"
+• "What tax applies to my investments?"
+• "How to start investing as a beginner?"
+
+🗣️ **Multilingual Support Available**: English, हिंदी, தமிழ், తెలుగు, मराठी, ગુજરાતી, বাংলা
+
+Ask me anything about investments, fraud prevention, or financial planning! 💡"""
     
     return jsonify({
         'response': response,
-        'timestamp': datetime.utcnow().isoformat()
+        'timestamp': datetime.utcnow().isoformat(),
+        'category': 'investment_advisory',
+        'compliance': 'SEBI-aligned'
     })
 
 @app.route('/export/analysis/<content_hash>')
