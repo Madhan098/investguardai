@@ -37,9 +37,9 @@ class OAuth(OAuthConsumerMixin, db.Model):
 class FraudAlert(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content_type = db.Column(db.String(50), nullable=False)  # text, image, video, url
-    content = db.Column(db.Text, nullable=False)
+    content = db.Column(db.Text(collation='utf8_unicode_ci'), nullable=False)
     risk_score = db.Column(db.Float, nullable=False)  # 1-10 scale
-    fraud_indicators = db.Column(db.Text)  # JSON string of detected patterns
+    fraud_indicators = db.Column(db.Text(collation='utf8_unicode_ci'))  # JSON string of detected patterns
     severity = db.Column(db.String(20), nullable=False)  # low, medium, high, critical
     status = db.Column(db.String(20), default='active')  # active, resolved, false_positive
     source_platform = db.Column(db.String(50))

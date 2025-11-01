@@ -126,13 +126,17 @@ def analyzer():
         
         processing_time = time.time() - start_time
         
-        # Store analysis in history
-        content_hash = hashlib.sha256(content.encode()).hexdigest()
+        # Store analysis in history with proper Unicode handling
+        content_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+        
+        # Ensure content is properly encoded for database storage
+        safe_content = content.encode('utf-8', 'ignore').decode('utf-8')
+        
         history_entry = AnalysisHistory(
             content_hash=content_hash,
             analysis_type=content_type,
             risk_score=analysis_result['risk_score'],
-            analysis_result=json.dumps(analysis_result),
+            analysis_result=json.dumps(analysis_result, ensure_ascii=False),
             processing_time=processing_time
         )
         db.session.add(history_entry)
@@ -145,9 +149,9 @@ def analyzer():
             
             alert = FraudAlert(
                 content_type=content_type,
-                content=content[:1000],  # Truncate for storage
+                content=safe_content[:1000],  # Truncate for storage with safe Unicode
                 risk_score=analysis_result['risk_score'],
-                fraud_indicators=json.dumps(analysis_result['indicators']),
+                fraud_indicators=json.dumps(analysis_result['indicators'], ensure_ascii=False),
                 severity=severity,
                 source_platform='manual_submission'
             )

@@ -20,10 +20,11 @@ app.secret_key = os.environ.get("SESSION_SECRET", "fraud-detection-secret-key-20
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///fraud_detection.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///fraud_detection.db?charset=utf8")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
+    'connect_args': {'check_same_thread': False}
 }
 
 # initialize the app with the extension
@@ -33,6 +34,6 @@ with app.app_context():
     # Import models to ensure tables are created
     import models
     db.create_all()
-    
+
     # Import and register routes
     import routes
