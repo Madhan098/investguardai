@@ -10,6 +10,13 @@ import hashlib
 import time
 import json
 from datetime import datetime, timedelta
+from flask import send_file
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+import io
 
 # Register Replit Auth Blueprint
 app.register_blueprint(make_replit_blueprint(), url_prefix="/auth")
@@ -162,7 +169,8 @@ def analyzer():
         return render_template('analyzer.html',
                              analysis_result=analysis_result,
                              content=content,
-                             processing_time=processing_time)
+                             processing_time=processing_time,
+                             content_hash=content_hash)
 
     return render_template('analyzer.html')
 
@@ -326,7 +334,7 @@ def api_simulate_risk():
         'risk_score': multiplier['loss'] * 10
     })
 
-@app.route('/api/education/chatbot', methods=['POST'])
+@app.route('/api/chatbot', methods=['POST'])
 @require_login
 def api_chatbot():
     """API endpoint for AI advisor chatbot responses"""
@@ -354,6 +362,147 @@ def api_chatbot():
         'response': response,
         'timestamp': datetime.utcnow().isoformat()
     })
+
+@app.route('/export/analysis/<content_hash>')
+@require_login
+def export_analysis_pdf(content_hash):
+    """Export analysis results as PDF"""
+    try:
+        # Get analysis from history
+        analysis = AnalysisHistory.query.filter_by(content_hash=content_hash).first()
+        if not analysis:
+            flash('Analysis not found', 'error')
+            return redirect(url_for('analyzer'))
+        
+        # Parse analysis result
+        analysis_data = json.loads(analysis.analysis_result)
+        
+        # Create PDF buffer
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.75*inch)
+        
+        # Get styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            spaceAfter=30,
+            textColor=colors.darkblue,
+            alignment=1  # Center alignment
+        )
+        
+        story = []
+        
+        # Title
+        story.append(Paragraph("InvestGuard AI - Fraud Analysis Report", title_style))
+        story.append(Spacer(1, 20))
+        
+        # Basic Information
+        basic_info = [
+            ['Analysis Date:', analysis.created_at.strftime('%Y-%m-%d %H:%M:%S')],
+            ['Content Type:', analysis.analysis_type.title()],
+            ['Risk Score:', f"{analysis.risk_score:.1f}/10"],
+            ['Processing Time:', f"{analysis.processing_time:.2f} seconds"],
+            ['Content Hash:', content_hash[:16] + '...']
+        ]
+        
+        basic_table = Table(basic_info, colWidths=[2*inch, 3*inch])
+        basic_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        story.append(Paragraph("Analysis Summary", styles['Heading2']))
+        story.append(Spacer(1, 10))
+        story.append(basic_table)
+        story.append(Spacer(1, 20))
+        
+        # Risk Assessment
+        risk_level = "High Risk" if analysis.risk_score >= 7 else "Medium Risk" if analysis.risk_score >= 4 else "Low Risk"
+        risk_color = colors.red if analysis.risk_score >= 7 else colors.orange if analysis.risk_score >= 4 else colors.green
+        
+        story.append(Paragraph("Risk Assessment", styles['Heading2']))
+        story.append(Spacer(1, 10))
+        story.append(Paragraph(f"<font color='{risk_color.hexval()}'>Risk Level: {risk_level}</font>", styles['Normal']))
+        story.append(Spacer(1, 10))
+        
+        # Fraud Indicators
+        if 'indicators' in analysis_data and analysis_data['indicators']:
+            story.append(Paragraph("Detected Fraud Indicators", styles['Heading2']))
+            story.append(Spacer(1, 10))
+            
+            for indicator in analysis_data['indicators']:
+                story.append(Paragraph(f"• {indicator}", styles['Normal']))
+            
+            story.append(Spacer(1, 20))
+        
+        # Recommendations
+        story.append(Paragraph("Recommendations", styles['Heading2']))
+        story.append(Spacer(1, 10))
+        
+        if analysis.risk_score >= 7:
+            recommendations = [
+                "Immediately cease any financial transactions related to this content",
+                "Report this content to relevant authorities (SEBI, police)",
+                "Verify all claims through official channels",
+                "Consult with registered financial advisors before making decisions"
+            ]
+        elif analysis.risk_score >= 4:
+            recommendations = [
+                "Exercise extreme caution with this content",
+                "Verify all information through independent sources",
+                "Check advisor credentials through SEBI database",
+                "Consider seeking second opinion from registered advisors"
+            ]
+        else:
+            recommendations = [
+                "Content appears relatively safe but remain vigilant",
+                "Always verify investment opportunities independently",
+                "Ensure any advisors are SEBI registered",
+                "Never invest more than you can afford to lose"
+            ]
+        
+        for rec in recommendations:
+            story.append(Paragraph(f"• {rec}", styles['Normal']))
+        
+        story.append(Spacer(1, 30))
+        
+        # Footer
+        footer_style = ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.grey,
+            alignment=1
+        )
+        
+        story.append(Paragraph("Generated by InvestGuard AI - Investment Fraud Prevention Platform", footer_style))
+        story.append(Paragraph("This report is for informational purposes only. Always consult qualified professionals.", footer_style))
+        
+        # Build PDF
+        doc.build(story)
+        
+        # Prepare file for download
+        buffer.seek(0)
+        
+        filename = f"fraud_analysis_report_{content_hash[:8]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        print(f"PDF Export Error: {e}")
+        flash('Failed to export PDF. Please try again.', 'error')
+        return redirect(url_for('analyzer'))
 
 @app.route('/api/social-media-feed')
 def api_social_media_feed():

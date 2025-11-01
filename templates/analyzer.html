@@ -101,10 +101,10 @@
                     <span class="badge bg-info me-2">
                         Processed in {{ "%.2f"|format(processing_time) }}s
                     </span>
-                    <button class="btn btn-sm btn-outline-primary" onclick="exportResults()">
+                    <a href="{{ url_for('export_analysis_pdf', content_hash=content_hash) }}" class="btn btn-sm btn-outline-primary" target="_blank">
                         <i data-feather="download" class="me-1"></i>
-                        Export
-                    </button>
+                        Export PDF
+                    </a>
                 </div>
             </div>
             <div class="card-body">
