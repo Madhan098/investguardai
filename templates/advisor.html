@@ -27,7 +27,13 @@
                 </h5>
             </div>
             <div class="card-body">
-                <form method="POST">
+                <!-- Real-time SEBI Database Verification -->
+                <div class="alert alert-info mb-3">
+                    <i data-feather="database" class="me-2"></i>
+                    <strong>Live SEBI Database Connection:</strong> This verification connects directly to SEBI's official database for real-time advisor status.
+                </div>
+                
+                <form id="advisorVerificationForm">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="license_number" class="form-label">
@@ -45,7 +51,7 @@
                                 Advisor Name
                                 <span class="text-muted">(Alternative)</span>
                             </label>
-                            <input type="text" class="form-control" id="name" name="name" 
+                            <input type="text" class="form-control" id="advisor_name" name="advisor_name" 
                                 placeholder="e.g., John Doe" value="{{ name if name }}">
                             <div class="form-text">
                                 Full name as registered with SEBI
@@ -55,9 +61,9 @@
                     
                     <div class="row">
                         <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="verifyBtn">
                                 <i data-feather="shield-check" class="me-2"></i>
-                                Verify Advisor
+                                Verify Against SEBI Database
                             </button>
                             <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearForm()">
                                 <i data-feather="x" class="me-2"></i>
@@ -66,6 +72,11 @@
                         </div>
                     </div>
                 </form>
+                
+                <!-- Verification Results -->
+                <div id="verificationResults" class="mt-4" style="display: none;">
+                    <!-- Results will be populated here -->
+                </div>
             </div>
         </div>
     </div>
@@ -280,5 +291,189 @@
         }
         e.target.value = value;
     });
+
+    // Real-time SEBI Database Verification
+    document.getElementById('advisorVerificationForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const licenseNumber = document.getElementById('license_number').value.trim();
+        const advisorName = document.getElementById('advisor_name').value.trim();
+        const verifyBtn = document.getElementById('verifyBtn');
+        const resultsDiv = document.getElementById('verificationResults');
+        
+        if (!licenseNumber && !advisorName) {
+            alert('Please provide either license number or advisor name');
+            return;
+        }
+        
+        // Show loading state
+        verifyBtn.innerHTML = '<i data-feather="loader" class="me-2"></i>Verifying with SEBI Database...';
+        verifyBtn.disabled = true;
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Verifying with SEBI database...</span>
+                </div>
+                <p class="mt-2">Connecting to SEBI Official Database...</p>
+            </div>
+        `;
+        
+        try {
+            const response = await fetch('/api/sebi/verify-advisor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    license_number: licenseNumber,
+                    advisor_name: advisorName
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.verification_result) {
+                displayVerificationResults(data.verification_result);
+            } else {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i data-feather="x-circle" class="me-2"></i>
+                        Verification failed: ${data.error || 'Unknown error'}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Verification error:', error);
+            resultsDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i data-feather="x-circle" class="me-2"></i>
+                    Error connecting to SEBI database. Please try again.
+                </div>
+            `;
+        } finally {
+            // Reset button
+            verifyBtn.innerHTML = '<i data-feather="search" class="me-2"></i>Verify Against SEBI Database';
+            verifyBtn.disabled = false;
+            feather.replace();
+        }
+    });
+    
+    function displayVerificationResults(result) {
+        const resultsDiv = document.getElementById('verificationResults');
+        
+        if (result.found) {
+            const advisor = result.advisor_details;
+            const statusClass = advisor.status === 'active' ? 'success' : 
+                              advisor.status === 'suspended' ? 'warning' : 'danger';
+            const statusIcon = advisor.status === 'active' ? 'check-circle' : 
+                              advisor.status === 'suspended' ? 'alert-triangle' : 'x-circle';
+            
+            resultsDiv.innerHTML = `
+                <div class="card border-${statusClass}">
+                    <div class="card-header bg-${statusClass} text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i data-feather="${statusIcon}" class="me-2"></i>
+                                SEBI Database Verification Result
+                            </h6>
+                            <span class="badge bg-light text-dark">
+                                ${result.verification_confidence.toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        ${result.success ? `
+                            <div class="alert alert-success">
+                                <i data-feather="check-circle" class="me-2"></i>
+                                ${result.success}
+                            </div>
+                        ` : ''}
+                        
+                        ${result.warning ? `
+                            <div class="alert alert-${statusClass}">
+                                <i data-feather="alert-triangle" class="me-2"></i>
+                                ${result.warning}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Advisor Information</h6>
+                                <p><strong>Name:</strong> ${advisor.name}</p>
+                                <p><strong>License Number:</strong> ${advisor.license_number}</p>
+                                <p><strong>Firm:</strong> ${advisor.firm_name}</p>
+                                <p><strong>Status:</strong> 
+                                    <span class="badge bg-${statusClass}">${advisor.status.toUpperCase()}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Contact Details</h6>
+                                <p><strong>Email:</strong> ${advisor.email}</p>
+                                <p><strong>Phone:</strong> ${advisor.phone}</p>
+                                <p><strong>Address:</strong> ${advisor.address}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6 class="fw-bold">Registration Details</h6>
+                                <p><strong>Registration Date:</strong> ${advisor.registration_date}</p>
+                                <p><strong>Validity:</strong> ${advisor.validity}</p>
+                                <p><strong>Specializations:</strong> ${advisor.specializations.join(', ')}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <a href="${advisor.sebi_website_url}" target="_blank" class="btn btn-outline-primary">
+                                    <i data-feather="external-link" class="me-2"></i>
+                                    View on SEBI Portal
+                                </a>
+                                <small class="text-muted d-block mt-2">
+                                    <i data-feather="clock" class="me-1"></i>
+                                    Verified: ${result.last_updated} | Source: ${result.database_source}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            resultsDiv.innerHTML = `
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="mb-0">
+                            <i data-feather="x-circle" class="me-2"></i>
+                            Advisor Not Found in SEBI Database
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger">
+                            <i data-feather="alert-triangle" class="me-2"></i>
+                            ${result.warning}
+                        </div>
+                        <p><strong>Recommendation:</strong> ${result.recommendation}</p>
+                        <div class="alert alert-warning">
+                            <h6 class="fw-bold">Red Flags to Watch:</h6>
+                            <ul class="mb-0">
+                                <li>No SEBI registration number provided</li>
+                                <li>Advisor not found in SEBI database</li>
+                                <li>Promises of guaranteed returns</li>
+                                <li>Pressure to invest immediately</li>
+                                <li>Unverified contact information</li>
+                            </ul>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            <i data-feather="clock" class="me-1"></i>
+                            Verified: ${result.last_updated} | Source: ${result.database_source}
+                        </small>
+                    </div>
+                </div>
+            `;
+        }
+        
+        feather.replace();
+    }
 </script>
 {% endblock %}

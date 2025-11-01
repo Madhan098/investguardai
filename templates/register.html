@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Register - InvestGuard AI{% endblock %}
+
+{% block content %}
+<!-- Professional Registration Section -->
+<section class="py-5" style="min-height: 100vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <div class="card-ultra">
+                    <div class="card-body p-5">
+                        <!-- Registration Header -->
+                        <div class="text-center mb-4">
+                            <div class="registration-icon mb-3">
+                                <i class="fas fa-user-plus text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h2 class="fw-bold text-gradient mb-2">Create Your Account</h2>
+                            <p class="text-muted">Join InvestGuard AI and protect your investments</p>
+                        </div>
+
+                        <!-- Registration Form -->
+                        <form method="POST" action="{{ url_for('register') }}" id="registrationForm">
+                            <!-- User Type Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Account Type</label>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="user_type" id="normal_user" value="normal" checked>
+                                            <label class="form-check-label" for="normal_user">
+                                                <i class="fas fa-user me-2"></i>Individual Investor
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="user_type" id="advisor" value="advisor">
+                                            <label class="form-check-label" for="advisor">
+                                                <i class="fas fa-chart-line me-2"></i>SEBI Advisor
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Personal Information -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="first_name" class="form-label fw-semibold">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="last_name" class="form-label fw-semibold">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-semibold">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                                <div class="form-text">We'll use this to send you important updates</div>
+                            </div>
+
+                            <!-- SEBI ID (for advisors only) -->
+                            <div class="mb-4" id="sebi_id_section" style="display: none;">
+                                <label for="sebi_id" class="form-label fw-semibold">SEBI Registration ID</label>
+                                <input type="text" class="form-control" id="sebi_id" name="sebi_id" placeholder="Enter your SEBI registration number">
+                                <div class="form-text">Required for SEBI registered advisors</div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold">Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Must be at least 8 characters long</div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-4">
+                                <label for="confirm_password" class="form-label fw-semibold">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            </div>
+
+                            <!-- Terms and Conditions -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                                    <label class="form-check-label" for="terms">
+                                        I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-hero">
+                                    <i class="fas fa-user-plus me-2"></i>Create Account
+                                </button>
+                            </div>
+
+                            <!-- Login Link -->
+                            <div class="text-center">
+                                <p class="mb-0">Already have an account? 
+                                    <a href="{{ url_for('login') }}" class="text-primary fw-semibold">Sign In</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Professional Registration Form JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // User type selection handler
+        const userTypeRadios = document.querySelectorAll('input[name="user_type"]');
+        const sebiIdSection = document.getElementById('sebi_id_section');
+        const sebiIdInput = document.getElementById('sebi_id');
+
+        userTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'advisor') {
+                    sebiIdSection.style.display = 'block';
+                    sebiIdInput.required = true;
+                } else {
+                    sebiIdSection.style.display = 'none';
+                    sebiIdInput.required = false;
+                    sebiIdInput.value = '';
+                }
+            });
+        });
+
+        // Password toggle functionality
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
+        // Form validation
+        const form = document.getElementById('registrationForm');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+
+        confirmPassword.addEventListener('input', function() {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('Passwords do not match');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        });
+
+        password.addEventListener('input', function() {
+            if (this.value.length < 8) {
+                this.setCustomValidity('Password must be at least 8 characters long');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Professional form submission
+        form.addEventListener('submit', function(e) {
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+            submitBtn.disabled = true;
+
+            // Let the form submit naturally - the server will handle the redirect
+            // The form will be submitted to the server and the server will redirect to dashboard
+        });
+
+        // Professional notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    });
+</script>
+{% endblock %}

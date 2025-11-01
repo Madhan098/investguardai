@@ -1,12 +1,13 @@
 from datetime import datetime
-from app import db
-from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
-from flask_login import UserMixin
+# Removed Flask-Dance and Flask-Login dependencies
 from sqlalchemy import UniqueConstraint
 
+# Import db from app - this will work since db is defined before models is imported
+from app import db
 
-# Authentication Models (Required for Replit Auth)
-class User(UserMixin, db.Model):
+
+# Authentication Models (Simplified for local development)
+class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String, primary_key=True)
     email = db.Column(db.String, unique=True, nullable=True)
@@ -20,17 +21,7 @@ class User(UserMixin, db.Model):
                            onupdate=datetime.now)
 
 
-class OAuth(OAuthConsumerMixin, db.Model):
-    user_id = db.Column(db.String, db.ForeignKey(User.id))
-    browser_session_key = db.Column(db.String, nullable=False)
-    user = db.relationship(User)
-
-    __table_args__ = (UniqueConstraint(
-        'user_id',
-        'browser_session_key',
-        'provider',
-        name='uq_user_browser_session_key_provider',
-    ),)
+# OAuth model removed - using simple session-based authentication
 
 
 # Fraud Detection Models

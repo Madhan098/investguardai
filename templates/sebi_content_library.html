@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEBI Content Library - InvestGuard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sebi-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+        .content-card {
+            transition: transform 0.2s ease-in-out;
+            border-left: 4px solid #1e3c72;
+        }
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .sebi-badge {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #1e3c72;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .content-section {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- SEBI Header -->
+    <div class="sebi-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-3">
+                        <i class="fas fa-landmark me-3"></i>
+                        SEBI Content Library
+                    </h1>
+                    <p class="lead mb-0">
+                        Real-time content from <strong>SEBI Official Website</strong> 
+                        <a href="https://www.sebi.gov.in/" target="_blank" class="text-white">
+                            <i class="fas fa-external-link-alt ms-1"></i>
+                        </a>
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="refreshContent()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Refresh Content
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statsContainer">
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-1" id="totalUpdates">-</h3>
+                        <p class="mb-0">SEBI Updates</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-1" id="totalDepartments">-</h3>
+                        <p class="mb-0">Departments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-1" id="totalAnnouncements">-</h3>
+                        <p class="mb-0">Announcements</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center py-5">
+            <div class="loading-spinner mb-3"></div>
+            <h5>Loading SEBI Content...</h5>
+            <p class="text-muted">Fetching latest content from SEBI official website</p>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="contentSections" style="display: none;">
+            
+            <!-- SEBI Updates Section -->
+            <div class="content-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-newspaper text-primary me-2"></i>
+                        Latest SEBI Updates
+                    </h3>
+                    <span class="sebi-badge" id="updatesCount">0 items</span>
+                </div>
+                <div id="updatesContent" class="row">
+                    <!-- Updates will be loaded here -->
+                </div>
+            </div>
+
+            <!-- SEBI Departments Section -->
+            <div class="content-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-building text-info me-2"></i>
+                        SEBI Departments
+                    </h3>
+                    <span class="sebi-badge" id="departmentsCount">0 items</span>
+                </div>
+                <div id="departmentsContent" class="row">
+                    <!-- Departments will be loaded here -->
+                </div>
+            </div>
+
+            <!-- SEBI Announcements Section -->
+            <div class="content-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-bullhorn text-warning me-2"></i>
+                        SEBI Announcements
+                    </h3>
+                    <span class="sebi-badge" id="announcementsCount">0 items</span>
+                </div>
+                <div id="announcementsContent" class="row">
+                    <!-- Announcements will be loaded here -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="alert alert-danger" style="display: none;">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Error Loading Content</h5>
+            <p id="errorText">Unable to load content from SEBI website. Please try again later.</p>
+            <button class="btn btn-outline-danger" onclick="refreshContent()">
+                <i class="fas fa-retry me-2"></i>Retry
+            </button>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let contentData = null;
+
+        // Load content on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Loading SEBI Content Library...');
+            loadSEBIContent();
+        });
+
+        async function loadSEBIContent() {
+            try {
+                showLoading();
+                
+                const response = await fetch('/api/sebi/content-library');
+                const data = await response.json();
+                
+                if (data.success) {
+                    contentData = data;
+                    displayContent(data);
+                    hideLoading();
+                } else {
+                    showError(data.error || 'Failed to load SEBI content');
+                }
+            } catch (error) {
+                console.error('Error loading SEBI content:', error);
+                showError('Network error: ' + error.message);
+            }
+        }
+
+        function displayContent(data) {
+            // Update statistics
+            document.getElementById('totalUpdates').textContent = data.statistics.total_updates;
+            document.getElementById('totalDepartments').textContent = data.statistics.total_departments;
+            document.getElementById('totalAnnouncements').textContent = data.statistics.total_announcements;
+
+            // Update counts
+            document.getElementById('updatesCount').textContent = `${data.statistics.total_updates} items`;
+            document.getElementById('departmentsCount').textContent = `${data.statistics.total_departments} items`;
+            document.getElementById('announcementsCount').textContent = `${data.statistics.total_announcements} items`;
+
+            // Display updates
+            displayUpdates(data.content.updates);
+            
+            // Display departments
+            displayDepartments(data.content.departments);
+            
+            // Display announcements
+            displayAnnouncements(data.content.announcements);
+
+            // Show content sections
+            document.getElementById('contentSections').style.display = 'block';
+        }
+
+        function displayUpdates(updates) {
+            const container = document.getElementById('updatesContent');
+            
+            if (updates.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No updates available at the moment
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = updates.map(update => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card content-card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                                <i class="fas fa-file-alt me-2"></i>
+                                ${update.title.substring(0, 60)}${update.title.length > 60 ? '...' : ''}
+                            </h6>
+                            <p class="card-text small text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                ${update.date}
+                            </p>
+                            <p class="card-text small">
+                                <span class="badge bg-primary">${update.type}</span>
+                                <span class="badge bg-secondary ms-1">${update.source}</span>
+                            </p>
+                            <a href="${update.url}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayDepartments(departments) {
+            const container = document.getElementById('departmentsContent');
+            
+            if (departments.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No departments information available
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = departments.map(dept => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card content-card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-info">
+                                <i class="fas fa-building me-2"></i>
+                                ${dept.name}
+                            </h6>
+                            <p class="card-text small text-muted">
+                                ${dept.description.substring(0, 100)}${dept.description.length > 100 ? '...' : ''}
+                            </p>
+                            <a href="${dept.url}" target="_blank" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayAnnouncements(announcements) {
+            const container = document.getElementById('announcementsContent');
+            
+            if (announcements.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No announcements available at the moment
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = announcements.map(announcement => `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card content-card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-warning">
+                                <i class="fas fa-bullhorn me-2"></i>
+                                ${announcement.title.substring(0, 60)}${announcement.title.length > 60 ? '...' : ''}
+                            </h6>
+                            <p class="card-text small text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                ${announcement.date}
+                            </p>
+                            <p class="card-text small">
+                                <span class="badge bg-warning">${announcement.type}</span>
+                            </p>
+                            <a href="${announcement.url}" target="_blank" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showLoading() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('contentSections').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('contentSections').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('errorText').textContent = message;
+        }
+
+        function refreshContent() {
+            console.log('🔄 Refreshing SEBI content...');
+            loadSEBIContent();
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            console.log('🔄 Auto-refreshing SEBI content...');
+            loadSEBIContent();
+        }, 300000); // 5 minutes
+    </script>
+</body>
+</html>

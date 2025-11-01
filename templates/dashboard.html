@@ -1,207 +1,433 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - FraudShield{% endblock %}
+{% block title %}Dashboard - InvestGuard AI{% endblock %}
 
 {% block content %}
-<!-- Dashboard Header -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1>
-                <i data-feather="activity" class="me-2"></i>
-                Real-time Dashboard
-            </h1>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary" onclick="refreshDashboard()">
-                    <i data-feather="refresh-cw" class="me-1"></i>
-                    Refresh
+<!-- Professional Dashboard Header -->
+<section class="dashboard-header py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center">
+                    <div class="dashboard-icon me-3">
+                        <i class="fas fa-chart-line text-primary"></i>
+                    </div>
+                    <div>
+                        <h1 class="display-6 fw-bold mb-1">Real-time Dashboard</h1>
+                        <p class="text-muted mb-0">Live monitoring and analysis of investment fraud threats</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-flex gap-2 justify-content-lg-end">
+                    <button class="btn btn-primary" onclick="refreshDashboard()" data-aos="fade-left">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Data
+                    </button>
+                <button class="btn btn-outline-success btn-sm" onclick="generateFraudPreventionContent()" data-aos="fade-left" data-aos-delay="100">
+                    <i class="fas fa-shield-alt me-1"></i>AI Fraud Guide
                 </button>
-                <span class="badge bg-success">Live</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Key Metrics -->
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <div class="mb-2">
-                    <i data-feather="alert-triangle" class="text-warning" width="32" height="32"></i>
-                </div>
-                <h3 class="mb-1" id="total-alerts">{{ recent_alerts|length }}</h3>
-                <p class="text-muted mb-0">Active Alerts</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <div class="mb-2">
-                    <i data-feather="trending-up" class="text-danger" width="32" height="32"></i>
-                </div>
-                <h3 class="mb-1" id="high-risk-count">{{ risk_distribution.high }}</h3>
-                <p class="text-muted mb-0">High Risk</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <div class="mb-2">
-                    <i data-feather="shield" class="text-info" width="32" height="32"></i>
-                </div>
-                <h3 class="mb-1" id="medium-risk-count">{{ risk_distribution.medium }}</h3>
-                <p class="text-muted mb-0">Medium Risk</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body text-center">
-                <div class="mb-2">
-                    <i data-feather="check-circle" class="text-success" width="32" height="32"></i>
-                </div>
-                <h3 class="mb-1" id="low-risk-count">{{ risk_distribution.low }}</h3>
-                <p class="text-muted mb-0">Low Risk</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Charts Row -->
-<div class="row mb-4">
-    <div class="col-md-8 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i data-feather="bar-chart-2" class="me-2"></i>
-                    Weekly Fraud Trend
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="trendChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i data-feather="pie-chart" class="me-2"></i>
-                    Risk Distribution
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="riskChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Alerts -->
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i data-feather="alert-circle" class="me-2"></i>
-                    Recent Fraud Alerts
-                </h5>
-                <button class="btn btn-sm btn-outline-primary" onclick="loadAlerts()">
-                    <i data-feather="refresh-cw" class="me-1"></i>
-                    Refresh Alerts
+                <button class="btn btn-outline-info btn-sm" onclick="generateSEBIGuidelinesContent()" data-aos="fade-left" data-aos-delay="200">
+                    <i class="fas fa-book me-1"></i>AI SEBI Guide
                 </button>
+                <a href="/whatsapp-scanner" class="btn btn-outline-warning btn-sm" data-aos="fade-left" data-aos-delay="300">
+                    <i class="fab fa-whatsapp me-1"></i>WhatsApp Scanner
+                </a>
+                    <div class="status-indicator-container" data-aos="fade-left" data-aos-delay="300">
+                        <div class="status-indicator status-online me-2"></div>
+                        <span class="badge bg-success">Live Monitoring</span>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div id="alerts-container">
-                    {% if recent_alerts %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Risk Score</th>
-                                        <th>Severity</th>
-                                        <th>Content Type</th>
-                                        <th>Content Preview</th>
-                                        <th>Detected</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for alert in recent_alerts %}
-                                    <tr>
-                                        <td>
-                                            <span class="badge bg-{{ 'danger' if alert.risk_score >= 8 else 'warning' if alert.risk_score >= 6 else 'info' }}">
-                                                {{ "%.1f"|format(alert.risk_score) }}/10
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }}">
-                                                {{ alert.severity.title() }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <i data-feather="{{ 'file-text' if alert.content_type == 'text' else 'link' if alert.content_type == 'url' else 'image' }}" class="me-1"></i>
-                                            {{ alert.content_type.title() }}
-                                        </td>
-                                        <td>
-                                            <span class="text-truncate d-inline-block" style="max-width: 300px;">
+        </div>
+    </div>
+</section>
+
+<!-- SEBI Live Updates Section -->
+<section class="py-3">
+    <div class="container">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-broadcast-tower me-2"></i>
+                                Live SEBI Updates
+                            </h6>
+                            <button class="btn btn-dark btn-sm" onclick="refreshSEBIUpdates()">
+                                <i class="fas fa-sync-alt me-1"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body py-2">
+                        <div id="sebiUpdates" class="row">
+                            <!-- SEBI updates will be loaded here -->
+                            <div class="col-12 text-center">
+                                <div class="spinner-border spinner-border-sm text-warning" role="status">
+                                    <span class="visually-hidden">Loading SEBI updates...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Professional Key Metrics -->
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="dashboard-card stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-warning bg-opacity-10 rounded-3 p-3 me-3">
+                            <i class="fas fa-exclamation-triangle text-warning fs-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="stat-number mb-1" id="total-alerts">{{ recent_alerts|length }}</h3>
+                            <p class="text-muted mb-0">Active Alerts</p>
+                        </div>
+                    </div>
+                    <div class="stat-trend mt-2">
+                        <small class="text-warning">
+                            <i class="fas fa-arrow-up me-1"></i>+12% from yesterday
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="dashboard-card stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-danger bg-opacity-10 rounded-3 p-3 me-3">
+                            <i class="fas fa-fire text-danger fs-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="stat-number text-danger mb-1" id="high-risk-count">{{ risk_distribution.high }}</h3>
+                            <p class="text-muted mb-0">High Risk</p>
+                        </div>
+                    </div>
+                    <div class="stat-trend mt-2">
+                        <small class="text-danger">
+                            <i class="fas fa-arrow-up me-1"></i>+8% from yesterday
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="dashboard-card stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-info bg-opacity-10 rounded-3 p-3 me-3">
+                            <i class="fas fa-shield-alt text-info fs-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="stat-number text-info mb-1" id="medium-risk-count">{{ risk_distribution.medium }}</h3>
+                            <p class="text-muted mb-0">Medium Risk</p>
+                        </div>
+                    </div>
+                    <div class="stat-trend mt-2">
+                        <small class="text-info">
+                            <i class="fas fa-minus me-1"></i>No change
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="dashboard-card stat-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-success bg-opacity-10 rounded-3 p-3 me-3">
+                            <i class="fas fa-check-circle text-success fs-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="stat-number text-success mb-1" id="low-risk-count">{{ risk_distribution.low }}</h3>
+                            <p class="text-muted mb-0">Low Risk</p>
+                        </div>
+                    </div>
+                    <div class="stat-trend mt-2">
+                        <small class="text-success">
+                            <i class="fas fa-arrow-down me-1"></i>-5% from yesterday
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Professional Charts Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-8" data-aos="fade-right" data-aos-delay="100">
+                <div class="chart-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            Weekly Fraud Trend Analysis
+                        </h5>
+                        <div class="chart-controls">
+                            <button class="btn btn-sm btn-outline-primary me-2">7D</button>
+                            <button class="btn btn-sm btn-primary">30D</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="trendChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4" data-aos="fade-left" data-aos-delay="200">
+                <div class="chart-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-pie-chart text-info me-2"></i>
+                            Risk Distribution
+                        </h5>
+                        <div class="chart-legend">
+                            <span class="legend-dot bg-success me-1"></span>
+                            <span class="legend-dot bg-warning me-1"></span>
+                            <span class="legend-dot bg-danger"></span>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="riskChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Professional Recent Alerts Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Recent Fraud Alerts
+                    </h5>
+                    <p class="text-muted mb-0">Latest threats detected by our AI system</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="loadAlerts()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                </div>
+            </div>
+            
+            <div id="alerts-container">
+                {% if recent_alerts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-semibold">Risk Score</th>
+                                    <th class="fw-semibold">Severity</th>
+                                    <th class="fw-semibold">Content Type</th>
+                                    <th class="fw-semibold">Content Preview</th>
+                                    <th class="fw-semibold">Detected</th>
+                                    <th class="fw-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in recent_alerts %}
+                                <tr class="alert-row" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="risk-score-circle bg-{{ 'danger' if alert.risk_score >= 8 else 'warning' if alert.risk_score >= 6 else 'info' }} me-2">
+                                                {{ "%.1f"|format(alert.risk_score) }}
+                                            </div>
+                                            <span class="small text-muted">/10</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }} px-3 py-2">
+                                            {{ alert.severity.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-{{ 'file-text' if alert.content_type == 'text' else 'link' if alert.content_type == 'url' else 'image' }} text-muted me-2"></i>
+                                            <span class="fw-medium">{{ alert.content_type.title() }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="content-preview">
+                                            <span class="text-truncate d-inline-block" style="max-width: 300px;" title="{{ alert.content }}">
                                                 {{ alert.content[:100] }}{% if alert.content|length > 100 %}...{% endif %}
                                             </span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">
-                                                {{ alert.created_at.strftime('%m/%d %H:%M') }}
-                                            </small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <button class="btn btn-outline-primary" onclick="viewAlert({{ alert.id }})">
-                                                    <i data-feather="eye" width="14" height="14"></i>
-                                                </button>
-                                                <button class="btn btn-outline-success" onclick="resolveAlert({{ alert.id }})">
-                                                    <i data-feather="check" width="14" height="14"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <small class="text-muted">{{ alert.created_at.strftime('%m/%d %H:%M') }}</small>
+                                            <small class="text-success">{{ alert.source_platform.title() }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewAlert({{ alert.id }})" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="resolveAlert({{ alert.id }})" title="Mark Resolved">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="dismissAlert({{ alert.id }})" title="Dismiss">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5" data-aos="fade-up">
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle text-success mb-3" style="font-size: 4rem;"></i>
+                            <h5 class="fw-bold">No Active Alerts</h5>
+                            <p class="text-muted">The system is actively monitoring for fraudulent activity.</p>
+                            <button class="btn btn-primary" onclick="refreshDashboard()">
+                                <i class="fas fa-sync-alt me-2"></i>Refresh Status
+                            </button>
                         </div>
-                    {% else %}
-                        <div class="text-center text-muted py-5">
-                            <i data-feather="check-circle" width="64" height="64" class="mb-3"></i>
-                            <h5>No Active Alerts</h5>
-                            <p>The system is actively monitoring for fraudulent activity.</p>
-                        </div>
-                    {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Live Market Data Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        Live Market Data
+                        <span class="badge bg-success ms-2">LIVE</span>
+                    </h5>
+                    <p class="text-muted mb-0">Real-time NSE/BSE market information</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="realtimeDashboard.refreshData()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div id="marketData">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading market data...</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Alert Detail Modal -->
-<div class="modal fade" id="alertModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<!-- Live Fraud Alerts Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Live Fraud Alerts
+                        <span class="badge bg-danger ms-2">REAL-TIME</span>
+                    </h5>
+                    <p class="text-muted mb-0">Latest fraud cases detected by our AI system</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-warning btn-sm" onclick="realtimeDashboard.loadFraudAlerts()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div id="fraudAlerts">
+                <div class="text-center">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading fraud alerts...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SEBI Updates Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="fas fa-newspaper text-info me-2"></i>
+                        Latest SEBI Updates
+                        <span class="badge bg-success ms-2">LIVE</span>
+                    </h5>
+                    <p class="text-muted mb-0">Recent regulatory announcements and circulars</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-info btn-sm" onclick="realtimeDashboard.loadSEBIUpdates()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div id="sebiUpdates">
+                <div class="text-center">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Loading SEBI updates...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Professional Alert Detail Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Alert Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="alertModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Alert Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="alert-details">
-                <!-- Alert details will be loaded here -->
+                <div class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="text-muted mt-2">Loading alert details...</p>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" onclick="resolveCurrentAlert()">Mark as Resolved</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Close
+                </button>
+                <button type="button" class="btn btn-success" onclick="resolveCurrentAlert()">
+                    <i class="fas fa-check me-2"></i>Mark as Resolved
+                </button>
+                <button type="button" class="btn btn-danger" onclick="dismissCurrentAlert()">
+                    <i class="fas fa-trash me-2"></i>Dismiss Alert
+                </button>
             </div>
         </div>
     </div>
@@ -209,152 +435,464 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<!-- SocketIO for WebSocket connections -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+
+<!-- Real-time Dashboard -->
+<script src="{{ url_for('static', filename='js/realtime-dashboard.js') }}"></script>
+
+<!-- Real-time Alerts System -->
+<script src="{{ url_for('static', filename='js/realtime-alerts.js') }}"></script>
+
+<!-- WebSocket Client -->
+<script src="{{ url_for('static', filename='js/websocket-client.js') }}"></script>
+
+<!-- Advanced Notification System -->
+<script src="{{ url_for('static', filename='js/notification-system.js') }}"></script>
+
+<!-- Alert Preferences Management -->
+<script src="{{ url_for('static', filename='js/alert-preferences.js') }}"></script>
+
+<!-- AI Content Generator -->
+<script src="{{ url_for('static', filename='js/ai-content-generator.js') }}"></script>
+
 <script>
-    // Initialize charts
+    // Professional Dashboard JavaScript
     document.addEventListener('DOMContentLoaded', function() {
-        // Trend Chart
-        const trendCtx = document.getElementById('trendChart').getContext('2d');
-        const trendData = {{ daily_alerts | tojson }};
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+
+        // Professional Chart Initialization
+        initializeCharts();
         
-        new Chart(trendCtx, {
-            type: 'line',
-            data: {
-                labels: trendData.map(d => d.date),
-                datasets: [{
-                    label: 'Fraud Alerts',
-                    data: trendData.map(d => d.count),
-                    borderColor: 'rgb(54, 162, 235)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                    tension: 0.1,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        // Professional Dashboard Functions
+        function initializeCharts() {
+            // Trend Chart with professional styling
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            const trendData = {{ daily_alerts | tojson }};
+            
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendData.map(d => d.date),
+                    datasets: [{
+                        label: 'Fraud Alerts',
+                        data: trendData.map(d => d.count),
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#2563eb',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                color: '#6b7280'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
                         }
                     }
                 }
-            }
-        });
-        
-        // Risk Distribution Chart
-        const riskCtx = document.getElementById('riskChart').getContext('2d');
-        const riskData = {{ risk_distribution | tojson }};
-        
-        new Chart(riskCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Low Risk', 'Medium Risk', 'High Risk'],
-                datasets: [{
-                    data: [riskData.low, riskData.medium, riskData.high],
-                    backgroundColor: [
-                        'rgba(40, 167, 69, 0.8)',
-                        'rgba(255, 193, 7, 0.8)',
-                        'rgba(220, 53, 69, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(40, 167, 69, 1)',
-                        'rgba(255, 193, 7, 1)',
-                        'rgba(220, 53, 69, 1)'
-                    ],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+            });
+            
+            // Risk Distribution Chart with professional styling
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            const riskData = {{ risk_distribution | tojson }};
+            
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                    datasets: [{
+                        data: [riskData.low, riskData.medium, riskData.high],
+                        backgroundColor: [
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444'
+                        ],
+                        borderColor: [
+                            '#ffffff',
+                            '#ffffff',
+                            '#ffffff'
+                        ],
+                        borderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#2563eb',
+                            borderWidth: 1
+                        }
                     }
                 }
-            }
-        });
-        
-        // Real-time dashboard refresh functions
+            });
+        }
+
+        // Professional Dashboard Refresh Functions
         function refreshDashboardStats() {
             fetch('/api/dashboard/stats')
                 .then(response => response.json())
                 .then(data => {
-                    // Update stats cards using existing IDs
-                    document.getElementById('total-alerts').textContent = data.total_alerts;
-                    document.getElementById('high-risk-count').textContent = data.high_risk_alerts;
-                    document.getElementById('medium-risk-count').textContent = data.total_alerts - data.high_risk_alerts - data.active_alerts;
-                    document.getElementById('low-risk-count').textContent = data.active_alerts;
+                    // Animate number updates
+                    animateNumberUpdate('total-alerts', data.total_alerts);
+                    animateNumberUpdate('high-risk-count', data.high_risk_alerts);
+                    animateNumberUpdate('medium-risk-count', data.total_alerts - data.high_risk_alerts - data.active_alerts);
+                    animateNumberUpdate('low-risk-count', data.active_alerts);
                     
-                    // Update live indicator
+                    // Update timestamp
                     const now = new Date();
                     console.log('Dashboard refreshed at:', now.toLocaleTimeString());
                 })
                 .catch(error => console.error('Error fetching dashboard stats:', error));
         }
-        
+
+        function animateNumberUpdate(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                const currentValue = parseInt(element.textContent) || 0;
+                const increment = (newValue - currentValue) / 20;
+                let current = currentValue;
+                
+                const animation = setInterval(() => {
+                    current += increment;
+                    if ((increment > 0 && current >= newValue) || (increment < 0 && current <= newValue)) {
+                        current = newValue;
+                        clearInterval(animation);
+                    }
+                    element.textContent = Math.round(current);
+                }, 50);
+            }
+        }
+
         function refreshRecentAlerts() {
             fetch('/api/dashboard/recent-alerts')
                 .then(response => response.json())
                 .then(alerts => {
-                    // Update alerts table if it exists
                     const alertsTable = document.querySelector('.table tbody');
                     if (alertsTable && alerts.length > 0) {
-                        const updatedRows = alerts.slice(0, 5).map(alert => {
+                        const updatedRows = alerts.slice(0, 10).map((alert, index) => {
                             const severityClass = alert.severity === 'critical' ? 'danger' : 
                                                 alert.severity === 'high' ? 'warning' : 'info';
                             
                             return `
-                                <tr class="alert-new">
+                                <tr class="alert-row" data-aos="fade-up" data-aos-delay="${index * 50}">
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <div class="risk-score-circle bg-${severityClass}" style="width: 40px; height: 40px; font-size: 0.8rem;">
+                                            <div class="risk-score-circle bg-${severityClass} me-2">
                                                 ${alert.risk_score.toFixed(1)}
                                             </div>
+                                            <span class="small text-muted">/10</span>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-${severityClass}">${alert.severity.toUpperCase()}</span>
+                                        <span class="badge bg-${severityClass} px-3 py-2">
+                                            ${alert.severity.toUpperCase()}
+                                        </span>
                                     </td>
                                     <td>
-                                        <div class="text-truncate" style="max-width: 300px;">
-                                            ${alert.content}
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-file-text text-muted me-2"></i>
+                                            <span class="fw-medium">${alert.content_type.toUpperCase()}</span>
                                         </div>
                                     </td>
                                     <td>
-                                        <small class="text-muted">${alert.created_at}</small>
+                                        <div class="content-preview">
+                                            <span class="text-truncate d-inline-block" style="max-width: 300px;" title="${alert.content}">
+                                                ${alert.content.substring(0, 100)}${alert.content.length > 100 ? '...' : ''}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-${alert.status === 'active' ? 'warning' : 'success'}">${alert.status}</span>
+                                        <div class="d-flex flex-column">
+                                            <small class="text-muted">${alert.created_at}</small>
+                                            <small class="text-success">${alert.source_platform || 'Unknown'}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewAlert(${alert.id})" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" onclick="resolveAlert(${alert.id})" title="Mark Resolved">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="dismissAlert(${alert.id})" title="Dismiss">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             `;
                         }).join('');
                         
                         alertsTable.innerHTML = updatedRows;
+                        
+                        // Reinitialize AOS for new elements
+                        AOS.refresh();
                     }
                 })
                 .catch(error => console.error('Error fetching recent alerts:', error));
         }
-        
-        function refreshDashboard() {
+
+        // Professional Alert Management Functions
+        window.viewAlert = function(alertId) {
+            const modal = new bootstrap.Modal(document.getElementById('alertModal'));
+            const modalBody = document.getElementById('alert-details');
+            
+            modalBody.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="text-muted mt-2">Loading alert details...</p>
+                </div>
+            `;
+            
+            modal.show();
+            
+            // Simulate loading alert details
+            setTimeout(() => {
+                modalBody.innerHTML = `
+                    <div class="alert-detail-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Alert Information</h6>
+                                <p><strong>ID:</strong> ${alertId}</p>
+                                <p><strong>Risk Score:</strong> <span class="badge bg-danger">8.5/10</span></p>
+                                <p><strong>Severity:</strong> <span class="badge bg-warning">High</span></p>
+                                <p><strong>Detected:</strong> ${new Date().toLocaleString()}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Content Analysis</h6>
+                                <p><strong>Type:</strong> Text Message</p>
+                                <p><strong>Platform:</strong> WhatsApp</p>
+                                <p><strong>Language:</strong> English</p>
+                                <p><strong>Confidence:</strong> 95%</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <h6 class="fw-bold">Content Preview</h6>
+                            <div class="alert alert-warning">
+                                This is a sample fraud alert content that would be displayed here...
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }, 1000);
+        };
+
+        window.resolveAlert = function(alertId) {
+            if (confirm('Are you sure you want to mark this alert as resolved?')) {
+                // Simulate API call
+                console.log('Resolving alert:', alertId);
+                // Show success message
+                showNotification('Alert resolved successfully', 'success');
+            }
+        };
+
+        window.dismissAlert = function(alertId) {
+            if (confirm('Are you sure you want to dismiss this alert?')) {
+                // Simulate API call
+                console.log('Dismissing alert:', alertId);
+                // Show success message
+                showNotification('Alert dismissed', 'info');
+            }
+        };
+
+        // Professional Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Professional Dashboard Refresh
+        window.refreshDashboard = function() {
+            showNotification('Refreshing dashboard data...', 'info');
             refreshDashboardStats();
             refreshRecentAlerts();
-        }
-        
-        // Auto-refresh every 10 seconds for real-time updates
-        setInterval(refreshDashboard, 10000);
+        };
+
+        // Auto-refresh every 30 seconds for real-time updates
+        setInterval(() => {
+            refreshDashboardStats();
+            refreshRecentAlerts();
+        }, 30000);
         
         // Initial refresh after page load
-        setTimeout(refreshDashboard, 2000);
+        setTimeout(() => {
+            refreshDashboardStats();
+            refreshRecentAlerts();
+            loadSEBIUpdates();
+        }, 2000);
     });
+
+    // SEBI Updates Management
+    async function loadSEBIUpdates() {
+        try {
+            const response = await fetch('/api/sebi/latest');
+            const data = await response.json();
+            
+            if (data.success) {
+                displaySEBIUpdates(data.announcements);
+            } else {
+                console.error('Failed to load SEBI updates:', data.error);
+                document.getElementById('sebiUpdates').innerHTML = `
+                    <div class="col-12 text-center">
+                        <small class="text-muted">Unable to load SEBI updates</small>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading SEBI updates:', error);
+            document.getElementById('sebiUpdates').innerHTML = `
+                <div class="col-12 text-center">
+                    <small class="text-muted">Error loading SEBI updates</small>
+                </div>
+            `;
+        }
+    }
+
+    function displaySEBIUpdates(announcements) {
+        const sebiUpdates = document.getElementById('sebiUpdates');
+        
+        if (announcements.length === 0) {
+            sebiUpdates.innerHTML = `
+                <div class="col-12 text-center">
+                    <small class="text-muted">No SEBI updates available</small>
+                </div>
+            `;
+            return;
+        }
+        
+        sebiUpdates.innerHTML = announcements.map(announcement => {
+            // Determine priority styling
+            const priorityClass = announcement.priority === 'critical' ? 'danger' : 
+                                announcement.priority === 'high' ? 'warning' : 
+                                announcement.priority === 'medium' ? 'info' : 'secondary';
+            
+            // Determine type icon
+            const typeIcon = announcement.type === 'circular' ? 'fas fa-file-alt' :
+                            announcement.type === 'notice' ? 'fas fa-bullhorn' :
+                            announcement.type === 'alert' ? 'fas fa-exclamation-triangle' :
+                            announcement.type === 'guidance' ? 'fas fa-lightbulb' :
+                            announcement.type === 'maintenance' ? 'fas fa-tools' : 'fas fa-info-circle';
+            
+            return `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border-${priorityClass} h-100">
+                        <div class="card-header bg-${priorityClass} text-white py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="${typeIcon} me-2"></i>
+                                    <span class="fw-bold small">${announcement.type.toUpperCase()}</span>
+                                </div>
+                                <span class="badge bg-light text-dark">${announcement.priority.toUpperCase()}</span>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <h6 class="card-title fw-bold mb-2">${announcement.title}</h6>
+                            <p class="card-text small text-muted mb-3">${announcement.summary}</p>
+                            
+                            <div class="row small mb-2">
+                                <div class="col-6">
+                                    <strong>Impact:</strong><br>
+                                    <span class="text-${priorityClass}">${announcement.impact}</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Deadline:</strong><br>
+                                    <span class="text-muted">${announcement.deadline}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    ${announcement.published_date}
+                                </small>
+                                <a href="${announcement.url}" target="_blank" class="btn btn-outline-${priorityClass} btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function refreshSEBIUpdates() {
+        document.getElementById('sebiUpdates').innerHTML = `
+            <div class="col-12 text-center">
+                <div class="spinner-border spinner-border-sm text-warning" role="status">
+                    <span class="visually-hidden">Loading SEBI updates...</span>
+                </div>
+            </div>
+        `;
+        loadSEBIUpdates();
+    }
 </script>
 {% endblock %}

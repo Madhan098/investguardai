@@ -1,12 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}InvestGuard AI - India's Comprehensive Investment Fraud Prevention Platform{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>{% block title %}InvestGuard AI - Advanced Investment Fraud Prevention Platform{% endblock %}</title>
     
-    <!-- Bootstrap CSS with Replit Dark Theme -->
-    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
@@ -14,104 +27,118 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Advanced AI-powered investment fraud prevention platform with real-time monitoring and SEBI compliance.">
+    <meta name="keywords" content="investment fraud, AI detection, SEBI compliance, financial security">
+    <meta name="author" content="InvestGuard AI">
     
     {% block head %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <!-- Professional Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
-                <i data-feather="shield" class="me-2"></i>
-                InvestGuard AI
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('index') }}">
+                <div class="brand-icon me-2">
+                    <i class="fas fa-shield-alt text-primary"></i>
+                </div>
+                <span class="heading-gradient">InvestGuard AI</span>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon">
+                    <i class="fas fa-bars"></i>
+                </span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">
-                            <i data-feather="home" class="me-1"></i>Home
+                            <i class="fas fa-home me-1"></i>Home
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('dashboard') }}">
-                            <i data-feather="activity" class="me-1"></i>Dashboard
+                            <i class="fas fa-chart-line me-1"></i>Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('analyzer') }}">
-                            <i data-feather="search" class="me-1"></i>Analyzer
+                            <i class="fas fa-search me-1"></i>Analyzer
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('advisor') }}">
-                            <i data-feather="user-check" class="me-1"></i>Advisor Check
+                            <i class="fas fa-user-check me-1"></i>Advisor Check
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('network') }}">
-                            <i data-feather="share-2" class="me-1"></i>Network
+                            <i class="fas fa-project-diagram me-1"></i>Network
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('reports') }}">
-                            <i data-feather="flag" class="me-1"></i>Reports
+                            <i class="fas fa-flag me-1"></i>Reports
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="educationDropdown" role="button" data-bs-toggle="dropdown">
-                            <i data-feather="book-open" class="me-1"></i>Education
+                            <i class="fas fa-graduation-cap me-1"></i>Education
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('education') }}">
-                                <i data-feather="play-circle" class="me-2"></i>Risk Simulator
+                                <i class="fas fa-play-circle me-2"></i>Risk Simulator
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('chatbot') }}">
-                                <i data-feather="message-circle" class="me-2"></i>AI Advisor Chat
+                                <i class="fas fa-robot me-2"></i>AI Advisor Chat
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('education_library') }}">
-                                <i data-feather="book" class="me-2"></i>Content Library
+                                <i class="fas fa-book me-2"></i>Content Library
                             </a></li>
                         </ul>
                     </li>
                 </ul>
                 
                 <div class="navbar-nav">
-                    <div class="nav-item">
-                        <span class="nav-link">
-                            <i data-feather="clock" class="me-1"></i>
+                    <div class="nav-item me-3">
+                        <span class="nav-link text-muted">
+                            <i class="fas fa-clock me-1"></i>
                             <span id="current-time"></span>
                         </span>
                     </div>
                     
-                    {% if current_user.is_authenticated %}
+                    {% if session.user_id %}
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                {% if current_user.profile_image_url %}
-                                    <img src="{{ current_user.profile_image_url }}" alt="Profile" class="rounded-circle me-2" width="24" height="24" style="object-fit: cover;">
-                                {% else %}
-                                    <i data-feather="user" class="me-2"></i>
-                                {% endif %}
-                                {{ current_user.first_name or 'User' }}
+                                <div class="user-avatar me-2">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <span class="fw-medium">{{ session.user_name or 'User' }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><span class="dropdown-item-text">{{ current_user.email or 'No email' }}</span></li>
+                                <li><span class="dropdown-item-text text-muted">{{ session.user_id }}</span></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('replit_auth.logout') }}">
-                                    <i data-feather="log-out" class="me-2"></i>Logout
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
                                 </a></li>
                             </ul>
                         </div>
                     {% else %}
-                        <div class="nav-item">
-                            <a class="nav-link" href="{{ url_for('replit_auth.login') }}">
-                                <i data-feather="log-in" class="me-1"></i>Login
+                        <div class="nav-item d-flex flex-column flex-sm-row gap-2">
+                            <a class="btn btn-outline-primary btn-sm w-100 w-sm-auto" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                            <a class="btn btn-primary btn-sm w-100 w-sm-auto" href="{{ url_for('register') }}">
+                                <i class="fas fa-user-plus me-1"></i>Register
                             </a>
                         </div>
                     {% endif %}
@@ -121,35 +148,95 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-5 mt-3">
-        <div class="container">
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
+    <main class="main-content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container mt-4">
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert" data-aos="fade-down">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }} me-2"></i>
+                                {{ message }}
+                            </div>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     {% endfor %}
-                {% endif %}
-            {% endwith %}
-            
-            {% block content %}{% endblock %}
-        </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
+    <!-- Professional Footer -->
+    <footer class="footer">
         <div class="container">
             <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="footer-brand">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-shield-alt text-primary me-2"></i>
+                            InvestGuard AI
+                        </h5>
+                        <p class="text-muted mb-3">
+                            Advanced AI-powered investment fraud prevention platform with real-time monitoring and SEBI compliance.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="text-muted me-3"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-muted me-3"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="text-muted me-3"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-semibold mb-3">Platform</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('dashboard') }}" class="text-muted">Dashboard</a></li>
+                        <li><a href="{{ url_for('analyzer') }}" class="text-muted">Content Analyzer</a></li>
+                        <li><a href="{{ url_for('advisor') }}" class="text-muted">Advisor Check</a></li>
+                        <li><a href="{{ url_for('network') }}" class="text-muted">Network Analysis</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-semibold mb-3">Education</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('education') }}" class="text-muted">Risk Simulator</a></li>
+                        <li><a href="{{ url_for('chatbot') }}" class="text-muted">AI Advisor</a></li>
+                        <li><a href="{{ url_for('education_library') }}" class="text-muted">Content Library</a></li>
+                        <li><a href="{{ url_for('reports') }}" class="text-muted">Report Fraud</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6 class="fw-semibold mb-3">Contact & Support</h6>
+                    <div class="contact-info">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-envelope me-2"></i>
+                            support@investguard.ai
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-phone me-2"></i>
+                            +91-800-123-4567
+                        </p>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Mumbai, India
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5>InvestGuard AI</h5>
-                    <p class="mb-0">India's first comprehensive AI-powered investment fraud prevention platform providing real-time protection and regulatory compliance.</p>
+                    <p class="text-muted mb-0">
+                        © 2024 InvestGuard AI. All rights reserved. | 
+                        <a href="#" class="text-muted">Privacy Policy</a> | 
+                        <a href="#" class="text-muted">Terms of Service</a>
+                    </p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">
-                        <small>Powered by advanced machine learning | Real-time protection</small>
+                    <p class="text-muted mb-0">
+                        <small>Powered by Advanced AI | SEBI Compliant | Real-time Protection</small>
                     </p>
                 </div>
             </div>
@@ -157,19 +244,150 @@
     </footer>
 
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Initialize Feather Icons -->
+    <!-- Professional JavaScript -->
     <script>
-        feather.replace();
-        
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+
         // Update current time
         function updateTime() {
             const now = new Date();
-            document.getElementById('current-time').textContent = now.toLocaleTimeString();
+            const timeElement = document.getElementById('current-time');
+            if (timeElement) {
+                timeElement.textContent = now.toLocaleTimeString('en-US', {
+                    hour12: true,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
         }
         updateTime();
         setInterval(updateTime, 1000);
+
+        // Professional scroll effects
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Mobile menu auto-close on link click
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            const navbarCollapse = document.querySelector('.navbar-collapse');
+            
+            navLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 992) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) {
+                            bsCollapse.hide();
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Prevent zoom on input focus (iOS)
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea');
+            inputs.forEach(function(input) {
+                if (input.style.fontSize === '' || parseInt(input.style.fontSize) < 16) {
+                    input.style.fontSize = '16px';
+                }
+            });
+        });
+        
+        // Touch-friendly tap highlight removal
+        document.addEventListener('touchstart', function() {}, true);
+
+        // Professional loading states
+        function showLoading(element) {
+            element.innerHTML = '<div class="loading-spinner"></div>';
+        }
+
+        // Professional tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Professional form validation
+        function validateForm(form) {
+            const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            
+            return isValid;
+        }
+
+        // Professional number animation
+        function animateNumber(element, start, end, duration) {
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 16);
+        }
+
+        // Professional smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Professional theme detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Professional performance optimization
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('scroll-reveal');
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.scroll-reveal').forEach(el => {
+                observer.observe(el);
+            });
+        }
     </script>
     
     {% block scripts %}{% endblock %}

@@ -1,0 +1,30 @@
+# Environment Variables for InvestGuard
+# Copy this file to .env and fill in your actual values
+
+# Flask Configuration
+FLASK_SECRET_KEY=your_secret_key_here
+FLASK_ENV=development
+
+# Database Configuration
+DATABASE_URL=sqlite:///investguard.db
+
+# API Keys (Get these for free)
+
+# NewsAPI (Free tier: 100 requests/day)
+# Get from: https://newsapi.org/register
+NEWS_API_KEY=your_newsapi_key_here
+
+# Twilio (Free trial: $15 credit)
+# Get from: https://www.twilio.com/try-twilio
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_PHONE=+1234567890
+
+# Gemini AI (Already configured)
+GEMINI_API_KEY=AIzaSyBfEcZrrxe0N8TKweyDDVQYukESfES9M6Y
+
+# Yahoo Finance (No API key needed - works immediately)
+# Already integrated via yfinance package
+
+# SEBI Database (No API key needed - public data)
+# Uses web scraping from official SEBI website

@@ -1,5 +1,5 @@
 from models import NetworkConnection, FraudAlert
-from app import db
+from app import db, app
 from datetime import datetime, timedelta
 import random
 import json
@@ -11,75 +11,77 @@ class NetworkAnalyzer:
     
     def _initialize_mock_network_data(self):
         """Initialize mock network connection data"""
-        # Check if data already exists
-        if NetworkConnection.query.count() > 0:
-            return
-        
-        # Create mock suspicious network connections
-        mock_connections = [
-            {
-                'source_entity': 'fake_advisor_1@email.com',
-                'target_entity': 'fake_company_A',
-                'connection_type': 'financial',
-                'strength': 0.9,
-                'suspicious_score': 8.5,
-                'evidence': '{"shared_bank_accounts": true, "same_ip_addresses": true, "coordinated_messaging": true}'
-            },
-            {
-                'source_entity': 'fake_company_A',
-                'target_entity': 'fake_company_B',
-                'connection_type': 'ownership',
-                'strength': 0.95,
-                'suspicious_score': 9.2,
-                'evidence': '{"same_directors": true, "shared_office_address": true, "identical_website_templates": true}'
-            },
-            {
-                'source_entity': 'fake_advisor_2@email.com',
-                'target_entity': 'fake_company_B',
-                'connection_type': 'communication',
-                'strength': 0.8,
-                'suspicious_score': 7.8,
-                'evidence': '{"frequent_communication": true, "coordinated_posts": true, "shared_content": true}'
-            },
-            {
-                'source_entity': 'suspicious_whatsapp_group_1',
-                'target_entity': 'fake_advisor_1@email.com',
-                'connection_type': 'communication',
-                'strength': 0.85,
-                'suspicious_score': 8.0,
-                'evidence': '{"admin_role": true, "mass_messaging": true, "investment_promotions": true}'
-            },
-            {
-                'source_entity': 'suspicious_whatsapp_group_1',
-                'target_entity': 'fake_advisor_2@email.com',
-                'connection_type': 'communication',
-                'strength': 0.7,
-                'suspicious_score': 7.2,
-                'evidence': '{"member_role": true, "content_sharing": true, "referral_activities": true}'
-            },
-            {
-                'source_entity': 'fake_company_C',
-                'target_entity': 'offshore_account_1',
-                'connection_type': 'financial',
-                'strength': 0.9,
-                'suspicious_score': 9.5,
-                'evidence': '{"large_transfers": true, "frequent_transactions": true, "tax_haven_location": true}'
-            },
-            {
-                'source_entity': 'fake_advisor_3@email.com',
-                'target_entity': 'fake_company_C',
-                'connection_type': 'financial',
-                'strength': 0.75,
-                'suspicious_score': 8.3,
-                'evidence': '{"commission_payments": true, "undisclosed_relationship": true, "conflict_of_interest": true}'
-            }
-        ]
-        
-        for connection_data in mock_connections:
-            connection = NetworkConnection(**connection_data)
-            db.session.add(connection)
-        
-        db.session.commit()
+        # Wrap all database operations in app context
+        with app.app_context():
+            # Check if data already exists
+            if NetworkConnection.query.count() > 0:
+                return
+            
+            # Create mock suspicious network connections
+            mock_connections = [
+                {
+                    'source_entity': 'fake_advisor_1@email.com',
+                    'target_entity': 'fake_company_A',
+                    'connection_type': 'financial',
+                    'strength': 0.9,
+                    'suspicious_score': 8.5,
+                    'evidence': '{"shared_bank_accounts": true, "same_ip_addresses": true, "coordinated_messaging": true}'
+                },
+                {
+                    'source_entity': 'fake_company_A',
+                    'target_entity': 'fake_company_B',
+                    'connection_type': 'ownership',
+                    'strength': 0.95,
+                    'suspicious_score': 9.2,
+                    'evidence': '{"same_directors": true, "shared_office_address": true, "identical_website_templates": true}'
+                },
+                {
+                    'source_entity': 'fake_advisor_2@email.com',
+                    'target_entity': 'fake_company_B',
+                    'connection_type': 'communication',
+                    'strength': 0.8,
+                    'suspicious_score': 7.8,
+                    'evidence': '{"frequent_communication": true, "coordinated_posts": true, "shared_content": true}'
+                },
+                {
+                    'source_entity': 'suspicious_whatsapp_group_1',
+                    'target_entity': 'fake_advisor_1@email.com',
+                    'connection_type': 'communication',
+                    'strength': 0.85,
+                    'suspicious_score': 8.0,
+                    'evidence': '{"admin_role": true, "mass_messaging": true, "investment_promotions": true}'
+                },
+                {
+                    'source_entity': 'suspicious_whatsapp_group_1',
+                    'target_entity': 'fake_advisor_2@email.com',
+                    'connection_type': 'communication',
+                    'strength': 0.7,
+                    'suspicious_score': 7.2,
+                    'evidence': '{"member_role": true, "content_sharing": true, "referral_activities": true}'
+                },
+                {
+                    'source_entity': 'fake_company_C',
+                    'target_entity': 'offshore_account_1',
+                    'connection_type': 'financial',
+                    'strength': 0.9,
+                    'suspicious_score': 9.5,
+                    'evidence': '{"large_transfers": true, "frequent_transactions": true, "tax_haven_location": true}'
+                },
+                {
+                    'source_entity': 'fake_advisor_3@email.com',
+                    'target_entity': 'fake_company_C',
+                    'connection_type': 'financial',
+                    'strength': 0.75,
+                    'suspicious_score': 8.3,
+                    'evidence': '{"commission_payments": true, "undisclosed_relationship": true, "conflict_of_interest": true}'
+                }
+            ]
+            
+            for connection_data in mock_connections:
+                connection = NetworkConnection(**connection_data)
+                db.session.add(connection)
+            
+            db.session.commit()
     
     def analyze_network_patterns(self, entity_id=None):
         """

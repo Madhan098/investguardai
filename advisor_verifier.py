@@ -1,5 +1,5 @@
 from models import Advisor
-from app import db
+from app import db, app
 from datetime import datetime, date
 import random
 
@@ -10,74 +10,76 @@ class AdvisorVerifier:
     
     def _initialize_mock_data(self):
         """Initialize mock SEBI advisor database"""
-        # Check if data already exists
-        if Advisor.query.count() > 0:
-            return
-        
-        # Create mock legitimate advisors
-        legitimate_advisors = [
-            {
-                'name': 'Rajesh Kumar Sharma',
-                'license_number': 'INA000001234',
-                'registration_date': date(2018, 3, 15),
-                'status': 'active',
-                'firm_name': 'Kumar Investment Advisory',
-                'contact_email': 'rajesh@kumarinvestment.com',
-                'contact_phone': '+91-9876543210',
-                'specializations': '["Equity", "Mutual Funds", "Portfolio Management"]',
-                'verification_score': 9.8
-            },
-            {
-                'name': 'Priya Patel',
-                'license_number': 'INA000002468',
-                'registration_date': date(2019, 7, 22),
-                'status': 'active',
-                'firm_name': 'Patel Financial Services',
-                'contact_email': 'priya@patelfinancial.com',
-                'contact_phone': '+91-9876543211',
-                'specializations': '["Insurance", "Tax Planning", "Retirement Planning"]',
-                'verification_score': 9.5
-            },
-            {
-                'name': 'Amit Singh',
-                'license_number': 'INA000003691',
-                'registration_date': date(2020, 1, 10),
-                'status': 'active',
-                'firm_name': 'Singh Wealth Management',
-                'contact_email': 'amit@singhwealth.com',
-                'contact_phone': '+91-9876543212',
-                'specializations': '["Bonds", "Fixed Income", "Risk Assessment"]',
-                'verification_score': 9.2
-            },
-            {
-                'name': 'Dr. Sunita Gupta',
-                'license_number': 'INA000004815',
-                'registration_date': date(2017, 11, 5),
-                'status': 'suspended',
-                'firm_name': 'Gupta Investment Solutions',
-                'contact_email': 'sunita@guptainvestment.com',
-                'contact_phone': '+91-9876543213',
-                'specializations': '["Derivatives", "Options Trading"]',
-                'verification_score': 3.2
-            },
-            {
-                'name': 'Vikash Agarwal',
-                'license_number': 'INA000005927',
-                'registration_date': date(2021, 5, 18),
-                'status': 'revoked',
-                'firm_name': 'Agarwal Capital',
-                'contact_email': 'vikash@agarwalcapital.com',
-                'contact_phone': '+91-9876543214',
-                'specializations': '["Forex", "Commodities"]',
-                'verification_score': 1.5
-            }
-        ]
-        
-        for advisor_data in legitimate_advisors:
-            advisor = Advisor(**advisor_data)
-            db.session.add(advisor)
-        
-        db.session.commit()
+        # Wrap all database operations in app context
+        with app.app_context():
+            # Check if data already exists
+            if Advisor.query.count() > 0:
+                return
+            
+            # Create mock legitimate advisors
+            legitimate_advisors = [
+                {
+                    'name': 'Rajesh Kumar Sharma',
+                    'license_number': 'INA000001234',
+                    'registration_date': date(2018, 3, 15),
+                    'status': 'active',
+                    'firm_name': 'Kumar Investment Advisory',
+                    'contact_email': 'rajesh@kumarinvestment.com',
+                    'contact_phone': '+91-9876543210',
+                    'specializations': '["Equity", "Mutual Funds", "Portfolio Management"]',
+                    'verification_score': 9.8
+                },
+                {
+                    'name': 'Priya Patel',
+                    'license_number': 'INA000002468',
+                    'registration_date': date(2019, 7, 22),
+                    'status': 'active',
+                    'firm_name': 'Patel Financial Services',
+                    'contact_email': 'priya@patelfinancial.com',
+                    'contact_phone': '+91-9876543211',
+                    'specializations': '["Insurance", "Tax Planning", "Retirement Planning"]',
+                    'verification_score': 9.5
+                },
+                {
+                    'name': 'Amit Singh',
+                    'license_number': 'INA000003691',
+                    'registration_date': date(2020, 1, 10),
+                    'status': 'active',
+                    'firm_name': 'Singh Wealth Management',
+                    'contact_email': 'amit@singhwealth.com',
+                    'contact_phone': '+91-9876543212',
+                    'specializations': '["Bonds", "Fixed Income", "Risk Assessment"]',
+                    'verification_score': 9.2
+                },
+                {
+                    'name': 'Dr. Sunita Gupta',
+                    'license_number': 'INA000004815',
+                    'registration_date': date(2017, 11, 5),
+                    'status': 'suspended',
+                    'firm_name': 'Gupta Investment Solutions',
+                    'contact_email': 'sunita@guptainvestment.com',
+                    'contact_phone': '+91-9876543213',
+                    'specializations': '["Derivatives", "Options Trading"]',
+                    'verification_score': 3.2
+                },
+                {
+                    'name': 'Vikash Agarwal',
+                    'license_number': 'INA000005927',
+                    'registration_date': date(2021, 5, 18),
+                    'status': 'revoked',
+                    'firm_name': 'Agarwal Capital',
+                    'contact_email': 'vikash@agarwalcapital.com',
+                    'contact_phone': '+91-9876543214',
+                    'specializations': '["Forex", "Commodities"]',
+                    'verification_score': 1.5
+                }
+            ]
+            
+            for advisor_data in legitimate_advisors:
+                advisor = Advisor(**advisor_data)
+                db.session.add(advisor)
+            
+            db.session.commit()
     
     def verify_advisor(self, license_number=None, name=None):
         """

@@ -3,6 +3,7 @@ import logging
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_socketio import SocketIO
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -19,20 +20,23 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "fraud-detection-secret-key-2024")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
-# Configure session for OAuth in Replit proxy environment
-app.config['SESSION_COOKIE_SECURE'] = False
+# Configure session for consistent behavior across all hosts
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = None
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400
+app.config['SESSION_COOKIE_NAME'] = 'investguard_session'
+app.config['SESSION_COOKIE_DOMAIN'] = None  # Allow cookies on any domain
+app.config['SESSION_COOKIE_PATH'] = '/'
 
-# Set preferred URL scheme for OAuth redirects
-app.config['PREFERRED_URL_SCHEME'] = 'https'
-
-# Allow OAuth to work over HTTP in development
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-# configure the database
-database_url = os.environ.get("DATABASE_URL", "sqlite:///fraud_detection.db")
+# configure the database - use absolute path for consistency across all hosts
+if os.environ.get("DATABASE_URL"):
+    database_url = os.environ.get("DATABASE_URL")
+else:
+    # Use absolute path to ensure same database regardless of host
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'fraud_detection.db')
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    database_url = f"sqlite:///{db_path}"
 
 # Add UTF-8 encoding parameters for PostgreSQL
 if database_url.startswith('postgresql'):
@@ -56,10 +60,41 @@ app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 # initialize the app with the extension
 db.init_app(app)
 
+# Initialize SocketIO - allow all origins for consistent behavior across hosts
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins="*", 
+    async_mode='threading',
+    logger=False,
+    engineio_logger=False
+)
+
+# Import models after db is initialized to avoid circular imports
+# Note: This must happen after db.init_app(app) but before routes
+import models
+
 with app.app_context():
-    # Import models to ensure tables are created
-    import models
+    # Create all tables
     db.create_all()
 
-    # Import and register routes
-    import routes
+# Import and register routes after models are fully loaded
+# When models.py imports db from app, Python re-executes app.py
+# We ensure routes are only imported after models complete loading
+import sys
+
+# Only import routes if we haven't imported them yet
+# and if models are fully loaded
+if not hasattr(sys.modules.get(__name__, type(sys)('')), '_routes_imported'):
+    # Check if models module is fully loaded
+    models_module = sys.modules.get('models')
+    
+    # If models exists and has FraudAlert, it's fully loaded
+    if models_module and hasattr(models_module, 'FraudAlert'):
+        try:
+            import routes
+            # Mark routes as imported to prevent re-import
+            setattr(sys.modules[__name__], '_routes_imported', True)
+        except ImportError as e:
+            # If routes import fails because models aren't ready,
+            # we'll catch it here - but this shouldn't happen if check above works
+            pass

@@ -1,418 +1,363 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Enhanced Hero Section -->
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="hero-gradient text-white rounded-4 p-5 text-center position-relative">
-            <!-- Animated Background Particles -->
-            <div class="hero-particles">
-                <div class="particle" style="width: 4px; height: 4px; top: 20%; left: 10%; animation-delay: 0s;"></div>
-                <div class="particle" style="width: 2px; height: 2px; top: 60%; left: 80%; animation-delay: 1s;"></div>
-                <div class="particle" style="width: 3px; height: 3px; top: 40%; left: 30%; animation-delay: 2s;"></div>
-                <div class="particle" style="width: 5px; height: 5px; top: 80%; left: 60%; animation-delay: 3s;"></div>
-                <div class="particle" style="width: 2px; height: 2px; top: 30%; left: 90%; animation-delay: 4s;"></div>
-            </div>
-            
-            <div class="position-relative">
-                <h1 class="display-3 fw-bold mb-4 fade-in-up">
-                    <i data-feather="shield" class="me-3" style="width: 64px; height: 64px;"></i>
-                    <br>
-                    {% if current_user.is_authenticated %}
-                        Welcome back, {{ current_user.first_name or 'Investor' }}!
-                    {% else %}
-                        InvestGuard AI
-                    {% endif %}
-                </h1>
-                <p class="lead mb-5 fade-in-up" style="font-size: 1.3rem; max-width: 800px; margin: 0 auto;">
-                    India's first comprehensive AI-powered investment fraud prevention platform with real-time social media monitoring, market manipulation detection, and SEBI compliance
-                </p>
-                
-                <!-- Enhanced Statistics -->
-                <div class="row g-4 justify-content-center mb-4">
-                    <div class="col-md-3 fade-in-up">
-                        <div class="glow-card rounded-4 p-4 stats-pulse">
-                            <h2 class="mb-2 fw-bold display-6" data-stat="totalAlerts">{{ total_alerts }}</h2>
-                            <div class="text-light opacity-75">Total Alerts Detected</div>
-                            <i data-feather="alert-triangle" class="mt-2" style="width: 24px; height: 24px;"></i>
+<!-- Ultra Stunning Hero Section -->
+<section class="hero-gradient">
+    <div class="hero-particles">
+        <div class="particle" style="top: 20%; left: 10%; width: 4px; height: 4px; animation-delay: 0s;"></div>
+        <div class="particle" style="top: 60%; left: 80%; width: 6px; height: 6px; animation-delay: 2s;"></div>
+        <div class="particle" style="top: 80%; left: 20%; width: 3px; height: 3px; animation-delay: 4s;"></div>
+        <div class="particle" style="top: 30%; left: 70%; width: 5px; height: 5px; animation-delay: 1s;"></div>
+        <div class="particle" style="top: 70%; left: 50%; width: 4px; height: 4px; animation-delay: 3s;"></div>
+    </div>
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                <div class="hero-content">
+                    <div class="badge bg-primary bg-opacity-20 text-white px-4 py-2 rounded-pill mb-4 border border-white border-opacity-30" data-aos="fade-up" data-aos-delay="200">
+                        <i class="fas fa-shield-alt me-2"></i>AI-Powered Protection
+                    </div>
+                    <h1 class="hero-title" data-aos="fade-up" data-aos-delay="300">
+                        {% if session.user_id %}
+                            Welcome back, <span class="text-shimmer">{{ session.user_name or 'Investor' }}</span>!
+                        {% else %}
+                            Protect Your Investments with <span class="text-shimmer">Advanced AI</span>
+                        {% endif %}
+                    </h1>
+                    <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="400">
+                        India's most advanced investment fraud prevention platform. Real-time monitoring, 
+                        AI-powered analysis, and comprehensive protection for your financial future.
+                    </p>
+                    <div class="hero-stats row g-3 mb-4" data-aos="fade-up" data-aos-delay="500">
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-number" data-counter="{{ total_alerts }}">0</div>
+                                <div class="small text-muted">Alerts Detected</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-number text-danger" data-counter="{{ high_risk_alerts }}">0</div>
+                                <div class="small text-muted">High Risk</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-card">
+                                <div class="stat-number text-success" data-counter="{{ active_alerts }}">0</div>
+                                <div class="small text-muted">Active</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-3 fade-in-up">
-                        <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.2s;">
-                            <h2 class="mb-2 fw-bold display-6 text-danger" data-stat="highRiskAlerts">{{ high_risk_alerts }}</h2>
-                            <div class="text-light opacity-75">High Risk Cases</div>
-                            <i data-feather="alert-octagon" class="mt-2 text-danger" style="width: 24px; height: 24px;"></i>
+                    <div class="hero-actions d-flex flex-wrap gap-4" data-aos="fade-up" data-aos-delay="600">
+                        <a href="{{ url_for('analyzer') }}" class="btn btn-hero">
+                            <i class="fas fa-search me-2"></i>Start Analysis
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-hero" style="background: var(--gradient-secondary);">
+                            <i class="fas fa-chart-line me-2"></i>View Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+                <div class="hero-visual">
+                    <div class="dashboard-preview card shadow-lg border-0">
+                        <div class="card-header bg-transparent border-0">
+                            <div class="d-flex align-items-center">
+                                <div class="status-indicator status-online me-2"></div>
+                                <span class="small text-muted">Live Monitoring</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-3 fade-in-up">
-                        <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.4s;">
-                            <h2 class="mb-2 fw-bold display-6 text-warning" data-stat="activeAlerts">{{ active_alerts }}</h2>
-                            <div class="text-light opacity-75">Active Monitoring</div>
-                            <i data-feather="eye" class="mt-2 text-warning" style="width: 24px; height: 24px;"></i>
-                        </div>
-                    </div>
-                    <div class="col-md-3 fade-in-up">
-                        <div class="glow-card rounded-4 p-4 stats-pulse" style="animation-delay: 0.6s;">
-                            <h2 class="mb-2 fw-bold display-6 text-success" data-stat="platformsMonitored">15+</h2>
-                            <div class="text-light opacity-75">Platforms Monitored</div>
-                            <i data-feather="globe" class="mt-2 text-success" style="width: 24px; height: 24px;"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Call to Action -->
-                <div class="fade-in-up" style="animation-delay: 0.6s;">
-                    <a href="{{ url_for('analyzer') }}" class="btn btn-primary btn-lg me-3 px-5 py-3">
-                        <i data-feather="search" class="me-2"></i>
-                        Start Analysis
-                    </a>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary btn-lg px-5 py-3">
-                        <i data-feather="activity" class="me-2"></i>
-                        View Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Quick Actions -->
-<div class="row mb-5">
-    <div class="col-12">
-        <h2 class="mb-4">
-            <i data-feather="zap" class="me-2"></i>
-            Quick Actions
-        </h2>
-    </div>
-    
-    <div class="col-md-4 mb-4 fade-in-up">
-        <div class="card action-card h-100 border-0 shadow glow-card">
-            <div class="card-body text-center p-4">
-                <div class="mb-4">
-                    <div class="icon-container d-flex justify-content-center align-items-center mx-auto" style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);">
-                        <i data-feather="search" width="36" height="36" class="text-white"></i>
-                    </div>
-                </div>
-                <h5 class="card-title fw-bold mb-3">Content Analyzer</h5>
-                <p class="card-text text-muted">Analyze text, URLs, and media for fraud indicators using AI-powered detection algorithms.</p>
-                <a href="{{ url_for('analyzer') }}" class="btn btn-primary">
-                    <i data-feather="play" class="me-2"></i>
-                    Start Analysis
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4 fade-in-up">
-        <div class="card action-card h-100 border-0 shadow glow-card">
-            <div class="card-body text-center p-4">
-                <div class="mb-4">
-                    <div class="icon-container d-flex justify-content-center align-items-center mx-auto" style="width: 80px; height: 80px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 20px; box-shadow: 0 8px 32px rgba(17, 153, 142, 0.3);">
-                        <i data-feather="shield-check" width="36" height="36" class="text-white"></i>
-                    </div>
-                </div>
-                <h5 class="card-title fw-bold mb-3">Advisor Verification</h5>
-                <p class="card-text text-muted">Instantly verify investment advisor credentials against official SEBI database records.</p>
-                <a href="{{ url_for('advisor') }}" class="btn btn-success">
-                    <i data-feather="check-circle" class="me-2"></i>
-                    Verify Now
-                </a>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4 fade-in-up">
-        <div class="card action-card h-100 border-0 shadow glow-card">
-            <div class="card-body text-center p-4">
-                <div class="mb-4">
-                    <div class="icon-container d-flex justify-content-center align-items-center mx-auto" style="width: 80px; height: 80px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%, #fecfef 100%); border-radius: 20px; box-shadow: 0 8px 32px rgba(255, 154, 158, 0.3);">
-                        <i data-feather="git-branch" width="36" height="36" class="text-white"></i>
-                    </div>
-                </div>
-                <h5 class="card-title fw-bold mb-3">Network Analysis</h5>
-                <p class="card-text text-muted">Visualize fraud networks and identify suspicious connection patterns across platforms.</p>
-                <a href="{{ url_for('network') }}" class="btn btn-info">
-                    <i data-feather="eye" class="me-2"></i>
-                    View Network
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Real-time Monitoring Dashboard -->
-<div class="row mb-5">
-    <div class="col-12">
-        <h2 class="mb-4">
-            <i data-feather="activity" class="me-2"></i>
-            Real-time Monitoring
-        </h2>
-    </div>
-    
-    <div class="col-md-6 mb-4">
-        <div class="card border-success">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">
-                    <i data-feather="wifi" class="me-2"></i>
-                    Live Social Media Feed
-                </h5>
-            </div>
-            <div class="card-body">
-                <div id="social-media-feed" class="live-feed" style="height: 200px; overflow-y: auto;">
-                    <div class="text-center text-muted py-4">
-                        <i data-feather="radio" width="32" height="32" class="mb-2"></i>
-                        <p>Monitoring 15+ platforms for suspicious activity...</p>
-                        <div class="spinner-border spinner-border-sm" role="status"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6 mb-4">
-        <div class="card border-danger">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0">
-                    <i data-feather="trending-down" class="me-2"></i>
-                    Market Anomaly Detector
-                </h5>
-            </div>
-            <div class="card-body">
-                <div id="market-anomalies" class="live-feed" style="height: 200px; overflow-y: auto;">
-                    <div class="text-center text-muted py-4">
-                        <i data-feather="bar-chart" width="32" height="32" class="mb-2"></i>
-                        <p>Analyzing NSE/BSE for suspicious patterns...</p>
-                        <div class="spinner-border spinner-border-sm" role="status"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Fraud Alerts Ticker -->
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="card border-warning">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">
-                    <i data-feather="alert-triangle" class="me-2"></i>
-                    Recent Fraud Alerts
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if recent_alerts %}
-                    <div class="alert-ticker">
-                        {% for alert in recent_alerts %}
-                            <div class="alert alert-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }} mb-2">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <strong>Risk Score: {{ "%.1f"|format(alert.risk_score) }}/10</strong>
-                                        <span class="badge bg-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }} ms-2">
-                                            {{ alert.severity.title() }}
-                                        </span>
-                                        <p class="mb-1 mt-2">{{ alert.content[:150] }}{% if alert.content|length > 150 %}...{% endif %}</p>
-                                        <small class="text-muted">
-                                            <i data-feather="clock" width="14" height="14" class="me-1"></i>
-                                            {{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}
-                                        </small>
+                        <div class="card-body">
+                            <div class="chart-placeholder bg-light rounded-3 p-4 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold">Risk Analysis</span>
+                                    <span class="badge bg-warning">Active</span>
+                                </div>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-gradient-primary" style="width: 75%"></div>
+                                </div>
+                                <div class="small text-muted">75% Risk Detected</div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="mini-card bg-primary bg-opacity-10 p-2 rounded text-center">
+                                        <div class="small fw-bold text-primary">15</div>
+                                        <div class="small text-muted">Platforms</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mini-card bg-success bg-opacity-10 p-2 rounded text-center">
+                                        <div class="small fw-bold text-success">98%</div>
+                                        <div class="small text-muted">Accuracy</div>
                                     </div>
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center text-muted py-4">
-                        <i data-feather="check-circle" width="48" height="48" class="mb-3"></i>
-                        <p>No recent fraud alerts. System is monitoring for threats.</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Feature Highlights -->
-<div class="row mb-5">
-    <div class="col-12">
-        <h2 class="mb-4">
-            <i data-feather="star" class="me-2"></i>
-            Advanced AI Features
-        </h2>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i data-feather="cpu" class="me-2 text-primary"></i>
-                    AI-Powered Detection
-                </h5>
-                <ul class="list-unstyled">
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>BERT-based Sentiment Analysis</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>LSTM Rumor Classification</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Real-time Risk Scoring</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Multi-modal Analysis</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i data-feather="trending-up" class="me-2 text-warning"></i>
-                    Market Manipulation Detection
-                </h5>
-                <ul class="list-unstyled">
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Pump & Dump Detection</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Wash Trading Analysis</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Spoofing & Layering Alerts</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Cross-market Surveillance</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i data-feather="globe" class="me-2 text-info"></i>
-                    Social Media Monitoring
-                </h5>
-                <ul class="list-unstyled">
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Twitter/X Real-time Scanning</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>WhatsApp & Telegram Monitoring</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Multi-language Processing</li>
-                    <li><i data-feather="check" class="me-2 text-success" width="16" height="16"></i>Influencer Score Analysis</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Phase Implementation Status -->
-<div class="row mb-5">
-    <div class="col-12">
-        <h2 class="mb-4">
-            <i data-feather="layers" class="me-2"></i>
-            Implementation Phases
-        </h2>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card border-primary h-100">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i data-feather="message-circle" class="me-2"></i>
-                    Phase 1: Social Media Monitoring
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Progress</span>
-                        <span class="text-primary">75%</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-primary" style="width: 75%"></div>
+                        </div>
                     </div>
                 </div>
-                <ul class="list-unstyled mb-0">
-                    <li><i data-feather="check-circle" class="me-2 text-success" width="16" height="16"></i>Social Media Scanner</li>
-                    <li><i data-feather="check-circle" class="me-2 text-success" width="16" height="16"></i>Influence Score Analysis</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Rumor Detection Engine</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Multi-language Support</li>
-                </ul>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card border-warning h-100">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">
-                    <i data-feather="trending-up" class="me-2"></i>
-                    Phase 2: Market Manipulation
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Progress</span>
-                        <span class="text-warning">45%</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-warning" style="width: 45%"></div>
-                    </div>
-                </div>
-                <ul class="list-unstyled mb-0">
-                    <li><i data-feather="check-circle" class="me-2 text-success" width="16" height="16"></i>Pattern Recognition Dashboard</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Algorithmic Behavior Analyzer</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Cross-market Surveillance</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Predictive Risk Scoring</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card border-info h-100">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">
-                    <i data-feather="book-open" class="me-2"></i>
-                    Phase 3: Education Hub
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between">
-                        <span>Progress</span>
-                        <span class="text-info">30%</span>
-                    </div>
-                    <div class="progress" style="height: 8px;">
-                        <div class="progress-bar bg-info" style="width: 30%"></div>
-                    </div>
-                </div>
-                <ul class="list-unstyled mb-0">
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Interactive Risk Simulator</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Vernacular Content Library</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>Scam Alert Push Notifications</li>
-                    <li><i data-feather="clock" class="me-2 text-warning" width="16" height="16"></i>AI Chatbot Advisor</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+</section>
 
-<!-- Call to Action -->
-<div class="row">
-    <div class="col-12">
-        <div class="card bg-dark text-light border-0">
-            <div class="card-body text-center py-5">
-                <h3 class="mb-3">Ready to Protect Your Investments?</h3>
-                <p class="lead mb-4">Join thousands of investors using FraudShield to stay safe from financial fraud.</p>
-                <div class="d-flex gap-3 justify-content-center flex-wrap">
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
-                        <i data-feather="activity" class="me-2"></i>
-                        View Dashboard
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Advanced AI Features</h2>
+                <p class="lead text-muted">Cutting-edge technology protecting your investments</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-card card-ultra h-100 hover-lift-ultra">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-opacity-10 rounded-3 p-3 mb-3 d-inline-block hover-glow">
+                            <i class="fas fa-brain text-primary fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-gradient">AI-Powered Detection</h5>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>BERT Sentiment Analysis</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>LSTM Rumor Classification</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Real-time Risk Scoring</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Multi-modal Analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-card card-ultra h-100 hover-lift-ultra">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-warning bg-opacity-10 rounded-3 p-3 mb-3 d-inline-block hover-glow">
+                            <i class="fas fa-chart-line text-warning fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-gradient">Market Manipulation Detection</h5>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Pump & Dump Detection</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Wash Trading Analysis</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Spoofing & Layering Alerts</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Cross-market Surveillance</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-card card-ultra h-100 hover-lift-ultra">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-info bg-opacity-10 rounded-3 p-3 mb-3 d-inline-block hover-glow">
+                            <i class="fas fa-globe text-info fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-gradient">Social Media Monitoring</h5>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Twitter/X Real-time Scanning</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>WhatsApp & Telegram Monitoring</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Multi-language Processing</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Influencer Score Analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Get Started</h2>
+                <p class="lead text-muted">Choose your protection level</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+                <div class="action-card card-ultra h-100 hover-lift-ultra text-center">
+                    <div class="card-body p-4">
+                        <div class="action-icon bg-primary bg-opacity-10 rounded-circle p-4 mb-3 mx-auto hover-glow">
+                            <i class="fas fa-search text-primary fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-gradient">Content Analyzer</h5>
+                        <p class="text-muted mb-4">Analyze text, URLs, and media for fraud indicators using AI-powered detection algorithms.</p>
+                        <a href="{{ url_for('analyzer') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-play me-2"></i>Start Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="action-card card-ultra h-100 hover-lift-ultra text-center">
+                    <div class="card-body p-4">
+                        <div class="action-icon bg-success bg-opacity-10 rounded-circle p-4 mb-3 mx-auto hover-glow">
+                            <i class="fas fa-user-check text-success fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-gradient">Advisor Verification</h5>
+                        <p class="text-muted mb-4">Instantly verify investment advisor credentials against official SEBI database records.</p>
+                        <a href="{{ url_for('advisor') }}" class="btn btn-success w-100">
+                            <i class="fas fa-check-circle me-2"></i>Verify Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+                <div class="action-card card-ultra h-100 hover-lift-ultra text-center">
+                    <div class="card-body p-4">
+                        <div class="action-icon bg-info bg-opacity-10 rounded-circle p-4 mb-3 mx-auto hover-glow">
+                            <i class="fas fa-project-diagram text-info fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3 text-gradient">Network Analysis</h5>
+                        <p class="text-muted mb-4">Visualize fraud networks and identify suspicious connection patterns across platforms.</p>
+                        <a href="{{ url_for('network') }}" class="btn btn-info w-100">
+                            <i class="fas fa-eye me-2"></i>View Network
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Real-time Monitoring -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Real-time Monitoring</h2>
+                <p class="lead text-muted">Live protection across all platforms</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+                <div class="monitoring-card card-ultra h-100 hover-lift-ultra">
+                    <div class="card-header bg-transparent border-0">
+                        <div class="d-flex align-items-center">
+                            <div class="status-indicator status-online me-2"></div>
+                            <h5 class="mb-0 fw-bold text-gradient">Live Social Media Feed</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="social-media-feed" class="feed-container" style="height: 300px; overflow-y: auto;">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-broadcast-tower fs-1 mb-3 text-primary"></i>
+                                <p>Monitoring 15+ platforms for suspicious activity...</p>
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+                <div class="monitoring-card card-ultra h-100 hover-lift-ultra">
+                    <div class="card-header bg-transparent border-0">
+                        <div class="d-flex align-items-center">
+                            <div class="status-indicator status-danger me-2"></div>
+                            <h5 class="mb-0 fw-bold text-gradient">Market Anomaly Detector</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="market-anomalies" class="feed-container" style="height: 300px; overflow-y: auto;">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-chart-bar fs-1 mb-3 text-warning"></i>
+                                <p>Analyzing NSE/BSE for suspicious patterns...</p>
+                                <div class="spinner-border text-warning" role="status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Alerts -->
+{% if recent_alerts %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold mb-3">Recent Fraud Alerts</h2>
+                <p class="lead text-muted">Latest threats detected by our AI system</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            {% for alert in recent_alerts %}
+            <div class="col-lg-6" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                <div class="alert-card card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="risk-score bg-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }} text-white rounded-pill px-3 py-1 me-3">
+                                    {{ "%.1f"|format(alert.risk_score) }}/10
+                                </div>
+                                <span class="badge bg-{{ 'danger' if alert.severity == 'critical' else 'warning' if alert.severity == 'high' else 'info' }}">
+                                    {{ alert.severity.title() }}
+                                </span>
+                            </div>
+                            <small class="text-muted">{{ alert.created_at.strftime('%H:%M') }}</small>
+                        </div>
+                        <p class="mb-3">{{ alert.content[:150] }}{% if alert.content|length > 150 %}...{% endif %}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </span>
+                            <span class="small text-muted">{{ alert.source_platform.title() }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Ultra Stunning CTA Section -->
+<section class="py-5" style="background: var(--gradient-hero); position: relative; overflow: hidden;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8" data-aos="fade-right">
+                <h2 class="display-5 fw-bold mb-3 text-white text-glow">Ready to Protect Your Investments?</h2>
+                <p class="lead mb-0 text-white">Join thousands of investors using InvestGuard AI to stay safe from financial fraud.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end" data-aos="fade-left">
+                <div class="d-flex flex-column flex-lg-row gap-3">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-hero">
+                        <i class="fas fa-chart-line me-2"></i>View Dashboard
                     </a>
-                    <a href="{{ url_for('reports') }}" class="btn btn-outline-light btn-lg">
-                        <i data-feather="flag" class="me-2"></i>
-                        Report Fraud
+                    <a href="{{ url_for('reports') }}" class="btn btn-hero" style="background: var(--gradient-secondary);">
+                        <i class="fas fa-flag me-2"></i>Report Fraud
                     </a>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Live updates for social media feed and market anomalies
+    // Professional counter animation
+    function animateCounters() {
+        document.querySelectorAll('[data-counter]').forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-counter'));
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                counter.textContent = Math.floor(current);
+            }, 16);
+        });
+    }
+
+    // Professional live updates
     function updateSocialMediaFeed() {
         fetch('/api/social-media-feed')
             .then(response => response.json())
@@ -420,12 +365,14 @@
                 const feedContainer = document.getElementById('social-media-feed');
                 if (feedContainer && data.length > 0) {
                     feedContainer.innerHTML = data.map(item => `
-                        <div class="feed-item mb-2 p-2 border-start border-3 border-${item.risk_level === 'Critical' ? 'danger' : item.risk_level === 'High' ? 'warning' : 'info'}">
+                        <div class="feed-item mb-3 p-3 border-start border-3 border-${item.risk_level === 'Critical' ? 'danger' : item.risk_level === 'High' ? 'warning' : 'info'} bg-light rounded">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <strong>${item.platform}</strong>
-                                    <span class="badge bg-${item.risk_level === 'Critical' ? 'danger' : item.risk_level === 'High' ? 'warning' : 'info'} ms-2">${item.risk_level}</span>
-                                    <p class="mb-1 mt-1">${item.content}</p>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong class="me-2">${item.platform}</strong>
+                                        <span class="badge bg-${item.risk_level === 'Critical' ? 'danger' : item.risk_level === 'High' ? 'warning' : 'info'}">${item.risk_level}</span>
+                                    </div>
+                                    <p class="mb-2">${item.content}</p>
                                     <small class="text-muted">${item.entities} entities detected • ${item.timestamp}</small>
                                 </div>
                             </div>
@@ -443,12 +390,14 @@
                 const anomaliesContainer = document.getElementById('market-anomalies');
                 if (anomaliesContainer && data.length > 0) {
                     anomaliesContainer.innerHTML = data.map(item => `
-                        <div class="anomaly-item mb-2 p-2 border-start border-3 border-danger">
+                        <div class="anomaly-item mb-3 p-3 border-start border-3 border-danger bg-light rounded">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <strong>${item.exchange} - ${item.stock}</strong>
-                                    <span class="badge bg-danger ms-2">${item.type}</span>
-                                    <p class="mb-1 mt-1">Risk Score: ${item.risk_score}/10</p>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong class="me-2">${item.exchange} - ${item.stock}</strong>
+                                        <span class="badge bg-danger">${item.type}</span>
+                                    </div>
+                                    <p class="mb-2">Risk Score: ${item.risk_score}/10</p>
                                     <small class="text-muted">Volume spike: ${item.volume_spike} • ${item.timestamp}</small>
                                 </div>
                             </div>
@@ -459,14 +408,14 @@
             .catch(error => console.log('Anomaly update failed:', error));
     }
 
+    // Professional statistics update
     function updateStatistics() {
         fetch('/api/stats')
             .then(response => response.json())
             .then(data => {
-                // Update statistics with animation
-                const totalEl = document.querySelector('[data-stat="totalAlerts"]');
-                const highRiskEl = document.querySelector('[data-stat="highRiskAlerts"]');
-                const activeEl = document.querySelector('[data-stat="activeAlerts"]');
+                const totalEl = document.querySelector('[data-counter="${ total_alerts }"]');
+                const highRiskEl = document.querySelector('[data-counter="${ high_risk_alerts }"]');
+                const activeEl = document.querySelector('[data-counter="${ active_alerts }"]');
                 
                 if (totalEl) animateNumber(totalEl, data.total_alerts);
                 if (highRiskEl) animateNumber(highRiskEl, data.high_risk_alerts);
@@ -490,28 +439,76 @@
         }, 50);
     }
 
-    // Initialize live updates
+    // Professional scroll animations
+    function initScrollAnimations() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('scroll-reveal');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+    }
+
+    // Professional card hover effects
+    function initCardEffects() {
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            });
+        });
+    }
+
+    // Professional loading states
+    function showLoading(element) {
+        element.innerHTML = '<div class="loading-spinner"></div>';
+    }
+
+    // Initialize everything when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
-        // Initial load
+        // Start counter animation
+        setTimeout(animateCounters, 500);
+        
+        // Initial load of feeds
         updateSocialMediaFeed();
         updateMarketAnomalies();
         
         // Set up intervals for real-time updates
-        setInterval(updateSocialMediaFeed, 5000); // Update every 5 seconds
-        setInterval(updateMarketAnomalies, 7000); // Update every 7 seconds
-        setInterval(updateStatistics, 30000); // Update stats every 30 seconds
+        setInterval(updateSocialMediaFeed, 5000);
+        setInterval(updateMarketAnomalies, 7000);
+        setInterval(updateStatistics, 30000);
         
-        // Welcome message fade-in animation
-        const heroElements = document.querySelectorAll('.fade-in-up');
-        heroElements.forEach((el, index) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 0.6s ease';
-            
-            setTimeout(() => {
-                el.style.opacity = '1';
-                el.style.transform = 'translateY(0)';
-            }, index * 200);
+        // Initialize animations
+        initScrollAnimations();
+        initCardEffects();
+        
+        // Professional smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
         });
     });
 </script>

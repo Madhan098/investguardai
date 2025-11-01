@@ -9,52 +9,170 @@
     <div class="col-12">
         <h1>
             <i data-feather="book" class="me-2"></i>
-            Vernacular Content Library
+            Content Library
         </h1>
         <p class="lead text-muted">
-            Educational resources in multiple Indian languages to help investors make informed decisions.
+            Educational resources in multiple Indian languages plus real-time SEBI content to help investors make informed decisions.
         </p>
     </div>
 </div>
 
-<!-- Content Categories -->
+<!-- SEBI Live Content Section -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body text-center">
-                <i data-feather="shield" width="32" height="32" class="mb-2"></i>
-                <h6>Fraud Prevention</h6>
-                <p class="small mb-0">15 articles • 8 languages</p>
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="activity" class="me-2"></i>
+                        Live SEBI Content
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <a href="/sebi-content-library" class="btn btn-outline-light btn-sm">
+                            <i data-feather="external-link" width="16" height="16"></i>
+                            Full Library
+                        </a>
+                        <button class="btn btn-light btn-sm" onclick="refreshSEBIContent()">
+                            <i data-feather="refresh-cw" width="16" height="16"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row" id="sebiContent">
+                    <!-- SEBI content will be loaded here -->
+                    <div class="col-12 text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading SEBI content...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading SEBI educational content...</p>
+                    </div>
+                </div>
+                
+                <!-- Fallback SEBI Content (shown if API fails) -->
+                <div class="row" id="sebiContentFallback" style="display: none;">
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">SEBI Official</span>
+                                    <span class="badge bg-success">LIVE</span>
+                                </div>
+                            </div>
+                            <img src="https://via.placeholder.com/300x200?text=SEBI+Investor+Education" class="card-img-top" alt="SEBI Investor Education" style="height: 150px; object-fit: cover;">
+                            <div class="card-body">
+                                <h6 class="card-title">SEBI Investor Education Portal</h6>
+                                <p class="card-text small text-muted">Official SEBI educational content for investors</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">⏱️ 5:30</small>
+                                    <button class="btn btn-primary btn-sm" onclick="window.open('https://investor.sebi.gov.in', '_blank')">
+                                        <i data-feather="external-link" width="14" height="14" class="me-1"></i>
+                                        View
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    <i data-feather="calendar" width="12" height="12" class="me-1"></i>
+                                    Latest
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">SEBI Official</span>
+                                    <span class="badge bg-success">LIVE</span>
+                                </div>
+                            </div>
+                            <img src="https://via.placeholder.com/300x200?text=SEBI+Circulars" class="card-img-top" alt="SEBI Circulars" style="height: 150px; object-fit: cover;">
+                            <div class="card-body">
+                                <h6 class="card-title">SEBI Circulars & Guidelines</h6>
+                                <p class="card-text small text-muted">Latest regulatory updates and investor protection guidelines</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">📖 3 min</small>
+                                    <button class="btn btn-primary btn-sm" onclick="window.open('https://sebi.gov.in', '_blank')">
+                                        <i data-feather="external-link" width="14" height="14" class="me-1"></i>
+                                        View
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    <i data-feather="calendar" width="12" height="12" class="me-1"></i>
+                                    Latest
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">SEBI Official</span>
+                                    <span class="badge bg-success">LIVE</span>
+                                </div>
+                            </div>
+                            <img src="https://via.placeholder.com/300x200?text=SEBI+Videos" class="card-img-top" alt="SEBI Videos" style="height: 150px; object-fit: cover;">
+                            <div class="card-body">
+                                <h6 class="card-title">SEBI Video Gallery</h6>
+                                <p class="card-text small text-muted">Educational videos on market practices and investor rights</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">⏱️ 8:45</small>
+                                    <button class="btn btn-primary btn-sm" onclick="window.open('https://investor.sebi.gov.in/video_gallery.html', '_blank')">
+                                        <i data-feather="external-link" width="14" height="14" class="me-1"></i>
+                                        View
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    <i data-feather="calendar" width="12" height="12" class="me-1"></i>
+                                    Latest
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card bg-success text-white">
-            <div class="card-body text-center">
-                <i data-feather="trending-up" width="32" height="32" class="mb-2"></i>
-                <h6>Investment Basics</h6>
-                <p class="small mb-0">22 articles • 8 languages</p>
-            </div>
+</div>
+
+<!-- Content Categories -->
+<div class="row mb-4" id="contentCategories">
+    <!-- Dynamic content categories will be loaded here -->
+    <div class="col-12 text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading content statistics...</span>
         </div>
     </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card bg-warning text-dark">
-            <div class="card-body text-center">
-                <i data-feather="file-text" width="32" height="32" class="mb-2"></i>
-                <h6>SEBI Guidelines</h6>
-                <p class="small mb-0">12 articles • 5 languages</p>
+</div>
+
+<!-- Real-time Activity Feed -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i data-feather="activity" class="me-2"></i>
+                        Live Content Updates
+                    </h6>
+                    <button class="btn btn-light btn-sm" onclick="refreshContentStats()">
+                        <i data-feather="refresh-cw" width="16" height="16"></i>
+                        Refresh
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3 mb-3">
-        <div class="card bg-info text-white">
-            <div class="card-body text-center">
-                <i data-feather="alert-triangle" width="32" height="32" class="mb-2"></i>
-                <h6>Market Risks</h6>
-                <p class="small mb-0">18 articles • 8 languages</p>
+            <div class="card-body py-2">
+                <div id="recentActivity" class="row">
+                    <!-- Recent activity will be loaded here -->
+                    <div class="col-12 text-center">
+                        <div class="spinner-border spinner-border-sm text-success" role="status">
+                            <span class="visually-hidden">Loading activity...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -98,6 +216,344 @@
 
 {% block scripts %}
 <script>
+// SEBI Content Management
+async function loadSEBIContent() {
+    try {
+        console.log('Loading SEBI content...');
+        const response = await fetch('/api/sebi/content');
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (response.status === 302) {
+            console.log('Redirected to login - user not authenticated, showing fallback content');
+            document.getElementById('sebiContent').style.display = 'none';
+            document.getElementById('sebiContentFallback').style.display = 'block';
+            return;
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('SEBI content data:', data);
+        
+        if (data.success) {
+            displaySEBIContent(data.content);
+        } else {
+            console.error('Failed to load SEBI content:', data.error);
+            document.getElementById('sebiContent').innerHTML = `
+                <div class="col-12 text-center">
+                    <div class="alert alert-warning">
+                        <i data-feather="alert-triangle" class="me-2"></i>
+                        Unable to load SEBI content. Please try again later.
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading SEBI content:', error);
+        console.log('Showing fallback content due to error');
+        document.getElementById('sebiContent').style.display = 'none';
+        document.getElementById('sebiContentFallback').style.display = 'block';
+        
+        // Also try to load static content as backup
+        setTimeout(() => {
+            loadContent();
+        }, 1000);
+    }
+    feather.replace();
+}
+
+function displaySEBIContent(content) {
+    console.log('Displaying SEBI content:', content);
+    const sebiContent = document.getElementById('sebiContent');
+    
+    if (!content || content.length === 0) {
+        console.log('No SEBI content to display');
+        sebiContent.innerHTML = `
+            <div class="col-12 text-center">
+                <div class="alert alert-info">
+                    <i data-feather="info" class="me-2"></i>
+                    No SEBI content available at the moment.
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    sebiContent.innerHTML = content.map(item => `
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary">${item.source}</span>
+                        <span class="badge bg-success">LIVE</span>
+                    </div>
+                </div>
+                <img src="${item.thumbnail}" class="card-img-top" alt="${item.title}" style="height: 150px; object-fit: cover;">
+                <div class="card-body">
+                    <h6 class="card-title">${item.title}</h6>
+                    <p class="card-text small text-muted">${item.description}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            ${item.duration ? `⏱️ ${item.duration}` : item.readTime ? `📖 ${item.readTime}` : '📋 ${item.type}`}
+                        </small>
+                        <button class="btn btn-primary btn-sm" onclick="openSEBIContent('${item.url}')">
+                            <i data-feather="external-link" width="14" height="14" class="me-1"></i>
+                            View
+                        </button>
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        <i data-feather="calendar" width="12" height="12" class="me-1"></i>
+                        ${item.published_date}
+                    </small>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openSEBIContent(url) {
+    window.open(url, '_blank');
+}
+
+function refreshSEBIContent() {
+    document.getElementById('sebiContent').innerHTML = `
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading SEBI content...</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('sebiContent').style.display = 'block';
+    document.getElementById('sebiContentFallback').style.display = 'none';
+    loadSEBIContent();
+}
+
+// Real-time Content Statistics Management
+async function loadContentStats() {
+    try {
+        console.log('Loading content statistics...');
+        const response = await fetch('/api/content/stats');
+        console.log('Content stats response status:', response.status);
+        
+        if (response.status === 302) {
+            console.log('Redirected to login - user not authenticated, showing fallback stats');
+            showFallbackStats();
+            return;
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Content stats data:', data);
+        
+        if (data.success) {
+            displayContentCategories(data.categories);
+            displayRecentActivity(data.recent_activity);
+            updateLanguageFilter(data.languages);
+            updateContentTypeFilter(data.content_types);
+        } else {
+            console.error('Failed to load content stats:', data.error);
+            showFallbackStats();
+        }
+    } catch (error) {
+        console.error('Error loading content stats:', error);
+        showFallbackStats();
+    }
+    feather.replace();
+}
+
+function displayContentCategories(categories) {
+    const contentCategories = document.getElementById('contentCategories');
+    
+    const categoryCards = Object.values(categories).map(category => `
+        <div class="col-md-3 mb-3">
+            <div class="card bg-${category.color} text-white">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <i data-feather="${category.icon}" width="32" height="32"></i>
+                        <span class="badge bg-light text-dark">
+                            <i data-feather="${category.trend === 'up' ? 'trending-up' : 'minus'}" width="12" height="12"></i>
+                        </span>
+                    </div>
+                    <h6>${category.name}</h6>
+                    <p class="small mb-1">${category.articles} articles • ${category.languages} languages</p>
+                    <small class="opacity-75">Updated: ${category.last_updated}</small>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    contentCategories.innerHTML = categoryCards;
+}
+
+function displayRecentActivity(activities) {
+    const recentActivity = document.getElementById('recentActivity');
+    
+    if (activities.length === 0) {
+        recentActivity.innerHTML = `
+            <div class="col-12 text-center">
+                <small class="text-muted">No recent activity</small>
+            </div>
+        `;
+        return;
+    }
+    
+    const activityItems = activities.map(activity => `
+        <div class="col-md-4 mb-2">
+            <div class="card border-0 bg-light">
+                <div class="card-body p-2">
+                    <div class="d-flex align-items-center">
+                        <div class="me-2">
+                            <i data-feather="${activity.type === 'new_content' ? 'plus-circle' : 'edit'}" width="16" height="16" class="text-success"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <small class="text-muted">${activity.message}</small>
+                            <br>
+                            <small class="text-muted">
+                                <i data-feather="clock" width="12" height="12" class="me-1"></i>
+                                ${activity.timestamp}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    recentActivity.innerHTML = activityItems;
+}
+
+function updateLanguageFilter(languages) {
+    const languageFilter = document.getElementById('languageFilter');
+    const currentValue = languageFilter.value;
+    
+    // Update language options with counts
+    languageFilter.innerHTML = `
+        <option value="all">All Languages (${Object.values(languages).reduce((sum, lang) => sum + lang.count, 0)} articles)</option>
+        ${Object.entries(languages).map(([code, lang]) => 
+            `<option value="${code}">${lang.name} (${lang.count} articles)</option>`
+        ).join('')}
+    `;
+    
+    // Restore previous selection
+    languageFilter.value = currentValue;
+}
+
+function updateContentTypeFilter(contentTypes) {
+    const contentFilter = document.getElementById('contentFilter');
+    const currentValue = contentFilter.value;
+    
+    // Update content type options with counts
+    contentFilter.innerHTML = `
+        <option value="all">All Types (${Object.values(contentTypes).reduce((sum, type) => sum + type.count, 0)} items)</option>
+        ${Object.entries(contentTypes).map(([type, data]) => 
+            `<option value="${type}">${data.name} (${data.count} items)</option>`
+        ).join('')}
+    `;
+    
+    // Restore previous selection
+    contentFilter.value = currentValue;
+}
+
+function showFallbackStats() {
+    // Show static fallback statistics
+    const contentCategories = document.getElementById('contentCategories');
+    contentCategories.innerHTML = `
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i data-feather="shield" width="32" height="32" class="mb-2"></i>
+                    <h6>Fraud Prevention</h6>
+                    <p class="small mb-0">15 articles • 8 languages</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i data-feather="trending-up" width="32" height="32" class="mb-2"></i>
+                    <h6>Investment Basics</h6>
+                    <p class="small mb-0">22 articles • 8 languages</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i data-feather="file-text" width="32" height="32" class="mb-2"></i>
+                    <h6>SEBI Guidelines</h6>
+                    <p class="small mb-0">12 articles • 5 languages</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i data-feather="alert-triangle" width="32" height="32" class="mb-2"></i>
+                    <h6>Market Risks</h6>
+                    <p class="small mb-0">18 articles • 8 languages</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('recentActivity').innerHTML = `
+        <div class="col-12 text-center">
+            <small class="text-muted">Please log in to view live updates</small>
+        </div>
+    `;
+}
+
+function refreshContentStats() {
+    document.getElementById('contentCategories').innerHTML = `
+        <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading content statistics...</span>
+            </div>
+        </div>
+    `;
+    document.getElementById('recentActivity').innerHTML = `
+        <div class="col-12 text-center">
+            <div class="spinner-border spinner-border-sm text-success" role="status">
+                <span class="visually-hidden">Loading activity...</span>
+            </div>
+        </div>
+    `;
+    loadContentStats();
+}
+
+// Load content statistics on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, starting content loading...');
+    loadSEBIContent();
+    loadContentStats();
+    
+    // Also load the static content library
+    loadContent();
+    
+    // Fallback: Show content after 5 seconds if nothing loads
+    setTimeout(() => {
+        const sebiContent = document.getElementById('sebiContent');
+        const contentGrid = document.getElementById('contentGrid');
+        
+        if (sebiContent && sebiContent.innerHTML.includes('spinner-border')) {
+            console.log('Timeout reached, showing fallback content');
+            document.getElementById('sebiContent').style.display = 'none';
+            document.getElementById('sebiContentFallback').style.display = 'block';
+        }
+        
+        if (contentGrid && contentGrid.innerHTML.trim() === '') {
+            console.log('Loading static content as fallback');
+            loadContent();
+        }
+    }, 5000);
+});
+
 const contentLibrary = [
     {
         id: 1,

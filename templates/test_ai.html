@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Generator Test - InvestGuard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-robot me-2"></i>
+                            AI Content Generator Test
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h5>Test AI Content Generation</h5>
+                            <p class="text-muted">Click the buttons below to test the AI content generation system.</p>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <button class="btn btn-success w-100 mb-2" onclick="testFraudPrevention()">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Test Fraud Prevention Guide
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-info w-100 mb-2" onclick="testSEBIGuidelines()">
+                                    <i class="fas fa-book me-2"></i>
+                                    Test SEBI Guidelines
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <button class="btn btn-warning w-100 mb-2" onclick="testAPI()">
+                                    <i class="fas fa-cog me-2"></i>
+                                    Test API Connection
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-secondary w-100 mb-2" onclick="testFallback()">
+                                    <i class="fas fa-backup me-2"></i>
+                                    Test Fallback Content
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="testResults" class="mt-4">
+                            <!-- Test results will appear here -->
+                        </div>
+                        
+                        <div id="loadingIndicator" class="text-center" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Testing AI Content Generation...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showLoading() {
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('testResults').innerHTML = '';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+        
+        function showResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-info';
+            
+            resultsDiv.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <h5>${title}</h5>
+                    <div class="mt-3">${content}</div>
+                </div>
+            `;
+        }
+        
+        async function testAPI() {
+            showLoading();
+            try {
+                const response = await fetch('/api/test/ai-content');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('✅ API Test Successful', `
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                        <p><strong>Status:</strong> API is working correctly</p>
+                    `, 'success');
+                } else {
+                    showResult('❌ API Test Failed', `
+                        <p><strong>Error:</strong> ${data.error}</p>
+                        <p><strong>Status:</strong> API is not working</p>
+                    `, 'error');
+                }
+            } catch (error) {
+                showResult('❌ API Test Failed', `
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Status:</strong> Network or server error</p>
+                `, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function testFraudPrevention() {
+            showLoading();
+            try {
+                const response = await fetch('/api/ai/generate-content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'fraud_prevention',
+                        topic: 'investment fraud prevention',
+                        language: 'en'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('✅ Fraud Prevention Guide Generated', `
+                        <p><strong>Type:</strong> ${data.type}</p>
+                        <p><strong>Topic:</strong> ${data.topic}</p>
+                        <p><strong>Source:</strong> ${data.source}</p>
+                        <p><strong>Generated At:</strong> ${data.generated_at}</p>
+                        <div class="mt-3">
+                            <h6>Content Preview:</h6>
+                            <div class="border p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                                ${data.content.substring(0, 500)}...
+                            </div>
+                        </div>
+                    `, 'success');
+                } else {
+                    showResult('❌ Fraud Prevention Guide Failed', `
+                        <p><strong>Error:</strong> ${data.error}</p>
+                        <p><strong>Status:</strong> Content generation failed</p>
+                    `, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Fraud Prevention Guide Failed', `
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Status:</strong> Network or server error</p>
+                `, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function testSEBIGuidelines() {
+            showLoading();
+            try {
+                const response = await fetch('/api/ai/generate-content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'sebi_guidelines',
+                        topic: 'SEBI regulations and compliance',
+                        language: 'en'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('✅ SEBI Guidelines Generated', `
+                        <p><strong>Type:</strong> ${data.type}</p>
+                        <p><strong>Topic:</strong> ${data.topic}</p>
+                        <p><strong>Source:</strong> ${data.source}</p>
+                        <p><strong>Generated At:</strong> ${data.generated_at}</p>
+                        <div class="mt-3">
+                            <h6>Content Preview:</h6>
+                            <div class="border p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                                ${data.content.substring(0, 500)}...
+                            </div>
+                        </div>
+                    `, 'success');
+                } else {
+                    showResult('❌ SEBI Guidelines Failed', `
+                        <p><strong>Error:</strong> ${data.error}</p>
+                        <p><strong>Status:</strong> Content generation failed</p>
+                    `, 'error');
+                }
+            } catch (error) {
+                showResult('❌ SEBI Guidelines Failed', `
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p><strong>Status:</strong> Network or server error</p>
+                `, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function testFallback() {
+            showLoading();
+            setTimeout(() => {
+                const fallbackContent = `
+                    <div class="fraud-prevention-guide">
+                        <h2>🛡️ Investment Fraud Prevention Guide (Fallback)</h2>
+                        <h3>🚨 Red Flags to Watch For:</h3>
+                        <ul>
+                            <li><strong>Guaranteed Returns:</strong> No legitimate investment can guarantee returns</li>
+                            <li><strong>Pressure Tactics:</strong> "Limited time offers" or "act now" are warning signs</li>
+                            <li><strong>Unrealistic Returns:</strong> Promises of 20%+ monthly returns are likely scams</li>
+                        </ul>
+                    </div>
+                `;
+                
+                showResult('✅ Fallback Content Test', `
+                    <p><strong>Status:</strong> Fallback content is working</p>
+                    <p><strong>Note:</strong> This is the content that will be shown if AI generation fails</p>
+                    <div class="mt-3">
+                        <h6>Fallback Content Preview:</h6>
+                        <div class="border p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                            ${fallbackContent}
+                        </div>
+                    </div>
+                `, 'success');
+                hideLoading();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

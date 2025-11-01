@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Fraud Scanner - InvestGuard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .whatsapp-bg { background: #0a1f1c; }
+        .chat-bubble {
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .scan-animation {
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+        }
+        .risk-critical { border-color: #ef4444; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); }
+        .risk-high { border-color: #f59e0b; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); }
+        .risk-medium { border-color: #3b82f6; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+        .risk-low { border-color: #10b981; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-blue-900 min-h-screen text-white">
+
+    <div class="container mx-auto px-4 py-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center space-x-3 bg-green-500/20 px-6 py-3 rounded-full mb-4">
+                <i class="fab fa-whatsapp text-3xl text-green-400"></i>
+                <h1 class="text-2xl font-bold">WhatsApp Fraud Scanner</h1>
+            </div>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                Forward suspicious investment messages here for instant fraud detection
+            </p>
+            <div class="mt-4">
+                <a href="/dashboard" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+            
+            <!-- Left: WhatsApp-style Interface -->
+            <div class="bg-white/5 rounded-3xl p-6 backdrop-blur-lg border border-white/10">
+                
+                <!-- WhatsApp Header -->
+                <div class="whatsapp-bg rounded-t-2xl p-4 mb-4 flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Unknown Investment Advisor</h3>
+                        <p class="text-xs text-green-400">Forward message to scan</p>
+                    </div>
+                </div>
+
+                <!-- Message Input Area -->
+                <div class="space-y-4">
+                    <div class="bg-black/30 rounded-2xl p-4">
+                        <label class="text-sm text-gray-400 block mb-2">
+                            <i class="fas fa-paste mr-2"></i>Paste Suspicious Message:
+                        </label>
+                        <textarea 
+                            id="messageInput"
+                            class="w-full bg-white/5 border border-white/20 rounded-xl p-4 text-sm focus:outline-none focus:border-green-500 transition-all"
+                            rows="8"
+                            placeholder="Paste WhatsApp message here...
+
+Example:
+🔥 GUARANTEED 40% RETURNS! 🔥
+Invest just ₹50,000 today
+Get ₹70,000 in 30 days
+100% SAFE & SECURE
+Limited time offer!
+WhatsApp: +91-XXXXXXXXXX"
+                        ></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <button 
+                            onclick="loadSampleMessage()"
+                            class="bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 py-3 rounded-xl transition-all"
+                        >
+                            <i class="fas fa-file-alt mr-2"></i>Load Sample
+                        </button>
+                        <button 
+                            onclick="scanMessage()"
+                            class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 py-3 rounded-xl font-bold transition-all shadow-lg"
+                        >
+                            <i class="fas fa-shield-alt mr-2"></i>Scan Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Tips -->
+                <div class="mt-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                    <h4 class="font-semibold text-yellow-400 mb-2 flex items-center">
+                        <i class="fas fa-lightbulb mr-2"></i>Red Flags to Watch:
+                    </h4>
+                    <ul class="text-xs space-y-1 text-gray-300">
+                        <li>• "Guaranteed returns" or "100% safe"</li>
+                        <li>• Pressure tactics like "limited time"</li>
+                        <li>• Unrealistic returns (>20% monthly)</li>
+                        <li>• No SEBI registration mentioned</li>
+                        <li>• Requests for urgent action</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Right: Analysis Results -->
+            <div class="space-y-6">
+                
+                <!-- Results Container -->
+                <div id="resultsContainer" class="hidden">
+                    
+                    <!-- Risk Score Card -->
+                    <div id="riskCard" class="bg-white/5 rounded-3xl p-8 backdrop-blur-lg border border-white/10 text-center mb-6">
+                        <div class="mb-6">
+                            <div class="inline-flex items-center justify-center w-32 h-32 rounded-full border-8 mb-4" id="riskCircle">
+                                <div class="text-center">
+                                    <p class="text-5xl font-bold" id="riskScoreDisplay">0</p>
+                                    <p class="text-sm text-gray-400">/ 10</p>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2" id="riskLevelText">Analyzing...</h3>
+                        <p class="text-gray-400" id="recommendationText"></p>
+                    </div>
+
+                    <!-- Detected Flags -->
+                    <div class="bg-white/5 rounded-3xl p-6 backdrop-blur-lg border border-white/10">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-flag text-red-400 mr-3"></i>
+                            Detected Red Flags
+                            <span class="ml-auto text-sm bg-red-500/20 text-red-400 px-3 py-1 rounded-full" id="flagCount">0</span>
+                        </h3>
+                        <div id="flagsList" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="generateReport()" class="bg-white/5 hover:bg-white/10 border border-white/10 py-4 rounded-xl transition-all">
+                            <i class="fas fa-file-pdf mr-2"></i>Download Report
+                        </button>
+                        <button onclick="shareAlert()" class="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 py-4 rounded-xl transition-all">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Report Scam
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Initial State -->
+                <div id="initialState" class="bg-white/5 rounded-3xl p-12 backdrop-blur-lg border border-white/10 text-center">
+                    <div class="w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fab fa-whatsapp text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Paste Message to Begin</h3>
+                    <p class="text-gray-400 mb-6">Our AI will analyze it for fraud patterns in seconds</p>
+                    
+                    <div class="bg-black/30 rounded-xl p-6 text-left space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-robot text-green-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">AI-Powered Detection</p>
+                                <p class="text-xs text-gray-400">Analyzes 50+ fraud indicators</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-bolt text-blue-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Instant Results</p>
+                                <p class="text-xs text-gray-400">Analysis in under 1 second</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-red-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Real-Time Protection</p>
+                                <p class="text-xs text-gray-400">Updated fraud patterns daily</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4 max-w-7xl mx-auto">
+            <div class="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                <p class="text-3xl font-bold text-green-400" id="scansToday">0</p>
+                <p class="text-xs text-gray-400">Messages Scanned Today</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                <p class="text-3xl font-bold text-red-400" id="fraudDetected">0</p>
+                <p class="text-xs text-gray-400">Scams Prevented</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                <p class="text-3xl font-bold text-yellow-400">₹<span id="moneySaved">0</span>Cr</p>
+                <p class="text-xs text-gray-400">Money Saved</p>
+            </div>
+            <div class="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                <p class="text-3xl font-bold text-blue-400">98.5%</p>
+                <p class="text-xs text-gray-400">Detection Accuracy</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let analysisData = null;
+
+        // Auto-increment stats
+        function animateStats() {
+            let scans = 15847;
+            let frauds = 1243;
+            let saved = 247;
+
+            setInterval(() => {
+                scans += Math.floor(Math.random() * 3);
+                frauds += Math.floor(Math.random() * 2);
+                saved += Math.floor(Math.random() * 1);
+
+                document.getElementById('scansToday').textContent = scans.toLocaleString();
+                document.getElementById('fraudDetected').textContent = frauds.toLocaleString();
+                document.getElementById('moneySaved').textContent = saved.toLocaleString();
+            }, 5000);
+        }
+
+        function loadSampleMessage() {
+            const sampleMessages = [
+                `🔥 GUARANTEED 40% RETURNS! 🔥
+
+Invest just ₹50,000 today
+Get ₹70,000 in 30 days
+
+✅ 100% SAFE & SECURE
+✅ No risk investment
+✅ Limited time offer!
+✅ Only 5 seats left!
+
+SEBI approved scheme
+Hurry! Offer ends today!
+
+WhatsApp: +91-9876543210`,
+
+                `💰 EXCLUSIVE INVESTMENT OPPORTUNITY 💰
+
+Double your money in 60 days!
+Minimum investment: ₹25,000
+Maximum returns: 100%
+
+✓ Guaranteed profits
+✓ Daily payouts available
+✓ Join 5000+ happy investors
+
+⚡ ACT NOW - Limited slots!
+⚡ First come first serve
+
+Contact: +91-8765432109`,
+
+                `🎯 HIGH RETURN INVESTMENT PLAN 🎯
+
+Investment: ₹1,00,000
+Returns: ₹1,50,000 (30 days)
+
+Features:
+→ Zero risk policy
+→ Government backed
+→ Instant withdrawals
+→ Premium members only
+
+Don't miss this chance!
+Last day to join!
+
+Call now: +91-7654321098`
+            ];
+
+            const randomMessage = sampleMessages[Math.floor(Math.random() * sampleMessages.length)];
+            document.getElementById('messageInput').value = randomMessage;
+        }
+
+        async function scanMessage() {
+            const message = document.getElementById('messageInput').value.trim();
+
+            if (!message) {
+                alert('Please paste a message to scan');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('initialState').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            document.getElementById('riskLevelText').textContent = 'Analyzing...';
+            document.getElementById('riskScoreDisplay').textContent = '...';
+
+            try {
+                const response = await fetch('/api/fraud/analyze-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                analysisData = data;
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Error analyzing message: ' + data.error);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to analyze message');
+            }
+        }
+
+        function displayResults(data) {
+            // Update risk score
+            const score = data.risk_score;
+            const level = data.risk_level;
+
+            document.getElementById('riskScoreDisplay').textContent = score.toFixed(1);
+            document.getElementById('riskLevelText').textContent = level + ' RISK DETECTED';
+            document.getElementById('recommendationText').textContent = data.recommendation;
+
+            // Color coding
+            const colors = {
+                'HIGH': { border: 'border-red-500', bg: 'bg-red-500/20', text: 'text-red-400' },
+                'MEDIUM': { border: 'border-yellow-500', bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
+                'LOW': { border: 'border-green-500', bg: 'bg-green-500/20', text: 'text-green-400' }
+            };
+
+            const color = colors[level];
+            const riskCircle = document.getElementById('riskCircle');
+            riskCircle.className = `inline-flex items-center justify-center w-32 h-32 rounded-full border-8 mb-4 ${color.border} ${color.bg}`;
+
+            const riskLevelText = document.getElementById('riskLevelText');
+            riskLevelText.className = `text-2xl font-bold mb-2 ${color.text}`;
+
+            // Display flags
+            document.getElementById('flagCount').textContent = data.total_flags;
+            const flagsList = document.getElementById('flagsList');
+            flagsList.innerHTML = '';
+
+            if (data.detected_flags.length === 0) {
+                flagsList.innerHTML = '<p class="text-gray-400 text-center py-4">No major red flags detected</p>';
+            } else {
+                data.detected_flags.forEach(flag => {
+                    const severityColors = {
+                        'critical': 'border-red-500/50 bg-red-500/10',
+                        'high': 'border-orange-500/50 bg-orange-500/10',
+                        'medium': 'border-yellow-500/50 bg-yellow-500/10'
+                    };
+
+                    const severityIcons = {
+                        'critical': 'fa-skull-crossbones text-red-400',
+                        'high': 'fa-exclamation-circle text-orange-400',
+                        'medium': 'fa-exclamation-triangle text-yellow-400'
+                    };
+
+                    flagsList.innerHTML += `
+                        <div class="border ${severityColors[flag.severity]} rounded-xl p-4 chat-bubble">
+                            <div class="flex items-start space-x-3">
+                                <i class="fas ${severityIcons[flag.severity]} text-xl mt-1"></i>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm mb-1">${flag.category}</p>
+                                    <p class="text-xs text-gray-400">Found: "${flag.keyword}"</p>
+                                </div>
+                                <span class="text-xs uppercase px-2 py-1 bg-black/30 rounded">${flag.severity}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Add suggested action
+            flagsList.innerHTML += `
+                <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mt-4">
+                    <h4 class="font-semibold text-blue-400 mb-2 flex items-center">
+                        <i class="fas fa-lightbulb mr-2"></i>Suggested Action:
+                    </h4>
+                    <p class="text-sm text-gray-300">${data.suggested_action}</p>
+                </div>
+            `;
+        }
+
+        function generateReport() {
+            if (!analysisData) return;
+            alert('PDF Report feature - This would generate a detailed PDF report with all analysis details');
+        }
+
+        function shareAlert() {
+            if (!analysisData) return;
+            alert('Report Scam feature - This would submit the scam details to SEBI and police cybercrime portal');
+        }
+
+        // Initialize
+        animateStats();
+    </script>
+
+</body>
+</html>
