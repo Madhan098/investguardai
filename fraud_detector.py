@@ -184,23 +184,14 @@ class FraudDetector:
         else:
             result['recommendation'] = 'safe'
 
-        # Sample response for demonstration with more detailed analysis
-        analysis_result = {
-            'risk_score': risk_score,
-            'sentiment': sentiment,
-            'indicators': indicators,
-            'suspicious_patterns': suspicious_patterns,
-            'recommendation': recommendation,
-            'urgency_level': urgency_level,
-            'contact_pressure': contact_pressure,
-            'confidence_level': min(95, max(60, risk_score * 10)),
-            'fraud_type': self._determine_fraud_type(indicators),
-            'platform_risk': self._assess_platform_risk(content_type),
-            'language_analysis': {
-                'emotional_pressure': len([i for i in indicators if 'pressure' in i or 'urgency' in i]) > 0,
-                'financial_promises': len([i for i in indicators if 'return' in i or 'guarantee' in i]) > 0,
-                'contact_requests': contact_pressure
-            }
+        # Add additional analysis details to result
+        result['confidence_level'] = min(95, max(60, result['risk_score'] * 10))
+        result['fraud_type'] = self._determine_fraud_type(result['indicators'])
+        result['platform_risk'] = self._assess_platform_risk('text')
+        result['language_analysis'] = {
+            'emotional_pressure': len([i for i in result['indicators'] if 'pressure' in str(i).lower() or 'urgency' in str(i).lower()]) > 0,
+            'financial_promises': len([i for i in result['indicators'] if 'return' in str(i).lower() or 'guarantee' in str(i).lower()]) > 0,
+            'contact_requests': result.get('contact_pressure', False)
         }
 
         return result
@@ -258,23 +249,14 @@ class FraudDetector:
         else:
             result['recommendation'] = 'safe'
 
-        # Sample response for demonstration with more detailed analysis
-        analysis_result = {
-            'risk_score': risk_score,
-            'sentiment': sentiment,
-            'indicators': indicators,
-            'suspicious_patterns': suspicious_patterns,
-            'recommendation': recommendation,
-            'urgency_level': urgency_level,
-            'contact_pressure': contact_pressure,
-            'confidence_level': min(95, max(60, risk_score * 10)),
-            'fraud_type': self._determine_fraud_type(indicators),
-            'platform_risk': self._assess_platform_risk(content_type),
-            'language_analysis': {
-                'emotional_pressure': len([i for i in indicators if 'pressure' in i or 'urgency' in i]) > 0,
-                'financial_promises': len([i for i in indicators if 'return' in i or 'guarantee' in i]) > 0,
-                'contact_requests': contact_pressure
-            }
+        # Add additional analysis details to result
+        result['confidence_level'] = min(95, max(60, result['risk_score'] * 10))
+        result['fraud_type'] = self._determine_fraud_type(result['indicators'])
+        result['platform_risk'] = self._assess_platform_risk('url')
+        result['language_analysis'] = {
+            'emotional_pressure': len([i for i in result['indicators'] if 'pressure' in str(i).lower() or 'urgency' in str(i).lower()]) > 0,
+            'financial_promises': len([i for i in result['indicators'] if 'return' in str(i).lower() or 'guarantee' in str(i).lower()]) > 0,
+            'contact_requests': result.get('contact_pressure', False)
         }
 
         return result

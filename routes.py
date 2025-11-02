@@ -865,8 +865,15 @@ def analyzer():
 
         start_time = time.time()
 
-        # Analyze content for fraud
-        analysis_result = fraud_detector.analyze_content(content, content_type)
+        try:
+            # Analyze content for fraud
+            analysis_result = fraud_detector.analyze_content(content, content_type)
+        except Exception as e:
+            print(f"[ERROR] Content analyzer error: {e}")
+            import traceback
+            traceback.print_exc()
+            flash(f'Error analyzing content: {str(e)}. Please try again.', 'error')
+            return redirect(url_for('analyzer'))
 
         processing_time = time.time() - start_time
 
